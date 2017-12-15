@@ -1,0 +1,201 @@
+/* 
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+function EficienciaIn14(control){
+    if (!/^([0-9])*$/.test(control.value) || control.value==""){ //SI EL VALOR NO ES VÁLIDO
+        $().alerta("rojo","El valor '" +control.value+ "' no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");
+        return;
+    }else{
+        $(control).removeClass("inputerror").addClass("inputok");
+        control.value=Number(control.value);
+        if (!$("form[name='EficienciaIn14Form'] input").hasClass("inputerror")){
+            totalespcs();
+            totalpor1();
+            totalpor2();
+        }
+        var nombreControl=control.name.substring(0, control.name.length-1)
+        mayores(nombreControl);
+    }
+    if ($('form[name="EficienciaIn14Form"] input').hasClass("inputerror")){
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("update", "<center>Indicador con <br/> errores, favor <br/> de revisar.</center>").globo("show");
+    }else{
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide");
+    }
+}
+
+function mayores(nombre){
+    var num1=parseInt($("form[name='EficienciaIn14Form'] input[name='"+nombre+"1']").val());
+    var num2=parseInt($("form[name='EficienciaIn14Form'] input[name='"+nombre+"2']").val());
+    if (num2>num1){
+        $("form[name='EficienciaIn14Form'] input[name='"+nombre+"1']").globo("enable")
+        .globo("update", "<center>No puede ser menor a<br/>la cantidad de PC's <br/> con internet</center>")
+        .removeClass("inputok").addClass("inputerror");
+    }
+    else{
+        $("form[name='EficienciaIn14Form'] input[name='"+nombre+"1']")
+        .globo("disable").removeClass("inputerror").addClass("inputok");
+    }
+}
+
+function totalespcs(){
+    var comp1=parseInt($("form[name='EficienciaIn14Form'] input[name='completo1']").val());
+    var asig1=parseInt($("form[name='EficienciaIn14Form'] input[name='asignatura1']").val());
+    var alum1=parseInt($("form[name='EficienciaIn14Form'] input[name='alumnos1']").val());
+    var pers1=parseInt($("form[name='EficienciaIn14Form'] input[name='personal1']").val());
+    var mandos1=parseInt($("form[name='EficienciaIn14Form'] input[name='mandos1']").val());
+
+    var comp2=parseInt($("form[name='EficienciaIn14Form'] input[name='completo2']").val());
+    var asig2=parseInt($("form[name='EficienciaIn14Form'] input[name='asignatura2']").val());
+    var alum2=parseInt($("form[name='EficienciaIn14Form'] input[name='alumnos2']").val());
+    var pers2=parseInt($("form[name='EficienciaIn14Form'] input[name='personal2']").val());
+    var mandos2=parseInt($("form[name='EficienciaIn14Form'] input[name='mandos2']").val());
+
+    $("form[name='EficienciaIn14Form'] input[name='pcs1']").val(comp1+asig1+alum1+pers1+mandos1);
+    $("form[name='EficienciaIn14Form'] input[name='pcs2']").val(comp2+asig2+alum2+pers2+mandos2);
+
+
+}
+
+function totalpor1(){
+    var total1=parseInt($("form[name='EficienciaIn14Form'] input[name='pcs1']").val());
+    if (total1!=0){
+        var comp1=parseInt($("form[name='EficienciaIn14Form'] input[name='completo1']").val());
+        var asig1=parseInt($("form[name='EficienciaIn14Form'] input[name='asignatura1']").val());
+        var alum1=parseInt($("form[name='EficienciaIn14Form'] input[name='alumnos1']").val());
+        var pers1=parseInt($("form[name='EficienciaIn14Form'] input[name='personal1']").val());
+        var mandos1=parseInt($("form[name='EficienciaIn14Form'] input[name='mandos1']").val());
+
+        total1=parseInt($("form[name='EficienciaIn14Form'] input[name='pcs1']").val());
+        //TOTALES
+        $("form[name='EficienciaIn14Form'] input[name='total2']").val(Math.round((comp1/total1*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total3']").val(Math.round((asig1/total1*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total4']").val(Math.round((alum1/total1*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total5']").val(Math.round((pers1/total1*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total6']").val(Math.round((mandos1/total1*100)*100)/100);
+
+        var t2 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total2']").val());
+        var t3 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total3']").val());
+        var t4 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total4']").val());
+        var t5 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total5']").val());
+        var t6 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total6']").val());
+        var totalpor1=Math.round(parseFloat(t2+t3+t4+t5+t6));
+        $("form[name='EficienciaIn14Form'] input[name='total1']").val(totalpor1);
+    }else{
+        $("form[name='EficienciaIn14Form'] input[name='total1']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total2']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total3']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total4']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total5']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total6']").val(0);
+    }
+}
+
+function totalpor2(){
+    var total2=parseInt($("form[name='EficienciaIn14Form'] input[name='pcs2']").val());
+    if (total2!=0){
+        var comp2=parseInt($("form[name='EficienciaIn14Form'] input[name='completo2']").val());
+        var asig2=parseInt($("form[name='EficienciaIn14Form'] input[name='asignatura2']").val());
+        var alum2=parseInt($("form[name='EficienciaIn14Form'] input[name='alumnos2']").val());
+        var pers2=parseInt($("form[name='EficienciaIn14Form'] input[name='personal2']").val());
+        var mandos2=parseInt($("form[name='EficienciaIn14Form'] input[name='mandos2']").val());
+
+        total2=parseInt($("form[name='EficienciaIn14Form'] input[name='pcs2']").val());
+        //TOTALES 2
+        $("form[name='EficienciaIn14Form'] input[name='total8']").val(Math.round((comp2/total2*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total9']").val(Math.round((asig2/total2*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total10']").val(Math.round((alum2/total2*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total11']").val(Math.round((pers2/total2*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total12']").val(Math.round((mandos2/total2*100)*100)/100);
+
+        var total1=$("form[name='EficienciaIn14Form'] input[name='pcs1']").val();
+        var totalpor2=Math.round((total2/total1*100)*100)/100;
+        $("form[name='EficienciaIn14Form'] input[name='total7']").val(totalpor2);
+    }else{
+        $("form[name='EficienciaIn14Form'] input[name='total7']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total8']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total9']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total10']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total11']").val(0);
+        $("form[name='EficienciaIn14Form'] input[name='total12']").val(0);
+    }
+}
+
+function guardarEficIn14(){
+    var cadena="";
+    if (!$("form[name='EficienciaIn14Form'] input").hasClass("inputerror")){
+        var comp1=$("form[name='EficienciaIn14Form'] input[name='completo1']").val();
+        var asig1=$("form[name='EficienciaIn14Form'] input[name='asignatura1']").val();
+        var alum1=$("form[name='EficienciaIn14Form'] input[name='alumnos1']").val();
+        var pers1=$("form[name='EficienciaIn14Form'] input[name='personal1']").val();
+        var mandos1=$("form[name='EficienciaIn14Form'] input[name='mandos1']").val();
+        var comp2=$("form[name='EficienciaIn14Form'] input[name='completo2']").val();
+        var asig2=$("form[name='EficienciaIn14Form'] input[name='asignatura2']").val();
+        var alum2=$("form[name='EficienciaIn14Form'] input[name='alumnos2']").val();
+        var pers2=$("form[name='EficienciaIn14Form'] input[name='personal2']").val();
+        var mandos2=$("form[name='EficienciaIn14Form'] input[name='mandos2']").val();
+        cadena = cadena.concat(comp1, ",", asig1, ",", alum1, ",", pers1, ",", mandos1, ",", comp2, ",", asig2, ",", alum2, ",", pers2, ",", mandos2);
+    //$().alerta('verde', 'Datos guardados correctamente.');
+    }else{
+        //        $("form[name='EficienciaIn14Form'] input[name='completo1']").globo("disabled").
+        //            removeClass("inputerror").addClass("inputok");
+        //$().alerta('rojo', 'Datos NO guardados. Verifiquelos Por favor');
+        cadena="Error";
+    }
+    return cadena;
+}
+
+function operacionesInd14(){
+    var comp1=parseInt($("form[name='EficienciaIn14Form'] input[name='completo1']").val());
+    var asig1=parseInt($("form[name='EficienciaIn14Form'] input[name='asignatura1']").val());
+    var alum1=parseInt($("form[name='EficienciaIn14Form'] input[name='alumnos1']").val());
+    var pers1=parseInt($("form[name='EficienciaIn14Form'] input[name='personal1']").val());
+    var mandos1=parseInt($("form[name='EficienciaIn14Form'] input[name='mandos1']").val());
+
+    var comp2=parseInt($("form[name='EficienciaIn14Form'] input[name='completo2']").val());
+    var asig2=parseInt($("form[name='EficienciaIn14Form'] input[name='asignatura2']").val());
+    var alum2=parseInt($("form[name='EficienciaIn14Form'] input[name='alumnos2']").val());
+    var pers2=parseInt($("form[name='EficienciaIn14Form'] input[name='personal2']").val());
+    var mandos2=parseInt($("form[name='EficienciaIn14Form'] input[name='mandos2']").val());
+
+    var total1=0;
+    var total2=0;
+    //SUMAS
+    $("form[name='EficienciaIn14Form'] input[name='pcs1']").val(comp1+asig1+alum1+pers1+mandos1);
+    $("form[name='EficienciaIn14Form'] input[name='pcs2']").val(comp2+asig2+alum2+pers2+mandos2);
+
+    total1=parseInt($("form[name='EficienciaIn14Form'] input[name='pcs1']").val());
+    if (total1!=0){
+        $("form[name='EficienciaIn14Form'] input[name='total2']").val(Math.round((comp1/total1*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total3']").val(Math.round((asig1/total1*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total4']").val(Math.round((alum1/total1*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total5']").val(Math.round((pers1/total1*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total6']").val(Math.round((mandos1/total1*100)*100)/100);
+    }
+
+    var t2 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total2']").val());
+    var t3 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total3']").val());
+    var t4 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total4']").val());
+    var t5 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total5']").val());
+    var t6 =parseFloat($("form[name='EficienciaIn14Form'] input[name='total6']").val());
+    var totalpor1=Math.round(parseFloat(t2+t3+t4+t5+t6));
+    $("form[name='EficienciaIn14Form'] input[name='total1']").val(totalpor1);
+
+    total2=parseInt($("form[name='EficienciaIn14Form'] input[name='pcs2']").val());
+    if (total2!=0){
+        $("form[name='EficienciaIn14Form'] input[name='total8']").val(Math.round((comp2/total2*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total9']").val(Math.round((asig2/total2*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total10']").val(Math.round((alum2/total2*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total11']").val(Math.round((pers2/total2*100)*100)/100);
+        $("form[name='EficienciaIn14Form'] input[name='total12']").val(Math.round((mandos2/total2*100)*100)/100);
+    }
+
+    total1=parseInt($("form[name='EficienciaIn14Form'] input[name='pcs1']").val());
+    total2=parseInt($("form[name='EficienciaIn14Form'] input[name='pcs2']").val());
+
+    if (total2!=0){
+        var totalpor2=Math.round((total2/total1*100)*100)/100;
+        $("form[name='EficienciaIn14Form'] input[name='total7']").val(totalpor2);
+    }
+}

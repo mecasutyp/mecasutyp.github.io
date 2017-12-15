@@ -1,0 +1,160 @@
+<%--
+    Document   : EficienciaIn13
+    Created on : 29/05/2012, 15:00:23 PM
+    Author     : Daniel Ramìrez Torres
+    Actualización 2016: Salvador Zamora Arias
+--%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="java.sql.SQLException"%>
+<%@page import="javax.servlet.http.HttpSession"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%--
+Se consultaran los datos en caso de existir
+--%>
+<%try {%>
+<html:form action="/EficienciaIn13">
+    <div id="efici13" align="center">
+        <%
+            HttpSession sesion = request.getSession(false);
+            sesion.getAttribute("idUniversidad").toString();
+            sesion.getAttribute("idPeriodo").toString();
+            String tablas = "";
+            String matutino = "0";
+            String vespertino = "0";
+            String total_alumnos = "0";
+
+            boolean contenedor = false;
+            int c = 1;
+            ConexionMySQL con = new ConexionMySQL();
+            try {
+                String sql1 = "Select id_edificio,descripcion,capacidad from edificios where id_edificio IN(select id_edificio from edificios_universidad where id_universidad=".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo=".concat(sesion.getAttribute("idPeriodo").toString()).concat(" and edificios_universidad.id_edificio=edificios.id_edificio order by id_edificio)"));
+                ResultSet rs1 = con.Consultar(sql1);
+                String sql3 = "Select turno_matutino,turno_vespertino from eficienciain13_1 where id_universidad=".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo='".concat(sesion.getAttribute("idPeriodo").toString()).concat("'"));
+                ResultSet rs3 = con.Consultar(sql3);
+                if (rs3.first()) {
+                    matutino = rs3.getString("turno_matutino");
+                    vespertino = rs3.getString("turno_vespertino");
+                }
+                String sql4 = "SELECT matricula_total FROM datos_universidad WHERE id_universidad=".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo='".concat(sesion.getAttribute("idPeriodo").toString()).concat("'"));
+                ResultSet rs4 = con.Consultar(sql4);
+                if (rs4.next()) {
+                    total_alumnos = rs4.getString("matricula_total");
+                }
+                //DECLARACION DE RESULTADO PARA LAS CARRERAS POR nivel                       
+                tablas = tablas.concat("<h3><a href='#'>Cuadro 13.").concat(String.valueOf(c)).concat("<br/>Capacidad Instalada de la Universidad</a></h3> ");
+                //ENCABEZADOS DE LA TABLA
+                tablas = tablas.concat("<div><table id='rounded-corner' style='width: 100%'>");
+                tablas = tablas.concat("<thead>");
+                tablas = tablas.concat("<tr>");
+                tablas = tablas.concat("<th scope='col' class='rounded-company'>Descripción de los Edificios, Laboratorios y Talleres</th>");
+                tablas = tablas.concat("<th class='rounded-q1'>Capacidad de los edificios</th>");
+                tablas = tablas.concat("<th class='rounded-q1'>* No. de unidades, laboratorios y talleres</th>");
+                tablas = tablas.concat("<th width='20%' class='rounded-q1'>Total de espacios docentes</th>");
+                tablas = tablas.concat("<th class='rounded-q1'>Capacidad del espacio académico <br/>ocupado por otras áreas de trabajo</th>");
+                tablas = tablas.concat("<th class='rounded-q4' width='30%' >Observaciones</th>");
+                tablas = tablas.concat("</tr>");
+                tablas = tablas.concat("</thead>");
+                while (rs1.next()) {
+                    //Se realiza una consulta para visualizar los datos en caso de existir
+                    String sql2 = "SELECT no_laboratorios,espacio_academico,observaciones FROM eficienciain13 WHERE id_edifi='".concat(rs1.getString("id_edificio")).concat("' and id_universidad=".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo=").concat(sesion.getAttribute("idPeriodo").toString()));
+                    ResultSet rs2 = con.Consultar(sql2);
+                    contenedor = true;
+                    if (rs2.next()) {
+                        tablas = tablas.concat("<tr>");
+                        tablas = tablas.concat("<td align='center'>").concat(rs1.getString("descripcion")).concat("</td>");
+                        tablas = tablas.concat("<td  align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90% type='text'  name='val_uni").concat(rs1.getString("id_edificio")).concat("' value='").concat(rs1.getString("capacidad")).concat("' onblur='EficienciaIn13(this);' ></td>");
+                        tablas = tablas.concat("<td align='center' ><input type='text' name='val_uni' maxlength='6' value='").concat(rs2.getString("no_laboratorios")).concat("' onblur='EficienciaIn13(this);' ></td>");
+                        tablas = tablas.concat("<td align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90%' type='text' name='val_esp' value='0' onblur='EficienciaIn13(this);' ></td>");
+                        tablas = tablas.concat("<td align='center' ><input type='text' maxlength='6' name='val_cap' value='").concat(rs2.getString("espacio_academico")).concat("' onblur='EficienciaIn13(this);' ></td>");
+                        tablas = tablas.concat("<td align='center' ><input style='width:90%' maxlength='57' type='text' name='val_obser' value='").concat(rs2.getString("observaciones")).concat("' ></td>");
+                        tablas = tablas.concat("</tr>");
+                    } else {
+                        tablas = tablas.concat("<tr>");
+                        tablas = tablas.concat("<td align='center'>").concat(rs1.getString("descripcion")).concat("</td>");
+                        tablas = tablas.concat("<td  align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90% type='text' name='val_uni").concat(rs1.getString("id_edificio")).concat("' value='").concat(rs1.getString("capacidad")).concat("' onblur='EficienciaIn13(this);' ></td>");
+                        tablas = tablas.concat("<td align='center' ><input type='text' name='val_uni' maxlength='6' value='0' onblur='EficienciaIn13(this);' ></td>");
+                        tablas = tablas.concat("<td align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90%' type='text' name='val_esp' value='0' onblur='EficienciaIn13(this);' ></td>");
+                        tablas = tablas.concat("<td align='center' ><input type='text' name='val_cap' maxlength='6' value='0' onblur='EficienciaIn13(this);' ></td>");
+                        tablas = tablas.concat("<td align='center' ><input style='width:90%' maxlength='57' type='text' name='val_obser' value='Sin observaciones' ></td>");
+                        tablas = tablas.concat("</tr>");
+                    }
+
+                }
+                if (contenedor == false) {
+                    tablas = tablas.concat("<tr><td colspan=6><h1>La Universidad seleccionada no cuenta con edificios<h1></td><tr>");
+                } else {
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<td align='center' colspan='2'>Totales</td>");
+
+                    tablas = tablas.concat("<td align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90% type='text' name='tot_uni' value='0' ></td>");
+                    tablas = tablas.concat("<td align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90%' type='text' name='tot_esp' value='0' ></td>");
+                    tablas = tablas.concat("<td align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90% type='text' name='tot_cap' value='0'  ></td>");
+                    tablas = tablas.concat("<td align='center' ></td>");
+                    tablas = tablas.concat("</tr>");
+                    
+                    
+                      tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<td align='center' colspan='3'>Matricula inicial total</td>");
+                    tablas = tablas.concat("<td align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90% type='text' name='mat_total' value='").concat(total_alumnos).concat("' ></td>");
+                    tablas = tablas.concat("<td align='center' ></td>");
+                    tablas = tablas.concat("<td align='center' ></td>");
+                    tablas = tablas.concat("</tr>");
+                    
+                       tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<td align='center' colspan='3'>Porcentaje total de aprovechamiento</td>");
+                    tablas = tablas.concat("<td align='center' ><input readonly=\'readonly\' id='etiqueta' style='width:90% type='text' name='tue_1' value='0' ></td>");
+                    tablas = tablas.concat("<td align='center' ></td>");
+                    tablas = tablas.concat("<td align='center' ></td>");
+                    tablas = tablas.concat("</tr>");
+                }
+                //PIE DE LA TABLE
+                tablas = tablas.concat("<tfoot>");
+                tablas = tablas.concat("<tr>");
+                tablas = tablas.concat("<td colspan='5' class='rounded-foot-left'>Notas: No hay notas adicionales.</td>");
+                tablas = tablas.concat("<td class='rounded-foot-right'></td>");
+                tablas = tablas.concat("</tr>");
+                tablas = tablas.concat("</tfoot>");
+                tablas = tablas.concat("</table></div>");
+                c++;
+            } catch (SQLException ex) {
+                System.err.println("JSP ERROR-EficienciaIn13:" + ex.getMessage());
+            } finally {
+                con.Desconectar();
+            }
+
+        %>
+        <%=tablas%>
+        <%if (contenedor == true) {%>
+       
+        <%}%>        
+    </div>
+    <input type="hidden" name="fin" />
+    <html:hidden name="EficienciaIn13Form" property="valores" styleId="valores" />
+    <%
+   
+        String consulta = "select activo from system_mecasut";
+        ResultSet rs = con.Consultar(consulta);
+        rs.next();
+        if (rs.getInt("activo") == 1) {
+            if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")) {
+                      if (contenedor == true) {
+%>
+    <button type="button" class="btnGuardarIndicador" onclick="enviarDatosIndicadores(guardarEficienciaIn13(),'EficienciaIn13Datos','EficienciaIn13Form');" >Guardar</button>
+    <%}
+        }}
+    } else {%>
+    <button type="button" class="btnGuardarIndicador" disabled="disabled">La evaluación ha sido desactivada.</button>
+    <%        }%>
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+<input type="hidden" name="fin" />
+</div>
+<%            }
+%>

@@ -1,0 +1,72 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.reportes.sabana;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author DIN-A-C14-02
+ */
+public class ListaProgramasEducativos {
+
+    ConexionMySQL con;
+    ResultSet rs;
+    ArrayList<ProgramasEducativos> programasEducativos;
+
+    public ListaProgramasEducativos() {
+
+        programasEducativos = new ArrayList<ProgramasEducativos>();
+        try {
+            con = new ConexionMySQL();
+            con.Conectar();
+            String sql = "SELECT pe.id_pe, pe.id_nivel, CONCAT(pe.nombre_programa, '(', n.abreviatura ,')') as 'nombre_programa', pe.nomenclatura, pe.version, pe.activo"
+                    .concat(" FROM programa_educativo pe ")
+                    .concat(" INNER JOIN nivel_pe n ON pe.id_nivel=n.id_nivel")
+                    .concat(" ORDER BY pe.id_nivel asc");
+            rs = con.Consultar(sql);
+            while (rs.next()) {
+                programasEducativos.add(new ProgramasEducativos(
+                        rs.getInt("id_pe"),
+                        rs.getInt("id_nivel"),
+                        rs.getString("nombre_programa"),
+                        rs.getString("nomenclatura"),
+                        rs.getString("version"),
+                        rs.getBoolean("activo")));
+            }
+        } catch (SQLException ex) {
+            System.err.println("ERRORBD: Consultando ProgramasEducativos en ListaProgramasEducativos.java " + ex.getMessage());
+            con.Desconectar();
+        } finally {
+            con.Desconectar();
+        }
+
+    }
+
+    public int size() {
+        return programasEducativos.size();
+    }
+
+    public String getNombre(int index) {
+        return programasEducativos.get(index).getNombre_programa();
+    }
+    
+    public String getId(int index){
+        return String.valueOf(programasEducativos.get(index).getId_pe());
+    }
+
+    public int getPesXnivel(int idNivel) {
+        int cantidad = 0;
+        for (int i = 0; i < programasEducativos.size(); i++) {
+            if (programasEducativos.get(i).getId_nivel() == idNivel) {
+                cantidad++;
+            }
+        }
+        return cantidad;
+    }
+}

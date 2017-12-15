@@ -1,0 +1,94 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.reportes.sabana;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author Cuauh
+ */
+public class ListaUniversidades {
+
+    String consulta;
+    ArrayList<Universidades> universidades;
+    ConexionMySQL con;
+    ResultSet rs;
+    String periodo;
+
+    public ListaUniversidades(String periodo) {
+        this.periodo = periodo;
+        universidades = new ArrayList<Universidades>();
+        try {
+            con = new ConexionMySQL();
+            con.Conectar();
+            
+            //POR ORDEN DE CREACION
+//            String sql = "SELECT u.id_universidad as 'id', u.nombre_universidad as 'nombre', nuevo_ingreso, matricula_total, prof_tc, "
+//                    .concat(" prof_asig FROM datos_universidad d INNER JOIN universidades u ")
+//                    .concat(" ON d.id_universidad=u.id_universidad WHERE u.id_universidad>0 AND d.id_periodo=").concat(periodo).concat(" ORDER BY u.nombre_universidad ");
+            String sql = "select u.id_universidad as 'id', u.nombre_universidad as 'nombre', nuevo_ingreso, matricula_total, prof_tc, prof_asig FROM datos_universidad d INNER JOIN universidades u  ON d.id_universidad=u.id_universidad where u.id_universidad < 63 and u.id_universidad >0 and id_periodo =".concat(periodo)
+                    .concat(" UNION select  u.id_universidad as 'id', u.nombre_universidad as 'nombre', nuevo_ingreso, matricula_total, prof_tc, prof_asig FROM datos_universidad d INNER JOIN universidades u  ON d.id_universidad=u.id_universidad where u.id_universidad = 67 and id_periodo =").concat(periodo)
+                    .concat(" UNION select  u.id_universidad as 'id', u.nombre_universidad as 'nombre', nuevo_ingreso, matricula_total, prof_tc, prof_asig FROM datos_universidad d INNER JOIN universidades u  ON d.id_universidad=u.id_universidad where (u.id_universidad = 63 or u.id_universidad = 64) and id_periodo =").concat(periodo)
+                    .concat(" UNION select  u.id_universidad as 'id', u.nombre_universidad as 'nombre', nuevo_ingreso, matricula_total, prof_tc, prof_asig FROM datos_universidad d INNER JOIN universidades u  ON d.id_universidad=u.id_universidad where u.id_universidad = 68 and id_periodo =").concat(periodo)
+                    .concat(" UNION select  u.id_universidad as 'id', u.nombre_universidad as 'nombre', nuevo_ingreso, matricula_total, prof_tc, prof_asig FROM datos_universidad d INNER JOIN universidades u  ON d.id_universidad=u.id_universidad where (u.id_universidad = 65 or u.id_universidad = 66) and id_periodo =").concat(periodo).concat(
+                    " UNION select  u.id_universidad as 'id', u.nombre_universidad as 'nombre', nuevo_ingreso, matricula_total, prof_tc, prof_asig FROM datos_universidad d INNER JOIN universidades u  ON d.id_universidad=u.id_universidad where u.id_universidad > 66 and id_periodo =").concat(periodo);
+            
+            //System.out.println(sql);
+            //ORDEN POR ESTADO
+         
+            rs = con.Consultar(sql);
+            while (rs.next()) {
+                universidades.add(
+                        new Universidades(rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getInt("nuevo_ingreso"),
+                        rs.getInt("matricula_total"),
+                        rs.getInt("prof_tc"),
+                        rs.getInt("prof_asig")));
+            }
+        } catch (SQLException ex) {
+            System.err.println("ERRORBD: Consultando Universidades en ListaUniversidades.java " + ex.getMessage());
+            con.Desconectar();
+        } finally {
+            con.Desconectar();
+        }
+    }
+
+    public String getNombre(int index) {
+        return universidades.get(index).getNombre();
+    }
+
+    public int getId(int index) {
+        return universidades.get(index).getId();
+    }
+
+    public int size() {
+        return universidades.size();
+    }
+    
+    public int getMatriculaTotal(int index){
+        return universidades.get(index).getMatriculaTotal();
+    }
+    
+    public int getPtc(int index){
+        return universidades.get(index).getProfTiCom();
+    }
+    
+    public int getPasignatura(int index){
+        return universidades.get(index).getProfAsig();
+    }
+    
+    public int getNuevoIngreso(int index){
+        return universidades.get(index).getNuevoIngreso();
+    }
+    
+    
+    
+    
+}

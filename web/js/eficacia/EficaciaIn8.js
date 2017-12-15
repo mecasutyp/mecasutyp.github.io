@@ -1,0 +1,128 @@
+//* @author Daniel Ramìrez Torres
+function indicador8(control){   
+    var controles = new Array();
+    var j = 0;
+    while(document.forms["EficaciaIn8Form"][j].name != "fin"){
+        controles.push(document.forms["EficaciaIn8Form"][j].name);
+        j++;
+    }
+    for(i = 0; i < controles.length; i++){
+        if (document.forms["EficaciaIn8Form"].elements[controles[i]].value == "")
+            document.forms["EficaciaIn8Form"].elements[controles[i]].value = 0;
+    }
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("amarillo", "El valor '"+ control.value +"' no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");       
+        return;
+    }else{
+        control.value=Number(control.value);
+        $(control).removeClass("inputerror").addClass("inputok");
+        checkEficaciaIn8();
+    }
+    if ($('form[name="EficaciaIn8Form"] input').hasClass("inputerror")){
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("update", "<center>Indicador con <br/> errores, favor <br/> de revisar.</center>").globo("show");
+    }else{
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide");
+    }
+}
+
+function guardarEficaciaIn8(){
+    var x="";
+    if ($("form[name='EficaciaIn8Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+        //$().alerta('rojo', 'Error al guardar. Por favor verifique los datos.');
+        x="Error";
+    }else{
+         //SE GUARDARA LOS COMENTARIOS
+            var comentario = $("form[name='EficaciaIn8Form'] input[name='comentario']").val();
+             if(comentario != "Sin comentarios"){
+                 var indicador = "8";
+                 GuardarComentarios(comentario, indicador);
+             }
+        x = checkEficaciaIn8();
+       // $().alerta('verde', 'Datos guardados correctamente.');
+    }
+    return x;
+}
+
+function checkEficaciaIn8(){
+    var valor="-";
+    var nocuadros=$("form[name='EficaciaIn8Form'] input[name='nocuadros']").val();
+    for(var k=1;k<=nocuadros;k++){
+        var anio=$("form[name='EficaciaIn8Form'] input[name='anio"+k+"']").val();
+        var egresados=$("form[name='EficaciaIn8Form'] input[name='egresados"+k+"']").val();
+        var sobresaliente=$("form[name='EficaciaIn8Form'] input[name='sobresaliente"+k+"']").val();
+        var satisfactorio=$("form[name='EficaciaIn8Form'] input[name='satisfactorio"+k+"']").val();
+        var sin_testimonio=$("form[name='EficaciaIn8Form'] input[name='sin_testimonio"+k+"']").val();
+        var id_cuadro=$("form[name='EficaciaIn8Form'] input[name='id_cuadro"+k+"']").val();
+        $("form[name='EficaciaIn8Form'] input[name='total"+k+"']").val(parseInt(sobresaliente)+parseInt(satisfactorio)+parseInt(sin_testimonio));
+        var total=$("form[name='EficaciaIn8Form'] input[name='total"+k+"']").val();
+        if(total== 0 || egresados== 0){
+            $("form[name='EficaciaIn8Form'] input[name='div1"+k+"']").val(0 + " %");
+        }else{
+            $("form[name='EficaciaIn8Form'] input[name='div1"+k+"']").val(getDecimal(parseFloat(total/egresados*100)) + " %");
+        }
+        
+        if(parseInt(total) >parseInt(egresados)){
+            $("form[name='EficaciaIn8Form'] input[name='total"+k+"']").globo("enable").globo("update", "<center>El n&uacute;mero de egresados del mes <br/>Agosto no puede ser menor al <br/>total de egresados.<br/></center>").removeClass("inputok").addClass("inputerror");
+        }else{
+            $("form[name='EficaciaIn8Form'] input[name='total"+k+"']").globo("disable").removeClass("inputerror").addClass("inputok");
+        }
+        
+        if(total== 0 || sobresaliente== 0){
+            $("form[name='EficaciaIn8Form'] input[name='div2"+k+"']").val(0 + " %");
+        }else{
+            $("form[name='EficaciaIn8Form'] input[name='div2"+k+"']").val(getDecimal(parseFloat(sobresaliente/total*100)) + " %");
+        }
+        
+        if(total== 0 || satisfactorio== 0){
+            $("form[name='EficaciaIn8Form'] input[name='div3"+k+"']").val(0 + " %");
+        }else{
+            $("form[name='EficaciaIn8Form'] input[name='div3"+k+"']").val(getDecimal(parseFloat(satisfactorio/total*100)) + " %");
+        }
+        
+        if(total== 0 || sin_testimonio== 0){
+            $("form[name='EficaciaIn8Form'] input[name='div4"+k+"']").val(0 + " %");
+        }else{
+            $("form[name='EficaciaIn8Form'] input[name='div4"+k+"']").val(getDecimal(parseFloat(sin_testimonio/total*100)) + " %");
+        }
+        
+        valor=valor.concat(id_cuadro,",",sobresaliente,",",satisfactorio,",",sin_testimonio,",");
+        for (var i=0;i<$("form[name='EficaciaIn8Form'] input[name='radio"+k+"']").length;i++){
+
+            if ($("form[name='EficaciaIn8Form'] input[name='radio"+k+"']")[i].checked){
+
+                valor=valor.concat($("form[name='EficaciaIn8Form'] input[name='radio"+k+"']")[i].value,"-");
+                if($("form[name='EficaciaIn8Form'] input[name='radio"+k+"']")[i].value==1){                  
+                    $("form[name='EficaciaIn8Form'] input[name='total"+k+"']").removeAttr("disabled");
+                    
+                    $("form[name='EficaciaIn8Form'] input[name='sobresaliente"+k+"']").removeAttr("disabled");
+                    $("form[name='EficaciaIn8Form'] input[name='satisfactorio"+k+"']").removeAttr("disabled");
+                    $("form[name='EficaciaIn8Form'] input[name='sin_testimonio"+k+"']").removeAttr("disabled");                    
+                }
+                else{                   
+                    $("form[name='EficaciaIn8Form'] input[name='total"+k+"']").attr("disabled","disabled");
+                    $("form[name='EficaciaIn8Form'] input[name='total"+k+"']").val(0).removeClass("inputerror").addClass("inputok");
+                  
+                    $("form[name='EficaciaIn8Form'] input[name='sobresaliente"+k+"']").attr("disabled","disabled");
+                    $("form[name='EficaciaIn8Form'] input[name='sobresaliente"+k+"']").val(0).removeClass("inputerror");
+                    $("form[name='EficaciaIn8Form'] input[name='satisfactorio"+k+"']").attr("disabled","disabled");
+                    $("form[name='EficaciaIn8Form'] input[name='satisfactorio"+k+"']").val(0).removeClass("inputerror");
+                    $("form[name='EficaciaIn8Form'] input[name='sin_testimonio"+k+"']").attr("disabled","disabled");
+                    $("form[name='EficaciaIn8Form'] input[name='sin_testimonio"+k+"']").val(0).removeClass("inputerror");
+            $("form[name='EficaciaIn8Form'] input[name='div4"+k+"']").val(0 + " %");
+            $("form[name='EficaciaIn8Form'] input[name='div3"+k+"']").val(0 + " %");
+            $("form[name='EficaciaIn8Form'] input[name='div2"+k+"']").val(0 + " %");
+            $("form[name='EficaciaIn8Form'] input[name='div1"+k+"']").val(0 + " %");
+                }
+            }
+        }
+        if ($("form[name='EficaciaIn8Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+            $("form[name='EficaciaIn8Form'] input[name='div4"+k+"']").val(0 + " %");
+            $("form[name='EficaciaIn8Form'] input[name='div3"+k+"']").val(0 + " %");
+            $("form[name='EficaciaIn8Form'] input[name='div2"+k+"']").val(0 + " %");
+            $("form[name='EficaciaIn8Form'] input[name='div1"+k+"']").val(0 + " %");
+        }
+    }
+    return valor;
+}
+

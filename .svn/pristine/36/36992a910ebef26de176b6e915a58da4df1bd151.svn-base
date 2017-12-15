@@ -1,0 +1,122 @@
+<%-- 
+    Document   : EficienciaIn16
+    Created on : 31/05/2012, 10:53:48 PM
+    Author     : Cuauhtemoc Medina
+    Actualización 2016: Salvador Zamora Arias
+--%>
+
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+
+<!--OBTENER LA SESION-->
+<%
+    try {
+        HttpSession sesion = request.getSession(false);
+        int idUniversidad = Integer.parseInt(sesion.getAttribute("idUniversidad").toString());
+        int idPeriodo = Integer.parseInt(sesion.getAttribute("idPeriodo").toString());
+        ConexionMySQL con = new ConexionMySQL();
+        String matricula = "0";
+        String val1 = "0";
+        String val2 = "0";
+        String val3 = "0";
+        String val4 = "0";
+
+        try {
+
+            String consulta = "SELECT matricula_total FROM datos_universidad WHERE id_universidad=".concat(String.valueOf(idUniversidad)).concat(" AND id_periodo=").concat(String.valueOf(idPeriodo));
+            ResultSet mat = con.Consultar(consulta);
+            while (mat.next()) {
+                matricula = mat.getString(1);
+            }
+            consulta = "SELECT libros, titulos, revistas, bibliotecas FROM eficienciain16 WHERE id_universidad=".concat(String.valueOf(idUniversidad)).concat(" AND id_periodo=").concat(String.valueOf(idPeriodo));
+            mat = null;
+            mat = con.Consultar(consulta);
+            while (mat.next()) {
+                val1 = mat.getString(1);
+                val2 = mat.getString(2);
+                val3 = mat.getString(3);
+                val4 = mat.getString(4);
+            }
+        } catch (SQLException ex) {
+            System.err.println("Jsp error eficiencia 16: " + ex);
+        } finally {
+            con.Desconectar();
+        }
+%>
+
+<html:form action="/EficienciaIn16">
+    <div id="efic16">
+        <h3>Cuadro 16.1 <br/>Distribuci&oacute;n de Libros y T&iacute;tulos por Alumnos</h3>
+        <div>
+            <table id="rounded-corner" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th width="20%" scope="col" class="rounded-company">1</th>
+                        <th width="20%" class="rounded-q1">2</th>
+                        <th width="20%" class="rounded-q1">3</th>
+                        <th width="20%" class="rounded-q1">4</th>
+                        <th width="20%" class="rounded-q4">5</th>
+                    </tr>
+                    <tr>
+                        <th width="" class="rounded-q1">N&uacute;mero de Libros</th>
+                        <th class="rounded-q1">N&uacute;mero de T&iacute;tulos</th>
+                        <th class="rounded-q1">Matr&iacute;cula inicial atendida en el ciclo escolar</th>
+                        <th class="rounded-q1">N&uacute;mero de subscripciones a revistas fisicamente o electronicas vigentes al ciclo evaluado:</th>
+                        <th class="rounded-q1">N&uacute;mero de subscripciones a bibliotecas virtuales vigentes al ciclo escolar evaluado para ser consultadas por los alumnos:</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td align="center"><input style="width:90%" maxlength="7" type="text" name="libros" value="<%=val1%>" onblur="EficienciaIn16(this)"></td>
+                    <td align="center"><input style="width:90%" maxlength="7" type="text" name="titulos" value="<%=val2%>" onblur="EficienciaIn16(this)"></td>
+                    <td align="center"><input onchange="validarMatricula16();" type="text" name="matricula" value="<%=matricula%>" readonly="readonly" id="etiqueta"></td>
+                    <td align="center"><input style="width:90%" maxlength="7" type="text" name="revistas" value="<%=val3%>" onblur="EficienciaIn16(this)"></td>
+                    <td align="center"><input style="width:90%" maxlength="7" type="text" name="bibliotecas" value="<%=val4%>" onblur="EficienciaIn16(this)"></td>
+                </tr>
+                <tr>
+                    <td>DLPA<br/> 1/3</td>
+                    <td>DTPA<br/> 2/3</td>
+                    <td colspan="3" rowspan="3"></td>
+                </tr>
+                <tr>
+                    <td align="center"><input style="width:90%" maxlength="7" type="text" name="detla1" value="0" readonly="readonly" id="etiqueta"></td>
+                    <td align="center"><input style="width:90%" maxlength="7" type="text" name="detla2" value="0" readonly="readonly" id="etiqueta"></td>
+                </tr>
+                <tr>
+                    <td>Libros por Alumno</td>
+                    <td>T&iacute;tulos por Alumno</td>
+                </tr>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="rounded-foot-left">Notas: No hay notas adicionales.</td>
+                        <td class="rounded-foot-right"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <%
+        String consulta = "select activo from system_mecasut";
+        ResultSet rs = con.Consultar(consulta);
+        rs.next();
+        if (rs.getInt(1) == 1) {
+            if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")) {
+    %>
+    <button type="button" class="btnGuardarIndicador" onclick="enviarDatosIndicadores(guardarEficIn16(),'EficienciaIn16Datos','EficienciaIn16Form');" >Guardar</button>
+    <%}
+        }
+    } else {%>
+    <button type="button" class="btnGuardarIndicador" disabled="disabled">La evaluación ha sido desactivada.</button>
+    <%        }%>
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+<div id="efic16" align="center">
+    La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+</div>
+<%            }
+%>

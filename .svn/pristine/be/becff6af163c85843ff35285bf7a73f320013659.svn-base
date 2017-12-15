@@ -1,0 +1,239 @@
+<%--
+    Document   : PertinenciaIn24
+    Created on : 10/08/2012, 12:21:12 PM
+    Author     : Daniel Ramìrez Torres
+--%>
+<%@page import="javax.servlet.http.HttpSession"%>
+<%@page import="java.sql.*"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+
+
+<%--
+Se obtiene la sesion
+--%>
+<%
+try{
+            HttpSession sesion = request.getSession(false);
+            sesion.getAttribute("idUniversidad").toString();
+            sesion.getAttribute("idPeriodo").toString();
+            ConexionMySQL con = new ConexionMySQL();
+            String[] Datos = new String[18];
+            boolean vacio = false;
+            String ptc = "0";
+            try {
+                
+                String consulta = "SELECT * FROM  pertinenciain24 where id_universidad=".concat(String.valueOf(sesion.getAttribute("idUniversidad").toString())).concat(" and id_periodo=").concat(String.valueOf(sesion.getAttribute("idPeriodo").toString()));
+                ResultSet datos = con.Consultar(consulta);
+                String consulta1 = "SELECT prof_asig from datos_universidad WHERE id_universidad=".concat(String.valueOf(sesion.getAttribute("idUniversidad").toString())).concat(" and id_periodo=").concat(String.valueOf(sesion.getAttribute("idPeriodo").toString()));
+                ResultSet cons1 = con.Consultar(consulta1);
+                while (datos.next()) {
+                    vacio = true;
+                    Datos[0] = datos.getString(3);
+                    Datos[1] = datos.getString(4);
+                    Datos[2] = datos.getString(5);
+                    Datos[3] = datos.getString(6);
+                    Datos[4] = datos.getString(7);
+                    Datos[5] = datos.getString(8);
+                    Datos[6] = datos.getString(9);
+                    Datos[7] = datos.getString(10);
+                    Datos[8] = datos.getString(11);
+                    Datos[9] = datos.getString(12);
+                    Datos[10] = datos.getString(13);
+                    Datos[11] = datos.getString(14);
+                    Datos[12] = datos.getString(15);
+                    Datos[13] = datos.getString(16);
+                    Datos[14] = datos.getString(17);
+                    Datos[15] = datos.getString(18);                    
+                    Datos[16] = datos.getString(19);
+                    Datos[17] = datos.getString(20);
+                }
+                if (vacio == false) {
+                    for (int i = 0; i < 18; i++) {
+                        Datos[i] = "0";
+                    }
+                }
+                if (cons1.next()) {
+                    ptc = cons1.getString(1);
+                }
+            } catch (SQLException ex) {
+                System.out.println("Jsp error pertinencia 24: "+ex);
+            } finally {
+                con.Desconectar();
+            }
+%>
+
+<html:form action="/PertinenciaIn24">
+    <input type="hidden" name="tota_ptc" value="<%=ptc%>"/>
+    <div id="pert24" align="center">
+        <h3><a href="#">Cuadro 24.1<br/>Nivel de estudios de los profesores de asignatura y experiencia laboral en la materia</a></h3>
+        <div>
+            <table id="rounded-corner" style="width: 55%">
+                <thead>
+                    <tr>
+                        <th scope="col" class="rounded-company"  width="15%">No.</th>
+                        <th class="rounded-q1"  width="30%">Nivel M&aacute;ximo de estudios</th>
+                        <th class="rounded-q4" width="20%" >PA</th>
+                    </tr>            
+                </thead>
+                <tr>
+                    <td  align="center" >1</td>
+                    <td  align="center" >Media superior sin certificado</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor1' value='<%=Datos[0]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                 <tr>
+                    <td  align="center" >2</td>
+                    <td  align="center" >Media superior con certificado</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor2' value='<%=Datos[1]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >3</td>
+                    <td  align="center" >T&eacute;cnico superior universitario con t&iacute;tulo</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor3' value='<%=Datos[2]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >4</td>
+                    <td  align="center" >T&eacute;cnico superior universitario sin t&iacute;tulo</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor4' value='<%=Datos[3]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >5</td>
+                    <td  align="center" >Licenciatura sin t&iacute;tulo</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor5' value='<%=Datos[4]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >6</td>
+                    <td  align="center" >Licenciatura t&iacute;tulo</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor6' value='<%=Datos[5]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >7</td>
+                    <td  align="center" >Especialidad sin grado</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor7' value='<%=Datos[6]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >8</td>
+                    <td  align="center" >Maestr&iacute;a sin grado</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor8' value='<%=Datos[7]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td class="rounded-foot-right" colspan="2" align="right" style='font-weight: bold' >Subtotal 1</td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='subtotal1' value='0' ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >9</td>
+                    <td  align="center" >Especialidad con grado</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor9' value='<%=Datos[8]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >10</td>
+                    <td  align="center" >Maestr&iacute;a con grado</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor10' value='<%=Datos[9]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >11</td>
+                    <td  align="center" >Doctorado sin grado</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor11' value='<%=Datos[10]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td  align="center" >12</td>
+                    <td  align="center" >Doctorado con grado</td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor12' value='<%=Datos[11]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td class="rounded-foot-right" colspan="2"  align="right" style='font-weight: bold'>Subtotal 2</td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='subtotal2' value='0' ></td>
+                </tr>
+                <tr>
+                    <td class="rounded-foot-right" colspan="2" align="right" style='font-weight: bold'>Total</td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total' value='0' ></td>
+                </tr>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="rounded-foot-left">Notas: No hay notas adicionales.</td>
+                        <td class="rounded-foot-right"></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <%-- Segunda Tabla--%>
+        </div>
+        <h3><a href="#">Cuadro 24.2<br/>Situaci&oacute;n en el trabajo de los profesores de asignatura</a></h3>
+        <div>
+            <table id="rounded-corner" style="width: 70%">
+                <thead>
+                    <tr>
+                        <th scope="col" class="rounded-company" rowspan="2">Profesores de asignatura</th>
+                        <th class="rounded-q4" colspan="3">Situaci&oacute;n en el trabajo relacionado con su ejercicio profesional</th>
+                    </tr>
+
+                    <tr>
+                        <th scope="col" class="rounded-q1">Con trabajo actual</th>
+                        <th class="rounded-q1">Sin trabajo en los ultimos tres años</th>
+                        <th class="rounded-q1" width="30%" >Sin trabajo más de tres años</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='profecon' value='0' ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor21' value='<%=Datos[12]%>' onblur="PertinenciaIn24(this);" ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor22' value='<%=Datos[13]%>' onblur="PertinenciaIn24(this);" ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor23' value='<%=Datos[14]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <th scope="col" class="rounded-company" rowspan="2">Profesores de asignatura</th>
+                    <th class="rounded-q4" colspan="3">Situaci&oacute;n en el trabajo no relacionado con su ejercicio profesional</th>
+                </tr>
+                <tr>
+                    <th scope="col" class="rounded-q1">Con trabajo actual</th>
+                    <th class="rounded-q1">Sin trabajo en los ultimos tres años</th>
+                    <th class="rounded-q1" width="30%" >Sin trabajo más de tres años</th>
+                </tr>
+                <tr>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='profesin' value='0' ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor24' value='<%=Datos[15]%>' onblur="PertinenciaIn24(this);" ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor25' value='<%=Datos[16]%>' onblur="PertinenciaIn24(this);" ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valor26' value='<%=Datos[17]%>' onblur="PertinenciaIn24(this);" ></td>
+                </tr>
+                <tr>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='totalprofesores' value='0' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total_actual' value='0' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total_ultimos' value='0' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total_sin' value='0' ></td>
+                </tr>
+
+                <tfoot>
+                    <tr>
+                        <td>PAEL1</td>
+                        <td colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <td><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='porcentajepael' value='0' ></td>
+                        <td colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="rounded-foot-left">Notas: No hay notas adicionales.</td>
+                        <td class="rounded-foot-right"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <html:hidden name="PertinenciaIn24Form" property="valores" styleId="valores" />
+    <%
+                if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                    if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")){
+    //<button type="button" class="btnGuardarIndicador" onclick="retrieveURL('/PertinenciaIn24.msut?valores='+guardarPertinenciaIn24(), 'PertinenciaIn24Form');" >Guardar</button>
+    %>
+    <button type="button" class="btnGuardarIndicador" onclick="enviarDatosIndicadores(guardarPertinenciaIn24(),'PertinenciaIn24Datos','PertinenciaIn24Form');" >Guardar</button>
+    <%}}%>
+</html:form>
+    <%
+} catch (NullPointerException exNull) {
+%>
+<div id="pert24" align="center">
+    La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+</div>
+<%            }
+%>
+

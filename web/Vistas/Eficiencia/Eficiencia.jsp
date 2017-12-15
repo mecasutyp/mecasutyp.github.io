@@ -1,0 +1,83 @@
+<%-- 
+    Document   : Eficiencia
+    Created on : 24/05/2012, 12:04:25 PM
+    Author     : Joshua
+--%>
+<%@page import="java.sql.ResultSet, com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+
+<%
+    HttpSession sesion = request.getSession();
+    if (sesion.getAttribute("usuario") == null) {
+%>
+<jsp:forward page="/login.msut">
+    <jsp:param name="error" value="true"></jsp:param>
+    <jsp:param name="ask" value="false"></jsp:param>
+    <jsp:param name="errorMessage" value="Sesi&oacute;n caducada o inv&aacute;lida<br/>El recurso al que deseas acceder est&aacute; restringido, debes iniciar sesi&oacute;n para utilizarlo."></jsp:param>
+</jsp:forward>
+<%  }   %>
+
+<tiles:insert template="/Vistas/Master.jsp">
+    <%  ConexionMySQL conexion = new ConexionMySQL();
+
+        String sql = "Select archivo_jsp, archivo_js from system_indicadores where id_categoria = 2 and activo = 1";
+        ResultSet rs = conexion.Consultar(sql);
+        int i = 1;
+    %>
+    <tiles:put name="title" type="string">
+        MECASUT - Eficiencia
+    </tiles:put>
+    <tiles:put name="scripts" type="string">
+        <%
+            while (rs.next()) {
+                String js = rs.getString("archivo_js") + ".js";
+        %>
+        <script language="javascript" type="text/javascript" src="js/eficiencia/<%=js%>"></script>
+        <%
+            }
+        %>
+    </tiles:put>
+    <tiles:put name="body" type="string">
+        <h1 style="text-align: center;">II. EFICIENCIA</h1>
+        <div id="tabs">
+            <ul>
+                <%
+                    i = 1;
+                    rs.beforeFirst();
+                    while (rs.next()) {
+                        String tab = "<li><a id='pest".concat(String.valueOf(i)).concat("' onclick='limpiarDivs(); sendRequest(\"GET\",\"Vistas/Eficiencia/") + rs.getString("archivo_jsp") + ".jsp\",\"indT".concat(String.valueOf(i)).concat("\",\"" + rs.getString("archivo_jsp") + "Form\",\"Indicador 2.").concat(String.valueOf(i)).concat("\");' href='#indT").concat(String.valueOf(i)).concat("'>Indicador 2.").concat(String.valueOf(i)).concat("</a></li>");
+                        out.print(tab);    
+                        i++;
+                    }
+                %>
+            </ul>
+            <%
+                i = 1;
+                rs.beforeFirst();
+                while (rs.next()) {
+                    out.print("<div id='indT"+i+"' ></div>");
+                    i++;
+                }
+            %>
+        </div>
+        <input type="hidden" id="indActual" value="eficiencia"/>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("div > ul > li > a, div > div > form > div > h3 > a, div > form > div").click(function(){
+                    $("input").globo('reset');
+                });
+
+                $("div > form > div").accordion({
+                    icons: { "header": "ui-icon-arrowreturnthick-1-s", "headerSelected": "ui-icon-arrowreturnthick-1-n" },
+                    collapsible: true,
+                    autoHeight: false,
+                    navigation: true
+                });
+                $("#tabs").tabs();
+                $('#pest1').trigger('click');
+            });
+        </script>
+    </tiles:put>
+</tiles:insert>

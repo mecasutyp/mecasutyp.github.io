@@ -1,0 +1,141 @@
+<%-- 
+    Document   : login
+    Created on : 18/01/2012, 11:39:52 AM
+    Author     : Joshua
+--%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ page import = "net.tanesha.recaptcha.ReCaptcha" %> 
+<%@ page import = "net.tanesha.recaptcha.ReCaptchaFactory" %>
+<%@ page import = "net.tanesha.recaptcha.ReCaptchaImpl" %>
+<%@ page import = "net.tanesha.recaptcha.ReCaptchaResponse" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "http://www.w3.org/TR/html4/loose.dtd">
+<%@page session="true" import="java.util.*"%>
+<%  HttpSession sesion = request.getSession();
+    if (sesion.getAttribute("usuario") != null) {
+%>
+        <jsp:forward page="/login.msut">
+            <jsp:param name="ask" value="recuperar"></jsp:param>
+        </jsp:forward>
+<% }    %>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="css/jquery.toastmessage.css" />
+        <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+        <script language="javascript" type="text/javascript" src="js/jquery.ui.js"></script>
+        <script language="javascript" type="text/javascript" src="js/jquery.toastmessage.js"></script>
+        <script language="javascript" type="text/javascript" src="js/jquery.combobox.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/stylesheet.css"/>
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.css"/>
+        <link rel="stylesheet" type="text/css" href="css/jquery.combobox.css"/>
+        <script type="text/javascript">
+            var respuesta;
+            $("#captcha").val("");
+            var captchaResponse = function(response) {
+                respuesta = response;
+                $("#captcha").val(response);
+            };    
+            var onloadCallback = function() {
+                captchaResponse = grecaptcha.render('captcha', {
+                    'sitekey':'6LfiySgTAAAAAEQBMK6_rTxTHSPExobyj422NxWQ',
+                    'theme':'light',
+                    'callback':captchaResponse
+                });
+            };
+            function validarReCaptcha(){
+                $("#captcha").val(respuesta);
+            }
+            var RecaptchaOptions = {
+                theme : 'clean'
+            };
+            $(function() {
+                $("#aceptar").button();
+                $("#combobox").combobox();
+            });
+        </script>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="shortcut icon" href="images/favicon.gif" type="image/x-icon" />
+        <script src='https://www.google.com/recaptcha/api.js' async defer></script>
+        <title>MECASUT - Inicio de sesi&oacute;n</title>
+    </head>
+    <body>
+        <img alt="MECASUT" src="images/mecasut.png" />
+        <img alt="MECASUT" src="images/Logo-UTyVll.png" align="right" />
+        <html:form action="/login" onsubmit="validarReCaptcha();">
+            <div align="center"><h1>Iniciar Sesi&oacute;n</h1></div>
+            <div class="box" id="t3" style="width: 700px; position: absolute; left: 50%; margin-left: -350px; font-weight: normal; vertical-align: middle;">
+                <span id="errorMessage" style="display: none">
+                    <bean:write name="LoginForm" property="errorMessage" filter="false"></bean:write>
+                </span>
+                <table align="center">
+                    <tr>
+                        <td align="right"><label>Universidad:</label></td>
+                        <td colspan="2" align="left" style=" font-size: smaller;">
+                            <html:select property="universidad" styleId="combobox" style="width:auto;">
+                                <html:option value="-1">Elige una universidad...</html:option>
+                                <html:optionsCollection name="LoginForm" property="universidades" label="name" value="id"></html:optionsCollection>
+                            </html:select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><label>Usuario:</label></td>
+                        <td><html:text property="user" tabindex="2"/></td>
+                        <td rowspan="2">
+                            <button name="ask" value="login" id="aceptar" tabindex="4">Iniciar Sesi&oacute;n</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right"><label>Contrase&ntilde;a:</label></td>
+                        <td><html:password property="password" value="" tabindex="3"/></td>
+                    </tr>
+                    <tr  >
+                        <td colspan="4" >
+                            <div id="captcha" style="padding-left: 10em; height: 130px;">
+                                <%
+                                    ReCaptcha c = ReCaptchaFactory.newReCaptcha("6LfiySgTAAAAAEQBMK6_rTxTHSPExobyj422NxWQ", "6LfiySgTAAAAAAeXgpXoyxz_7xcB-jN6vpggFFy3", false);
+                                    out.print(c.createRecaptchaHtml(null, null));
+                                %>
+                            </div>
+                           
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                         <!--<td colspan="3" >Nota: El Sistema estará habilitado el día lunes 6 de marzo del 2017 para las universidades</td>-->
+                    </tr>
+                </table>
+                <logic:equal name="LoginForm" property="error" value="true">
+                    <span id="scr">
+                        <script type="text/javascript">
+                            $("#errorMessage").addClass("error");
+                            $("#errorMessage").slideDown();
+                        </script>
+                    </span>
+                </logic:equal>
+                <logic:equal name="LoginForm" property="error" value="false">
+                    <span id="scr">
+                        <script type="text/javascript">
+                            $("#errorMessage").slideUp();
+                        </script>
+                    </span>
+                </logic:equal>
+                <!--div id="opcGuardarBorrador">
+                    <a id="btnBorrador" onclick="alert('Esta opcion aun se encuentra en desarrollo y solo funciona con ciertos datos, favor de no reportar errores referentes a este borrador.'); window.open('Excel.msut');"><span class="ui-icon ui-icon-print" style="float:right;"></span>Borrador</a>
+                </div-->
+            </div>
+        </html:form>
+        <div style="position: absolute; bottom: 10px; font-size: 10.5px">
+            <div id="copyright">Copyright &copy; 2012 <a href="http://www.apycom.com">Apycom jQuery Menus</a></div>
+            <div id="copyright">Copyright &copy; 2012 <a href="http://www.jquery.com">jQuery</a></div>
+            <div id="copyright">Copyright &copy; 2012 <a href="http://www.jqueryui.com">jQuery-UI</a></div>
+            <br/>
+            <div id="copyright">Except as otherwise noted, the content of this page is licensed under the <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 License</a>,<br/>  and code samples are licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0"> Apache 2.0 License.</a> For details, see our <a href="https://developers.google.com/site-policies">Site Policies</a>.</div>
+        </div>
+        <div style="filter:alpha(opacity=50); opacity:0.5;position: absolute; bottom: 10px; right: 10px" align="right">
+            <div>MECASUT Version 1.2.336-&beta;eta1 (Steiner)</div>
+            <div>Revisi&oacute;n 115.08052015-15:O2</div>
+        </div>
+    </body>
+</html>

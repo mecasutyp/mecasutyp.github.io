@@ -1,0 +1,44 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.admon;
+/**
+ *
+ * @author Danny
+ */
+public class MensajesForm extends org.apache.struts.action.ActionForm {
+
+    private int id_mensaje;
+    private String ask;
+    private String mensaje;
+
+    public MensajesForm() {
+        super();
+    }
+
+    public int getId_mensaje() {
+        return id_mensaje;
+    }
+
+    public void setId_mensaje(int id_mensaje) {
+        this.id_mensaje = id_mensaje;
+    }
+
+    public String getAsk() {
+        return ask;
+    }
+
+    public void setAsk(String ask) {
+        this.ask = ask;
+    }
+
+    public String getMensaje() {
+        return mensaje;
+    }
+
+    public void setMensaje(String mensaje) {
+        this.mensaje = mensaje;
+    }
+
+}

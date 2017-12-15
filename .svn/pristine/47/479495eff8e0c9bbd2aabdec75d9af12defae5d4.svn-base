@@ -1,0 +1,86 @@
+<%-- 
+    Document   : Eficiencia
+    Created on : 06-may-2013, 19:10:18
+    Author     : EQ-30
+--%>
+
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<!DOCTYPE html>
+<html>
+    <div id="efic12">
+        <h3>Cuadro 12<br/>Vista previa costo por alumno</h3>
+        <div>
+            <table id="rounded-corner" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th width='5%'scope="col" class="rounded-company">1</th>
+                        <th class="rounded-q1">2</th>
+                        <th class="rounded-q1">3</th>
+                        <th width='5%' class="rounded-q4">4</th>
+                    </tr>
+                    <tr>
+                        <th width='5%' class="rounded-q1">No.</th>
+                        <th width='20%' class="rounded-q1">Universidad Tecnológica</th>
+                        <th width='5%' class="rounded-q1">Presupuesto total autorizado Federal y Estatal</th>
+                        <th width='5%' class="rounded-q1">Matr&iacute;cula inicial atendida en el ciclo escolar</th>
+                    </tr>
+                </thead>
+                <%
+                    ConexionMySQL con = new ConexionMySQL();
+                    String periodo = request.getParameter("periodo").toString();
+                    String unis = "";
+                    String matricula = "0";
+                    String consulta = "";
+                    String consulta1 = "";
+                    int cont = 1;
+                    try {
+                        String universidades = "Select id_universidad, nombre_universidad from universidades where activo = 1 and id_universidad>0";
+                        ResultSet uni = con.Consultar(universidades);
+                        while (uni.next()) {                           
+                %>
+                <tr>
+                    <td align="center"><%=cont%></td>
+                    <td align="center"><%=uni.getString(2)%></td>
+                    <%
+                        consulta = "SELECT autorizado FROM eficaciain11 WHERE id_universidad=".concat(uni.getString(1)).concat(" and id_periodo=").concat(periodo);
+                        ResultSet rs = con.Consultar(consulta);
+                        //VALORES DEL INDICADOR 1 POR UNIVERSIDAD
+                        while (rs.next()) {
+                            out.print("<td align='center'>"+rs.getString("autorizado")+"</td>");                              
+                     }
+                        consulta1 = "SELECT matricula_total FROM datos_universidad WHERE id_universidad=".concat(uni.getString(1)).concat(" and id_periodo=").concat(periodo);
+                        ResultSet rs1 = con.Consultar(consulta1);
+                        //VALORES DEL INDICADOR 1 POR UNIVERSIDAD
+                        while (rs1.next()) {
+                            out.print("<td align=center'>"+rs1.getString("matricula_total")+"</td>");             
+                        }
+                    %>                 
+                </tr>
+                <%
+                        cont++;
+                    }
+                %>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="rounded-foot-left">Notas: No hay notas adicionales.</td>
+                        <td class="rounded-foot-right"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+</html>
+
+<%
+    } catch (SQLException ex) {
+        System.err.println("Error eficiciencia 12: " + ex);
+    } finally {
+        con.Desconectar();
+    }
+%>

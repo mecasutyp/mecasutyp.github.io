@@ -1,0 +1,286 @@
+<%-- 
+    Document   : PertinenciaIn23
+    Created on : 5/07/2012, 12:08:27 PM
+    Author     : Cuauhtemoc Medina
+--%>
+
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+
+<!--OBTENER LA SESION-->
+<%try {
+        HttpSession sesion = request.getSession(false);
+        int idUniversidad = Integer.parseInt(sesion.getAttribute("idUniversidad").toString());
+        int idPeriodo = Integer.parseInt(sesion.getAttribute("idPeriodo").toString());
+%>
+<!--TERMINA OBTENER LA SESION-->
+
+<%
+    ConexionMySQL con = new ConexionMySQL();
+    String[] valores = new String[22];
+    boolean vacio = true;
+    String pct = "0";
+
+    try {
+
+        String consulta = "SELECT * FROM pertinenciain23 WHERE id_universidad=".concat(String.valueOf(idUniversidad)).concat(" and id_periodo=").concat(String.valueOf(idPeriodo));
+        ResultSet cons = con.Consultar(consulta);
+        String consulta1 = "SELECT prof_tc from datos_universidad WHERE id_universidad=".concat(String.valueOf(idUniversidad)).concat(" and id_periodo=").concat(String.valueOf(idPeriodo));
+        ResultSet cons1 = con.Consultar(consulta1);
+        while (cons.next()) {
+            vacio = false;
+            valores[0] = cons.getString("media_superior");
+            valores[1] = cons.getString("media_superior_con");
+            valores[2] = cons.getString("tsu");
+            valores[3] = cons.getString("tsu_con");
+            valores[4] = cons.getString("lic");
+            valores[5] = cons.getString("lic_titulo");
+            valores[6] = cons.getString("especialidad");
+            valores[7] = cons.getString("maestria");
+            valores[8] = cons.getString("especialidad_grado");
+            valores[9] = cons.getString("maestria_grado");
+            valores[10] = cons.getString("doctorado");
+            valores[11] = cons.getString("doctorado_grado");
+            valores[12] = cons.getString("cap_competencias");
+            valores[13] = cons.getString("cap_tutorias");
+            valores[14] = cons.getString("apl_competencias");
+            valores[15] = cons.getString("apl_tutorias");
+            valores[16] = cons.getString("promep");
+            valores[17] = cons.getString("becados");
+            valores[18] = cons.getString("cuerpos_academicos");
+            valores[19] = cons.getString("cuerpos_formacion");
+            valores[20] = cons.getString("cuerpos_consolidacion");
+            valores[21] = cons.getString("cuerpos_consolidados");
+        }
+
+        if (vacio == true) {
+            for (int i = 0; i <= 21; i++) {
+                valores[i] = "0";
+            }
+        }
+        if (cons1.next()) {
+            pct = cons1.getString(1);
+        }
+
+    } catch (SQLException ex) {
+        System.out.println("jsp error pertinencia 23: " + ex);
+    } finally {
+        con.Desconectar();
+    }
+%>
+
+<html:form action="/PertinenciaIn23">
+    <input type="hidden" name="ptc_base" value="<%=pct%>"/>
+    <div id="pert23">
+        <h2>Cuadro23.1<br/>Nivel de estudios de los profesores de tiempo completo</h2>
+        <div align="center">
+            <table id="rounded-corner" style="width: 60%">
+                <thead>
+                    <tr>
+                        <th class="rounded-company">No.</th>
+                        <th class="rounded-q1">Nivel M&aacute;ximo de Estudios</th>
+                        <th class="rounded-q4">TOTAL</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td align="center" >1</td>
+                    <td align="center" >Media superior sin certificado</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[0]%>" name="Estudios1" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >2</td>
+                    <td align="center" >Media superior con certificado</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[1]%>" name="Estudios2" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >3</td>
+                    <td align="center" >T&eacute;cnico superior universitario sin t&iacute;tulo</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[2]%>" name="Estudios3" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >4</td>
+                    <td align="center" >T&eacute;cnico superior universitario con t&iacute;tulo</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[3]%>" name="Estudios4" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >5</td>
+                    <td align="center" >Licenciatura sin t&iacute;tulo</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[4]%>" name="Estudios5" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >6</td>
+                    <td align="center" >Licenciatura con t&iacute;tulo</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[5]%>" name="Estudios6" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >7</td>
+                    <td align="center" >Especialidad sin grado</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[6]%>" name="Estudios7" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >8</td>
+                    <td align="center" >Maestr&iacute;a sin grado</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[7]%>" name="Estudios8" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="etiqueta" align="right" >Subtotal 1</td>
+                    <td align="center"><input style="width:90%" type="text" name="subtotal1" value="0" readonly="readonly" id="etiqueta"></td>
+                </tr>
+                <tr>
+                    <td align="center" >9</td>
+                    <td align="center" >Especialidad con grado</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[8]%>" name="Estudios9" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >10</td>
+                    <td align="center" >Maestr&iacute;a con grado</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[9]%>" name="Estudios10" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >11</td>
+                    <td align="center" >Doctorado sin grado</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[10]%>" name="Estudios11" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td align="center" >12</td>
+                    <td align="center" >Doctorado con grado</td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[11]%>" name="Estudios12" onblur="indicador23(this);"/></td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right" id="etiqueta">Subtotal 2</td>
+                    <td align="center"><input style="width:90%" type="text" name="subtotal2" value="0" readonly="readonly" id="etiqueta"></td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="right" id="etiqueta">TOTAL</td>
+                    <td align="center"><input style="width:90%" type="text" name="total" value="0" readonly="readonly" id="etiqueta"></td>
+                </tr>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" align="right" id="etiqueta">DISTRIBUCIÓN PORCENTUAL</td>
+                    <td align="center">PTCP1 </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="right" id="etiqueta"></td>
+                    <td align="center"><input style="width:90%" type="text" name="totalPosgrado" value="0" readonly="readonly" id="etiqueta"></td>
+                    </tr>
+                    <tr>
+                        <td colspan='2' class='rounded-foot-left'>Notas: No hay notas adicionales.</td>
+                        <td class='rounded-foot-right'></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <h2>Cuadro 23.2<br/>Perfil acad&eacute;mico de los profesores de tiempo completo</h2>
+        <div align="center">
+            <table align="center" id="rounded-corner" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th class="rounded-company" rowspan="2">Total de PTC</th>
+                        <th class="rounded-q1" colspan="2">Capacitados en</th>
+                        <th class="rounded-q1" colspan="2">Qu&eacute; aplican</th>
+                        <th rowspan="2" class="rounded-q1">Cuentan con perfil PROMEP</th>
+                        <th rowspan="2" class="rounded-q1">Becados por otra fuente para estudios de posgrado</th>
+                        <th rowspan="2" class="rounded-q4">Participan en cuerpos acad&eacute;micos</th>
+                    </tr>
+                    <tr>
+                        <td>Competencias profesionales</td>
+                        <td>Impartici&oacute;n de tutor&iacute;as</td>
+                        <td>Competencias profesionales</td>
+                        <td>Tutor&iacute;as</td>
+                    </tr>
+                </thead>
+                <tr>
+                    <td align="center" ><input style="width:90%" type="text" name="total" value="0" readonly="readonly" id="etiqueta"></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[12]%>" name="perfilptc1" onblur="indicador23segundo(this);"/></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[13]%>" name="perfilptc2" onblur="indicador23segundo(this);"/></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[14]%>" name="perfilptc3" onblur="indicador23segundo(this);"/></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[15]%>" name="perfilptc4" onblur="indicador23segundo(this);"/></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[16]%>" name="perfilptc5" onblur="indicador23segundo(this);"/></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[17]%>" name="perfilptc6" onblur="indicador23segundo(this);"/></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[18]%>" name="perfilptc7" onblur="indicador23segundo(this);"/></td>
+                </tr>
+                <tfoot>
+                     <tr>
+                        <td>DISTRIBUCIÓN PORCENTUAL</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>PTCP2</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                     <tr>
+                        <td></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td><span style="font-weight: bold"  id="porcentajeSINPEE"></span></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan='7' class='rounded-foot-left'>&nbsp;</td><td class="rounded-foot-right" ></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <br/>
+
+            <table align="center" id="rounded-corner" style="width: 60%">
+                <thead>
+                    <tr>
+                        <th class="rounded-company"></th>
+                        <th colspan="2" class="rounded-q1">Cuerpos acad&eacute;micos</th>
+                        <th class="rounded-q4"></th>
+                    </tr>
+                    <tr>
+                        <th class="rounded-q1">Total</th>
+                        <th class="rounded-q1">Formaci&oacute;n</th>
+                        <th class="rounded-q1">Consolidaci&oacute;n</th>
+                        <th class="rounded-q1">Consolidados</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td align="center" ><input style="width:90%" type="text" name="totalCuerpos" value="0" readonly="readonly" id="etiqueta"></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[19]%>" name="cuerposAcademicos1" onblur="cuerposAcademicos23(this);"/></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[20]%>" name="cuerposAcademicos2" onblur="cuerposAcademicos23(this);"/></td>
+                    <td align="center" ><input type="text" maxlength="6" style="width: 90%" value="<%=valores[21]%>" name="cuerposAcademicos3" onblur="cuerposAcademicos23(this);"/></td>
+                </tr>
+                <tfoot>
+                <td colspan='3' class='rounded-foot-left'>Notas: No hay notas adicionales.</td>
+                <td class='rounded-foot-right'></td>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <%
+        String consulta = "select activo from system_mecasut";
+        ResultSet rs = con.Consultar(consulta);
+        //rs.next();
+        //if (rs.getInt(1) == 1) {
+            //if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                //if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")) {
+                    //<button type="button" class="btnGuardarIndicador" onclick="retrieveURL('/PertinenciaIn23.msut?valores='+guardarIndicador23(), 'PertinenciaIn23Form');" >Guardar</button>
+%>
+    <button type="button" class="btnGuardarIndicador" onclick="enviarDatosIndicadores(guardarIndicador23(),'PertinenciaIn23Datos','PertinenciaIn23Form');" >Guardar</button>
+    <%//}
+        //}
+    //} else {%>
+    <!--<button type="button" class="btnGuardarIndicador" disabled="disabled">La evaluación ha sido desactivada.</button>-->
+    <%        //}%>
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+<div id="pert23" align="center">
+    La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+</div>
+<%            }
+%>
+

@@ -1,0 +1,82 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.cgut;
+
+import com.mecasut.conexion.ConexionMySQL;
+import com.mecasut.shared.Coleccion;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author EQ-30
+ */
+public class CgutCertificacionesForm extends org.apache.struts.action.ActionForm {
+
+    private int cboCertificacion = -1;
+    private String certificacionActiva = "";
+    private String nombreCertificacion = "";
+    private ArrayList certificaciones = new ArrayList();
+    private String ask = "login";
+
+    public String getAsk() {
+        return ask;
+    }
+
+    public void setAsk(String ask) {
+        this.ask = ask;
+    }
+
+    public String getNombreCertificacion() {
+        return nombreCertificacion;
+    }
+
+    public void setNombreCertificacion(String nombreCertificacion) {
+        this.nombreCertificacion = nombreCertificacion;
+    }
+
+    public int getCboCertificacion() {
+        return cboCertificacion;
+    }
+
+    public void setCboCertificacion(int cboCertificacion) {
+        this.cboCertificacion = cboCertificacion;
+    }
+
+    public String getCertificacionActiva() {
+        return certificacionActiva;
+    }
+
+    public void setCertificacionActiva(String certificacionActiva) {
+        this.certificacionActiva = certificacionActiva;
+    }
+
+    public ArrayList getCertificaciones() {
+        return certificaciones;
+    }
+
+    public void setCertificaciones() {
+        ArrayList certificaciones = new ArrayList();
+        ConexionMySQL con = new ConexionMySQL();
+
+        try {
+            ResultSet tabla = con.Consultar("select * from certificaciones");
+            while (tabla.next()) {
+                certificaciones.add(new Coleccion(tabla.getInt(1), tabla.getString(2)));
+            }
+        } catch (SQLException ex) {
+            System.err.println(ex.getMessage());
+        } finally {
+            con.Desconectar();
+        }
+        this.certificaciones = certificaciones;
+    }
+
+    public CgutCertificacionesForm() {
+        super();
+        setCertificaciones();
+    }
+}

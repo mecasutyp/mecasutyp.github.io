@@ -1,0 +1,157 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ * Modificó   : Salvador Zamora 23/11/2016
+ */
+package com.mecasut.admon;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.ResultSet;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author DIN-A-C14-02
+ */
+@WebServlet(name = "mensajeriaNueva", urlPatterns = {"/mensajeriaNueva"})
+public class mensajeriaNueva extends HttpServlet {
+
+    /**
+     * Processes requests for both HTTP
+     * <code>GET</code> and
+     * <code>POST</code> methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        ConexionMySQL con = new ConexionMySQL();
+        try {
+            HttpSession sesion = request.getSession(false);
+            String idUniversidad = sesion.getAttribute("idUniversidad").toString();
+            String ask = request.getParameter("ask");
+            con.Conectar();
+            String query, respuesta = "Error";
+            ResultSet rs;
+            //System.err.println("mecasut "+ask);
+            if (ask.equals("comprobarMensajesNuevos")) {
+                query = "SELECT count(id_mensaje) as 'cantidad' FROM mensajeria WHERE id_destinatario='".concat(idUniversidad).concat("'")
+                        .concat(" AND estatus='No Leido'");
+                rs = con.Consultar(query);
+                if (rs.next()) {
+                    respuesta = rs.getString("cantidad");
+                } else {
+                    respuesta = "Error";
+                    
+                }
+            } else if (ask.equals("mensajesPreview")) {
+                query = "SELECT id_remitente, nombre_universidad, asunto, mensaje, fecha, estatus, id_mensaje FROM mensajeria m"
+                        .concat(" INNER JOIN universidades u")
+                        .concat(" ON m.id_remitente=u.id_universidad ")
+                        .concat(" WHERE id_destinatario='").concat(idUniversidad).concat("' and estatus !='Eliminado' order by fecha desc");
+                rs = con.Consultar(query);
+                respuesta = "";
+                boolean bandera = false;
+                while (rs.next()) {
+                    if (bandera) {
+                        respuesta += "|";
+                    }
+                    bandera = true;
+                    respuesta += rs.getString("id_remitente") + "^";
+                    respuesta += rs.getString("nombre_universidad") + "^";
+                    respuesta += rs.getString("asunto") + "^";
+                    respuesta += rs.getString("mensaje") + "^";
+                    respuesta += rs.getString("fecha") + "^";
+                    respuesta += rs.getString("estatus") + "^";
+                    respuesta += rs.getString("id_mensaje");
+                }
+            } else if (ask.equals("enviarMensaje")) {
+                String destino = request.getParameter("destinatario");
+                String asunto = request.getParameter("asunto");
+                String mensaje = request.getParameter("mensaje");
+                query = "INSERT INTO mensajeria (id_mensaje, id_remitente, id_destinatario, asunto, mensaje, fecha, estatus) "
+                        .concat(" VALUES(null, ").concat(idUniversidad).concat(", ").concat(destino).concat(", '").concat(asunto)
+                        .concat("', '").concat(mensaje).concat("', now(), 'No Leido')");
+                int x = con.Insertar(query);
+                respuesta = String.valueOf(x);
+            }else if (ask.equals("marcarLeido")){
+                String idMensaje = request.getParameter("idMensaje");
+                respuesta = "failure";
+                query = "UPDATE mensajeria SET estatus='Leido' WHERE id_mensaje=".concat(idMensaje);
+                int x = con.Modificar(query);
+                if (x!=0){
+                    respuesta = "success";
+                }
+            }else if (ask.equals("eliminarmsj")){
+                String idMensaje = request.getParameter("idMensaje");
+                respuesta = "failure";
+                query = "UPDATE mensajeria SET estatus='Eliminado' WHERE id_mensaje=".concat(idMensaje);
+                int x = con.Modificar(query);
+                if (x!=0){
+                    respuesta = "success";
+                }
+            }else{
+                respuesta = "ask no definido";
+            }
+            out.print(respuesta);
+        } catch (Exception ex) {
+            System.err.println("Error: mensajeriaNueva.java mecasut" + ex.getMessage());
+        } finally {
+            con.Desconectar();
+            out.close();
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP
+     * <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP
+     * <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

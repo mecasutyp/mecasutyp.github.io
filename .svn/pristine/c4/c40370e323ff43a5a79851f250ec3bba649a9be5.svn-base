@@ -1,0 +1,100 @@
+<%-- 
+    Document   : CgutEgresados
+    Created on : 10-jul-2013, 10:29:06
+    Author     : Daniel Ramírez Torres
+--%>
+
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%
+    HttpSession sesion = request.getSession();
+    String anio="";
+    String id_periodo = "", id_user = "";
+    if (sesion.getAttribute("usuario") == null) {
+%>
+<jsp:forward page="/login.msut">
+    <jsp:param name="error" value="true"></jsp:param>
+    <jsp:param name="ask" value="false"></jsp:param>
+    <jsp:param name="errorMessage" value="Sesi&oacute;n caducada o inv&aacute;lida<br/>El recurso al que deseas acceder est&aacute; restringido, debes iniciar sesi&oacute;n para utilizarlo."></jsp:param>
+</jsp:forward>
+<%    } else {
+        id_periodo = sesion.getAttribute("idPeriodo").toString();
+        id_user = sesion.getAttribute("idUsuario").toString();
+        
+        ConexionMySQL con = new ConexionMySQL();
+         String sql = "select anio from periodos where id_Periodo=".concat(id_periodo);
+         ResultSet rs0 = con.Consultar(sql);
+         if(rs0.next()){
+             anio=rs0.getString(1);
+         }
+    }
+%>
+
+<html:form action="/CgutEgresadosAction" onsubmit="return false">
+    <input type="hidden" name="inicioEgresados" id="inicioEgresados"/>
+    <h2 align="center">Egresados de Bachillerato por estado <%=anio%></h2>
+    <%
+        int i = 0, valor, a = 0;
+        String tabla_egresados = "<table id='hor-minimalist-a' border='0px' align='center' cellpadding='10px' cellspacing='0px'>"
+                + "<tr>"
+                + "<th>#</th>"
+                + "<th align='center'>Estado</th>"
+                + "<th>Total Egresados</th>"
+                + "<th style='border: 3px'></th>"
+                + "<th>#</th>"
+                + "<th align='center'>Estado</th>"
+                + "<th>Total Egresados</th>"
+                + "<th></th>"
+                + "</tr>";
+        ConexionMySQL con = new ConexionMySQL();
+
+        ResultSet rs, rs2;
+        try {
+            String sql = "select id_estado, nombre from estados";
+            String sql2 = "select egresados from egresados_estado where id_Periodo=".concat(id_periodo);
+            rs = con.Consultar(sql);
+            rs2 = con.Consultar(sql2);
+            while (rs.next()) {
+                if (rs2.next()) {
+                    valor = rs2.getInt("egresados");
+                } else {
+                    valor = 0;
+                }
+                i++;
+                if (a == 0) {
+                    tabla_egresados += "<tr>";
+                    tabla_egresados += "<td align='center'>" + rs.getInt("id_estado") + "</td>";
+                    tabla_egresados += "<td align='right'>" + rs.getString("nombre") + "</td>";
+                    tabla_egresados += "<td><input type='text' onblur='solo_numeros(this);' maxlength='6' style='width: 70px' name='vale" + i + "' id='vale" + i + "' value='" + valor + "'/></td>";
+                    tabla_egresados += "<td><input value='" + rs.getInt("id_estado") + "' type='hidden' name='Egresados" + rs.getInt("id_estado") + "' id='Egresados" + rs.getInt("id_estado") + "'/></td>";
+                    a = 1;
+                } else {
+                    tabla_egresados += "<td align='center'>" + rs.getInt("id_estado") + "</td>";
+                    tabla_egresados += "<td align='right'>" + rs.getString("nombre") + "</td>";
+                    tabla_egresados += "<td><input type='text' onblur='solo_numeros(this);' maxlength='6' style='width: 70px' name='vale" + i + "' id='vale" + i + "' value='" + valor + "'/></td>";
+                    tabla_egresados += "<td><input value='" + rs.getInt("id_estado") + "' type='hidden' name='Egresados" + rs.getInt("id_estado") + "' id='Egresados" + rs.getInt("id_estado") + "'/></td>";
+                    tabla_egresados += "</tr>";
+                    a = 0;
+                }
+            }
+            tabla_egresados += "<tr>"
+                    + "<td colspan='8' align='right'>"
+                    + "<a class='green' onclick='validar_egresados();'>Guardar cambios</a>"
+                    + "</td>"
+                    + "</tr>"
+                    + "</table>";
+        } catch (SQLException ex) {
+            System.err.println("Error CgutEgresados" + ex.getMessage());
+        } finally {
+            con.Desconectar();
+        }
+    %>
+    <%=tabla_egresados%>
+    <input type="hidden" name="finEgresados" id="finEgresados"/>
+
+</html:form>
+

@@ -1,0 +1,61 @@
+<%-- 
+    Document   : PertinenciaIn21
+    Created on : 10/06/2012, 11:24:45 PM
+    Author     : Cuauhtemoc Medina
+--%>
+
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+
+<!--OBTENER LA SESION-->
+<%
+    HttpSession sesion = request.getSession(false);
+    int idUniversidad = Integer.parseInt(sesion.getAttribute("idUniversidad").toString());
+    int idPeriodo = Integer.parseInt(sesion.getAttribute("idPeriodo").toString());
+
+    int poblacion = 0;
+%>
+<!--TERMINA OBTENER LA SESION-->
+<html:form action="/PertinenciaIn21">
+    <h2>Cuadro 21.1<br/>Grado de Satisfacci&oacute;n de los Alumnos por Servicios</h2>
+    <div id="pert21">
+        <%
+            ConexionMySQL con = new ConexionMySQL();
+            try {
+                String consulta = "SELECT matricula_total from datos_universidad where id_universidad=".concat(String.valueOf(idUniversidad)).concat(" and id_periodo=").concat(String.valueOf(idPeriodo));
+                ResultSet rs = con.Consultar(consulta);
+
+                while (rs.next()) {
+                    poblacion = rs.getInt(1);
+                }
+
+                int cantidad = 0;
+                String servicios = "SELECT a.id_servicio, b.nombre, b.descripcion FROM servicios_universidad a INNER JOIN encuesta_servicios b ON a.id_servicio=b.id_servicio WHERE a.id_universidad=".concat(String.valueOf(idUniversidad)).concat(" and a.id_periodo=").concat(String.valueOf(idPeriodo));
+                ResultSet serv = con.Consultar(servicios);
+                while (serv.next()) { //SERVICIOS QUE TIENE, ES DECIR, CANTIDAD DE TABLAS QUE PINTARÁ
+                    //TITULOS DE LA TABLA
+        %>
+
+        <h2 id="<%=poblacion%>" name="<%=serv.getString("id_servicio")%>" onclick="cargarCuerpo21(<%=serv.getString("id_servicio")%>,<%=poblacion%>)">21.1.<%=serv.getString("id_servicio")%> <br/><%=serv.getString("nombre")%></h2>
+        <div id="contenedorServicio_<%=serv.getString("id_servicio")%>">
+        </div>
+        <%
+                cantidad++;
+            }
+        %>
+        <h2 onclick="cargarCuerpo21(-1,0)">SERVICIOS QUE OFRECE LA UNIVERSIDAD TECNOLÓGICA (Resultados)</h2>
+        <div id="contenedorServicio_-1" name="-1">
+        </div>
+        <%
+            } catch (SQLException ex) {
+                System.err.println("Jsp error pertinencia 21: " + ex);
+            } finally {
+                con.Desconectar();
+            }
+        %>
+    </div>
+
+</html:form>    

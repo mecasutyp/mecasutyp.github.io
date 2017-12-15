@@ -1,0 +1,91 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.cgut;
+
+import com.mecasut.conexion.ConexionMySQL;
+import com.mecasut.shared.Coleccion;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author Cuauh
+ */
+public class CgutEdificiosForm extends org.apache.struts.action.ActionForm {
+
+    private ArrayList edificios = new ArrayList();
+    private int cboEdificio = -1;
+    private String nombreEdificio = "";
+    private String capacidadEdificio = "";
+    private String edificioActivo = "";
+    private String ask = "";
+
+    public String getAsk() {
+        return ask;
+    }
+
+    public void setAsk(String ask) {
+        this.ask = ask;
+    }
+
+    public int getCboEdificio() {
+        return cboEdificio;
+    }
+
+    public void setCboEdificio(int cboEdificio) {
+        this.cboEdificio = cboEdificio;
+    }
+
+    public ArrayList getEdificios() {
+        return edificios;
+    }
+
+    public void setEdificios() {
+        ArrayList edificios = new ArrayList();
+        ConexionMySQL con = new ConexionMySQL();
+
+        try {
+            ResultSet tabla = con.Consultar("select * from edificios");
+            while (tabla.next()) {
+                edificios.add(new Coleccion(tabla.getInt(1), tabla.getString(2)));
+            }
+        } catch (SQLException ex) {
+            System.err.println(ex.getMessage());
+        } finally {
+            con.Desconectar();
+        }
+        this.edificios = edificios;
+    }
+
+    public String getEdificioActivo() {
+        return edificioActivo;
+    }
+
+    public void setEdificioActivo(String edificioActivo) {
+        this.edificioActivo = edificioActivo;
+    }
+
+    public String getCapacidadEdificio() {
+        return capacidadEdificio;
+    }
+
+    public void setCapacidadEdificio(String capacidadEdificio) {
+        this.capacidadEdificio = capacidadEdificio;
+    }
+
+    public String getNombreEdificio() {
+        return nombreEdificio;
+    }
+
+    public void setNombreEdificio(String nombreEdificio) {
+        this.nombreEdificio = nombreEdificio;
+    }
+
+    public CgutEdificiosForm() {
+        super();
+        setEdificios();
+    }
+}

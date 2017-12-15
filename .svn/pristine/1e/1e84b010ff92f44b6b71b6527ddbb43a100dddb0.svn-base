@@ -1,0 +1,77 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.pertinencia;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.SQLException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+/**
+ *
+ * @author Cuauhtemoc Medina
+ */
+public class PertinenciaIn23Action extends org.apache.struts.action.Action {
+
+    /* forward name="success" path="" */
+    private static final String SUCCESS = "success";
+
+    /**
+     * This is the action called from the Struts framework.
+     * @param mapping The ActionMapping used to select this instance.
+     * @param form The optional ActionForm bean for this request.
+     * @param request The HTTP Request we are processing.
+     * @param response The HTTP Response we are processing.
+     * @throws java.lang.Exception
+     * @return
+     */
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form,
+            HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        HttpSession sesion = request.getSession(false);
+        String idUniversidad = sesion.getAttribute("idUniversidad").toString();
+        String idPeriodo = sesion.getAttribute("idPeriodo").toString();
+
+        PertinenciaIn23Form frm = (PertinenciaIn23Form) form;
+        if (!frm.getValores().equals("-1")) {
+            boolean band = Guardar(frm.getValores(), idUniversidad, idPeriodo);
+            if (band == false) {
+                return mapping.findForward(SUCCESS);
+            } else {
+                return mapping.findForward(SUCCESS);
+            }
+        } else {
+            return mapping.findForward(SUCCESS);
+
+        }
+    }
+
+    private boolean Guardar(String valores, String idUniversidad, String idPeriodo) {
+        String[] datos;
+        datos = valores.split(",");
+        ConexionMySQL conexion = new ConexionMySQL();
+        
+        try {
+            String sql;
+            sql = "UPDATE pertinenciain23 set".concat(" media_superior=").concat(datos[0]).concat(",").concat(" media_superior_con=").concat(datos[1]).concat(", tsu=").concat(datos[2]).concat(",").concat(" tsu_con=").concat(datos[3]).concat(",").concat(" lic=").concat(datos[4]).concat(",").concat(" lic_titulo=").concat(datos[5]).concat(",").concat(" especialidad=").concat(datos[6]).concat(",").concat(" maestria=").concat(datos[7]).concat(",").concat(" especialidad_grado=").concat(datos[8]).concat(",").concat(" maestria_grado=").concat(datos[9]).concat(",").concat(" doctorado=").concat(datos[10]).concat(",").concat(" doctorado_grado=").concat(datos[11]).concat(",").concat(" cap_competencias=").concat(datos[12]).concat(",").concat(" cap_tutorias=").concat(datos[13]).concat(",").concat(" apl_competencias=").concat(datos[14]).concat(",").concat(" apl_tutorias=").concat(datos[15]).concat(",").concat(" promep=").concat(datos[16]).concat(",").concat(" becados=").concat(datos[17]).concat(",").concat(" cuerpos_academicos=").concat(datos[18]).concat(",").concat(" cuerpos_formacion=").concat(datos[19]).concat(",").concat(" cuerpos_consolidacion=").concat(datos[20]).concat(",").concat(" cuerpos_consolidados=").concat(datos[21]).concat(" WHERE id_universidad=").concat(idUniversidad).concat(" and id_periodo=").concat(idPeriodo);
+            if (conexion.Modificar(sql) == 0) {
+                sql = "INSERT INTO pertinenciain23 values".concat("(").concat(idUniversidad).concat(",").concat(idPeriodo).concat(",").concat(datos[0]).concat(",").concat(datos[1]).concat(",").concat(datos[2]).concat(",").concat(datos[3]).concat(",").concat(datos[4]).concat(",").concat(datos[5]).concat(",").concat(datos[6]).concat(",").concat(datos[7]).concat(",").concat(datos[8]).concat(",").concat(datos[9]).concat(",").concat(datos[10]).concat(",").concat(datos[11]).concat(",").concat(datos[12]).concat(",").concat(datos[13]).concat(",").concat(datos[14]).concat(",").concat(datos[15]).concat(",").concat(datos[16]).concat(",").concat(datos[17]).concat(",").concat(datos[18]).concat(",").concat(datos[19]).concat(",").concat(datos[20]).concat(",").concat(datos[21]).concat(")");
+            }
+            conexion.Insertar(sql);
+            return true;
+        } catch (SQLException ex) {
+            System.err.println("Error de guardado pertinencia 23: "+ex);
+            return false;
+        } finally {
+            conexion.Desconectar();
+        }
+    }
+}

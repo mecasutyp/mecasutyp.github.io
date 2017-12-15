@@ -1,0 +1,152 @@
+#rounded-corner
+{
+    text-align: center;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size: 12px;
+    margin: 45px;
+    margin: 0;
+    border-collapse: collapse;
+}
+#rounded-corner thead th.rounded-company
+{
+    background: #b9c9fe url('table-images/left.png') left -1px no-repeat;
+}
+#rounded-corner thead th.rounded-q4
+{
+    background: #b9c9fe url('table-images/right.png') right -1px no-repeat;
+}
+#rounded-corner th
+{
+    padding: 8px;
+    font-weight: normal;
+    font-size: 13px;
+    color: #039;
+    background: #b9c9fe;
+}
+
+#rounded-corner td
+{
+    background: #e8edff;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    color: #669;
+}
+
+#rounded-corner td.editablem
+{
+    background: #FFCCFF;
+}
+
+#rounded-corner td.editableh
+{
+    background: #AACAFF;
+}
+
+#rounded-corner tfoot td.rounded-foot-left
+{
+    text-align: left;
+    background: #e8edff url('table-images/botleft.png') left bottom no-repeat;
+}
+#rounded-corner tfoot td.rounded-foot-right
+{
+    background: #e8edff url('table-images/botright.png') right bottom no-repeat;
+}
+#rounded-corner tbody tr:hover td.editablem
+{
+    background: #FFBCEF;
+}
+
+#rounded-corner tbody tr:hover td.editableh
+{
+    background: #AABAEF;
+}
+
+
+#hor-minimalist-a
+{
+    font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size: 12px;
+    text-align: left;
+}
+#hor-minimalist-a th
+{
+    font-size: 14px;
+    font-weight: normal;
+    color: #039;
+    padding: 10px 8px;
+    border-bottom: 2px solid #6678b1;
+}
+#hor-minimalist-a td
+{
+    color: #669;
+    padding: 9px 8px 0px 8px;
+}
+#hor-minimalist-a tbody tr:hover td
+{
+    color: #009;
+}
+
+.inputgood
+{
+    border:none;
+    text-align: center;
+    background: #b9c9fe;
+    font-weight: normal;
+    font-size: 10px;
+
+}
+
+
+/**********************************************
+***********************************************
+************** TABLA PARA PROGRESO ************
+***********************************************
+***********************************************
+*/
+#tabla-progreso
+{
+    text-align: center;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size: 12px;
+    margin: 45px;
+    margin: 0;
+    border-collapse: collapse;
+}
+#tabla-progreso thead th.rounded-company
+{
+    background: #b9c9fe url('table-images/left.png') left -1px no-repeat;
+}
+#tabla-progreso thead th.rounded-q4
+{
+    background: #b9c9fe url('table-images/right.png') right -1px no-repeat;
+}
+#tabla-progreso th
+{
+    padding: 8px;
+    font-weight: normal;
+    font-size: 13px;
+    color: #039;
+    background: #b9c9fe;
+}
+
+.td1
+{
+    background: #e8edff;
+    color: #669;
+}
+
+.td2
+{
+    background: #D7D9DF;
+    color: #669;
+}
+
+#tabla-progreso tfoot td.rounded-foot-left
+{
+    text-align: left;
+    background: #e8edff url('table-images/botleft.png') left bottom no-repeat;
+}
+#tabla-progreso tfoot td.rounded-foot-right
+{
+    background: #e8edff url('table-images/botright.png') right bottom no-repeat;
+}

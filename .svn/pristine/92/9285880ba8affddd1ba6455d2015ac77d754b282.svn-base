@@ -1,0 +1,103 @@
+/*
+ * @author Daniel Ramìrez Torres
+ *    Actualización 2016: Salvador Zamora Arias
+ */
+
+
+function EficaciaIn11(control){
+    
+   /* $(control).val($(control).val().rep.replace(",", "."))
+    if (!/^([0-9]\.{0,1}[0-9]*)*$/.test(control.value)){
+        $().alerta("rojo","El valor '" + control.value + "' no es v&aacute;lido, debe ser un n&uacute;mero equivalente a una cantidad monetaria.");
+        $(control).addClass("inputerror").removeClass("inputok");
+        return;
+    }else{
+        $(control).val(Math.round((Number(control.value)*100))/100);
+        $(control).removeClass("inputerror").addClass("inputok");
+        operacionesEficaciaIn11();
+    }*/
+   //$(control).val(Math.round(control.value.replace(/,/g,"")));
+   
+   if(!/^\d+(\.\d{1,2})?$/.test(control.value.replace(/,/g,"")))
+   {
+        $().alerta("rojo","El valor '" + control.value + "' no es v&aacute;lido, \n\
+                    debe ser un n&uacute;mero equivalente a una cantidad monetaria.");  
+        $(control).addClass("inputerror").removeClass("inputok");
+        $(control).val(0)
+        return;
+   }
+   else
+   {
+       $(control).val(Math.round(control.value.replace(/,/g,"")));
+       $(control).removeClass("inputerror").addClass("inputok");
+       operacionesEficaciaIn11();
+       formatearnumero(control);
+   }
+}
+
+function operacionesEficaciaIn11()
+{
+    var preEje = $("form[name='EficaciaIn11Form'] input[name='preEje']").val().replace(/,/g,"");
+    var preTA = $("form[name='EficaciaIn11Form'] input[name='preTotalAuto']").val().replace(/,/g,"");
+    var orig_f_e= $("form[name='EficaciaIn11Form'] input[name='orig_f_e']").val().replace(/,/g,"");
+    var orig_f= $("form[name='EficaciaIn11Form'] input[name='orig_f']").val().replace(/,/g,"");
+    var orig_e= $("form[name='EficaciaIn11Form'] input[name='orig_e']").val().replace(/,/g,"");
+    var auto_f = $("form[name='EficaciaIn11Form'] input[name='auto_f']").val().replace(/,/g,"");
+    var ampl_f = $("form[name='EficaciaIn11Form'] input[name='ampl_f']").val().replace(/,/g,"");
+    var redd_f = $("form[name='EficaciaIn11Form'] input[name='redd_f']").val().replace(/,/g,"");
+    var ejer_f = $("form[name='EficaciaIn11Form'] input[name='ejer_f']").val().replace(/,/g,"");
+    var auto_e = $("form[name='EficaciaIn11Form'] input[name='auto_e']").val().replace(/,/g,"");
+    var ampl_e = $("form[name='EficaciaIn11Form'] input[name='ampl_e']").val().replace(/,/g,"");
+    var redd_e = $("form[name='EficaciaIn11Form'] input[name='redd_e']").val().replace(/,/g,"");
+    var ejer_e = $("form[name='EficaciaIn11Form'] input[name='ejer_e']").val().replace(/,/g,"");
+    var t_auto_f_e = $("form[name='EficaciaIn11Form'] input[name='t_auto_f_e']").val().replace(/,/g,"");
+    var t_ampl_f_e = $("form[name='EficaciaIn11Form'] input[name='t_ampl_f_e']").val().replace(/,/g,"");
+    var t_redd_f_e = $("form[name='EficaciaIn11Form'] input[name='t_redd_f_e']").val().replace(/,/g,"");
+    var t_ejer_f_e = $("form[name='EficaciaIn11Form'] input[name='t_ejer_f_e']").val().replace(/,/g,"");
+    var valores="";
+   
+    if(preEje == 0 || preTA == 0 ||
+        $("form[name='EficaciaIn11Form'] input").hasClass("inputerror"))
+    {
+        $("form[name='EficaciaIn11Form'] input[name='promedio']").val(0);
+    }
+    
+    if(parseInt(preEje) > parseInt(preTA))
+    {
+        $("form[name='EficaciaIn11Form'] input[name='preEje']\n\
+                ").globo("enable").globo("update", "<center>No puede ser mayor \n\
+                al  <br/> total Autorizado</center>").globo("show").removeClass("inputok\n\
+                ").addClass("inputerror");
+    }else
+    {
+        var promedio =((parseFloat(preEje) / parseFloat(preTA)) * 100).toFixed(2);
+        if(isNaN(promedio)){
+            promedio="0.0 %";
+        }    
+        
+        
+        $("form[name='EficaciaIn11Form'] input[name='promedio']").val(promedio);
+          $("form[name='EficaciaIn11Form'] input[name='preEje']").removeClass("inputerror").addClass("inputok");
+    }
+    valores=valores.concat("-",preEje,",",preTA,",",orig_f_e,",",orig_f,",",orig_e,",",auto_f,",",ampl_f,",",redd_f,",",ejer_f,",",auto_e,",",ampl_e,",",redd_e,",",ejer_e,",",t_auto_f_e,",",t_ampl_f_e,",",t_redd_f_e,",",t_ejer_f_e,"-") ;
+   return  valores;
+    
+   
+}
+
+function guardarEficaciaIn11(){
+    var x="";
+    if ($("form[name='EficaciaIn11Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+        //$().alerta('rojo', 'Error al guardar. Por favor verifique los datos.');
+        x="Error";
+    }else{
+        x = operacionesEficaciaIn11();
+        //$().alerta('verde', 'Datos guardados correctamente.');
+    }
+    return x;
+}
+
+function formatearnumero(control)
+{
+    $(control).val(accounting.formatNumber(control.value, 0, ","));
+}

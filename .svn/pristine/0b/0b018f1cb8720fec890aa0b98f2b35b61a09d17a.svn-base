@@ -1,0 +1,98 @@
+<%--
+    Document   : EficaciaIn11
+    Created on : 9/05/2012, 01:49:35 PM
+    Author     : Daniel Ramìrez Torres
+
+
+--%>
+<%@page import="java.text.DecimalFormat"%>
+<%@page import="java.util.logging.Logger"%>
+<%@page import="java.util.logging.Level"%>
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%try {%>
+<html:form action="/EficaciaIn11">
+    <div id="efi11" align="center">
+        <%
+            //se recupera la sesion
+            HttpSession sesion = request.getSession(false);
+            int idUniversidad = Integer.parseInt(sesion.getAttribute("idUniversidad").toString());
+            int idPeriodo = Integer.parseInt(sesion.getAttribute("idPeriodo").toString());
+            ConexionMySQL con = new ConexionMySQL();
+
+      
+            String preE = "0";
+            String preT = "0";
+            DecimalFormat formatea = new DecimalFormat("###,###");
+            try {
+                //se crea la consulta para recuperar los datos correspondientes a EficaciaIn11
+                String sql = "select * from eficaciain11 where id_universidad ='".concat(String.valueOf(idUniversidad)).concat("' and id_periodo ='").concat(String.valueOf(idPeriodo)).concat("'");
+                ResultSet rs = con.Consultar(sql);
+                //si encuentra datos se los asigna a las variables creadas con anterioridad para
+                while (rs.next()) {
+                    
+                    preE = formatea.format(Double.parseDouble(rs.getString(3)));
+                    preT = formatea.format(Double.parseDouble(rs.getString(4)));
+                }
+            } catch (SQLException ex) {
+                System.out.print("Error en EficaciaIn11: " + ex);
+            } finally {
+                con.Desconectar();
+            }
+        %>
+        <h3><a href='#'>Cuadro 11.1<br/>
+                Presupuesto ejercido</a></h3>
+        <div align="center">
+            <table id="rounded-corner">
+                <thead>
+                    <tr>
+                        <th scope="col" class="rounded-company">1</th>
+                        <th class="rounded-q1">2</th>
+                        <th colspan="2" class="rounded-q4"></th>
+                    </tr>
+                    <tr>
+                        <th align="center" class="rounded-q1">Presupuesto ejercido</th>
+                        <th align="center" class="rounded-q1">Presupuesto total autorizado Federal y Estatal</th>
+                        <th>1/2 * 100</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="rounded-foot-left">Notas: No hay notas adicionales.</td>
+                        <td class="rounded-foot-right"></td>
+                    </tr>
+                </tfoot>
+                <tr>
+                    <td align="center"><html:text maxlength='15' style="width:90%" name="EficaciaIn11Form" value="<%=preE%>" property="preEje" styleId="preEje" onblur="EficaciaIn11(this)"/></td>
+                    <td align="center"><html:text maxlength='15' style="width:90%" name="EficaciaIn11Form" value="<%=preT%>" property="preTotalAuto" styleId="preTotalAuto" onblur="EficaciaIn11(this);"/></td>
+                    <td><input type="text" style="width:90%" name="promedio" value="0" readonly="readonly" id="etiqueta"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <%
+        String consulta = "select activo from system_mecasut";
+        ResultSet rs = con.Consultar(consulta);
+        rs.next();
+        if (rs.getInt(1) == 1) {
+            if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")) {
+                    //<button type="button" class="btnGuardarIndicador"  onclick="retrieveURL('/EficaciaIn11.msut?valores='+guardarEficaciaIn11(), 'EficaciaIn11Form');" >Guardar</button>
+%>
+    <button type="button" class="btnGuardarIndicador"  onclick="enviarDatosIndicadores(guardarEficaciaIn11(),'EficaciaIn11Datos','EficaciaIn11Form');"  >Guardar</button>
+    <%}
+        }
+    } else {%>
+    <button type="button" class="btnGuardarIndicador" disabled="disabled">La evaluación ha sido desactivada.</button>
+    <%        }%>
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+<%            }
+%>

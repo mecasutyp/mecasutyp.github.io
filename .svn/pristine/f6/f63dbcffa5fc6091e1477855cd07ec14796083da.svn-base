@@ -1,0 +1,129 @@
+<%-- 
+    Document   : VinculacionIn30
+    Created on : 22/08/2012, 12:37:56 AM
+    Author     : Joshua
+--%>
+<%@page import="java.sql.*"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%try {
+
+        HttpSession sesion = request.getSession(false);
+        String idUniversidad = sesion.getAttribute("idUniversidad").toString();
+        String idPeriodo = sesion.getAttribute("idPeriodo").toString();
+        ConexionMySQL con = new ConexionMySQL();
+%>
+<html:form action="/VinculacionIn30">
+    <div id="vinc30">
+        <h3><a href='#'>Cuadro 30.1<br/>Cursos en Educaci&oacute;n Continua por Demanda Seg&uacute;n Tipo</a></h3>
+        <div><table id='rounded-corner' style='width: 100%'>
+                <thead>
+                    <tr>
+                        <th class='rounded-company'>Cursos</th>
+                        <th class='rounded-q1'>Capacitaci&oacute;n</th>
+                        <th class='rounded-q1'>Actualizaci&oacute;n</th>
+                        <th class='rounded-q1'>Desarrollo Profesional</th>
+                        <th class='rounded-q1'>Total</th>
+                        <th class='rounded-q1'>%</th>
+                        <th class='rounded-q4'>Indicador</th>
+                    </tr>
+                </thead>
+                <%
+                     try {
+                        String sql = "Select d_capacitacion, d_actualizacion, d_desarrollo, o_capacitacion, o_actualizacion, o_desarrollo from vinculacionin30 where id_universidad = ".concat(idUniversidad).concat(" and id_periodo = ").concat(idPeriodo);
+
+                        ResultSet rs = con.Consultar(sql);
+                        if (rs.next()) {
+                %>
+                <tr>
+                    <td align='center'>Por demanda</td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val1' value="<%=rs.getString(1)%>" onblur='indicador30(this);' ></td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val2' value="<%=rs.getString(2)%>" onblur='indicador30(this);' ></td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val3' value="<%=rs.getString(3)%>" onblur='indicador30(this);' ></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='th1' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='th%1' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='TCD1' value='TCD1'></td>
+
+                </tr>
+                <tr>
+                    <td align='center'>Por oferta de la UT</td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val4' value="<%=rs.getString(4)%>" onblur='indicador30(this);' ></td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val5' value="<%=rs.getString(5)%>" onblur='indicador30(this);' ></td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val6' value="<%=rs.getString(6)%>" onblur='indicador30(this);' ></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='th2' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='th%2' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='TCD2' value='TCD2'></td>
+                </tr>
+                <%
+                } else {
+                %>
+                <tr>
+                    <td align='center'>Por demanda</td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val1' value="0" onblur='indicador30(this);' ></td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val2' value="0" onblur='indicador30(this);' ></td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val3' value="0" onblur='indicador30(this);' ></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='th1' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='th%1' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='TCD2' value='TCD1'></td>
+                </tr>
+                <tr>
+                    <td align='center'>Por oferta de la UT</td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val4' value='0' onblur='indicador30(this);' ></td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val5' value='0' onblur='indicador30(this);' ></td>
+                    <td align='center'><input maxlength='6' style='width:90%' type='text' name='val6' value='0' onblur='indicador30(this);' ></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='th2' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='th%2' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='TCD2' value='TCD2'></td>
+                </tr>
+                <%                                }
+                    } catch (SQLException ex) {
+                        System.out.println("JSPERROR-VinculacionIn30:" + ex.getMessage());
+                    } finally {
+                        con.Desconectar();
+                    }
+                %>
+                <tr>
+                    <td align='center' style='font-weight: bold'>Total</td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='tv1' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='tv2' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='tv3' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='tv4' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='tv5' value='0'></td>
+                    <td align='center'><input readonly="readonly" id="etiqueta" style='width:90%' type='text' name='tv6'></td>
+                </tr>
+
+                <tfoot>
+                    <tr>
+                        <td colspan='6' class='rounded-foot-left'>Notas: No hay notas adicionales.</td>
+                        <td class='rounded-foot-right'></td>
+                    </tr>
+                </tfoot>
+            </table></div>
+        <input type="hidden" name="fin" />
+        <html:hidden name="VinculacionIn30Form" property="valores" styleId="valores" />
+    </div>
+    <%
+        String consulta = "select activo from system_mecasut";
+        ResultSet rs = con.Consultar(consulta);
+        rs.next();
+        if (rs.getInt(1) == 1) {
+            if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")) {
+    %>
+    <button type="button" class="btnGuardarIndicador" onclick="guardar30()">Guardar</button>
+    <%}
+        }
+    } else {%>
+    <button type="button" class="btnGuardarIndicador" disabled="disabled">La evaluación ha sido desactivada.</button>
+    <%        }%>
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+<div id="vinc30" align="center">
+    La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+</div>
+<%            }
+%>

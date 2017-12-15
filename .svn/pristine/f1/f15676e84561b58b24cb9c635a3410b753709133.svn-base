@@ -1,0 +1,245 @@
+function guardar35(){
+    var cadena="-";
+    var v1 =parseInt($('#i35v1').val());
+    var v2 =parseInt($('#i35v2').val());
+    var v3 =parseInt($('#i35v3').val());
+    var v4;
+    var temp;
+    if($('#i35v4').val()==""){
+        v4="'Sin aspectos a resaltar.'";
+    }else{
+        temp=replaceAll($('#i35v4').val(), ",", "");
+        temp=replaceAll(temp, "-", "");
+        v4 ="'".concat(temp).concat("'");
+    }
+    var v5 =parseInt($('#i35v5').val());
+    var v6 =parseInt($('#i35v6').val());
+    var v7 =parseInt($('#i35v7').val());
+    var v8;
+    var v
+    if($('#i35v8').val()==""){
+        v8="'Sin aspectos a resaltar.'";
+    }else{
+        temp=replaceAll($('#i35v8').val(), ",", "");
+        temp=replaceAll(temp, "-", "");
+        v8 ="'".concat(temp).concat("'");
+    }
+    var v9 =parseInt($('#i35v9').val());
+    var v10 =parseInt($('#i35v10').val());
+    var v11 =parseInt($('#i35v11').val());
+    var v12;
+    if($('#i35v12').val()==""){
+        v12="'Sin aspectos a resaltar.'";
+    }else{
+        temp=replaceAll($('#i35v12').val(), ",", "");
+        temp=replaceAll(temp, "-", "");
+        v12 ="'".concat(temp).concat("'");
+    }
+    cadena=cadena.concat(v1).concat(",")
+    .concat(v2).concat(",")
+    .concat(v3).concat(",")
+    .concat(v4).concat(",")
+    .concat(v5).concat(",")
+    .concat(v6).concat(",")
+    .concat(v7).concat(",")
+    .concat(v8).concat(",")
+    .concat(v9).concat(",")
+    .concat(v10).concat(",")
+    .concat(v11).concat(",")
+    .concat(v12).concat("-");
+    //alert(cadena);
+    return cadena;
+}
+
+function validarGuardado35(){
+    if($('form[name="EquidadIn35Form"] input').hasClass('inputerror')){
+        return "Error";
+    }else{
+        return guardar35();
+    }
+
+}
+
+function indicador35(control){
+    if($(control).val()==""){
+        $(control).val(0);
+    }
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("amarillo", "El valor '".concat(control.value).concat("' no es v&aacute;lido"));
+        $(control).addClass("inputerror").removeClass("inputok");
+        operacionesIndicador35();
+    }else{
+        $(control).addClass("inputok").removeClass("inputerror");
+        $(control).globo("disable");
+
+        if($(control).val()==0 && $(control).attr("name")=="dep_programados"){
+            $(control).val($('[name="dep_realizados"]').val());
+            $().alerta("azul", "El valor de los eventos programados ha sido cambiado para evitar conflicto en las operaciones.");
+        }
+        
+        if($(control).val()==0 && $(control).attr("name")=="com_programados"){
+            $(control).val($('[name="com_realizados"]').val());
+            $().alerta("azul", "El valor de los eventos programados ha sido cambiado para evitar conflicto en las operaciones.");
+        }
+        
+        if($(control).val()==0 && $(control).attr("name")=="cul_programados"){
+            $(control).val($('[name="cul_realizados"]').val());
+            $().alerta("azul", "El valor de los eventos programados ha sido cambiado para evitar conflicto en las operaciones.");
+        }
+
+        control.value=Number(control.value);
+        operacionesIndicador35();
+    }
+
+    //Validar el número de eventos contra el de personas
+
+    if($('[name="dep_eventos"]').val()>0 && /^([0-9])*$/.test($('[name="dep_personas"]').val())){
+        $('[name="dep_personas"]').addClass("inputok").removeClass("inputerror");
+        $('[name="dep_personas"]').globo("hide").globo("disable");
+    }
+
+    if($('[name="dep_eventos"]').val()==0 && /^([0-9])*$/.test($('[name="dep_personas"]').val()) && $('[name="dep_personas"]').val()>0){
+        $().alerta("amarillo", "El valor no es v&aacute;lido");
+        $('[name="dep_personas"]').addClass("inputerror").removeClass("inputok");
+        $('[name="dep_personas"]').globo("enable").globo("update", "<center>Ingrese el n&uacute;mero de eventos <br/> realizados en el &aacute;rea<br/>deportiva.</center>");
+    }
+
+    if($('[name="cul_eventos"]').val()>0 && /^([0-9])*$/.test($('[name="cul_personas"]').val())){
+        $('[name="cul_personas"]').addClass("inputok").removeClass("inputerror");
+        $('[name="cul_personas"]').globo("hide").globo("disable");
+    }
+
+    if($('[name="cul_eventos"]').val()==0 && /^([0-9])*$/.test($('[name="cul_personas"]').val()) && $('[name="cul_personas"]').val()>0){
+        $().alerta("amarillo", "El valor no es v&aacute;lido");
+        $('[name="cul_personas"]').addClass("inputerror").removeClass("inputok");
+        $('[name="cul_personas"]').globo("enable").globo("update", "<center>Ingrese el n&uacute;mero de eventos <br/> realizados en el &aacute;rea<br/>cultural.</center>");
+    }
+
+    if($('[name="com_eventos"]').val()>0 && /^([0-9])*$/.test($('[name="com_personas"]').val())){
+        $('[name="com_personas"]').addClass("inputok").removeClass("inputerror");
+        $('[name="com_personas"]').globo("hide").globo("disable");
+    }
+
+    if($('[name="com_eventos"]').val()==0 && /^([0-9])*$/.test($('[name="com_personas"]').val()) && $('[name="com_personas"]').val()>0){
+        $().alerta("amarillo", "El valor no es v&aacute;lido");
+        $('[name="com_personas"]').addClass("inputerror").removeClass("inputok");
+        $('[name="com_personas"]').globo("enable").globo("update", "<center>Ingrese el n&uacute;mero de eventos <br/> realizados en el &aacute;rea<br/>comunitaria.</center>");
+    }
+
+    if ($('form[name="EquidadIn35Form"] input').hasClass("inputerror")){
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("enable").globo("update", "<center>Indicador con <br/> errores, favor <br/> de revisar.</center>").globo("show");
+    }else{
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide").globo("disable");
+    }
+    //Validar que no quede ningun campo vacio en Cuadro 35.2
+    if($("form[name='EquidadIn35Form'] input[name='dep_eventos']").val() != 0 && $("form[name='EquidadIn35Form'] input[name='dep_personas']").val() == 0)
+    {
+        $("form[name='EquidadIn35Form'] input[name='dep_personas']").alerta("amarillo", "El n&uacute;mero debe ser mayor a 0");
+        $("form[name='EquidadIn35Form'] input[name='dep_personas']").removeClass("inputok").addClass("inputalert");
+        return;
+    }else
+    {
+        $("form[name='EquidadIn35Form'] input[name='dep_personas']").removeClass("inputalert").addClass("inputok")
+        $("form[name='EquidadIn35Form'] input[name='dep_personas']").globo("disable");
+    }
+    
+    if($("form[name='EquidadIn35Form'] input[name='cul_eventos']").val() != 0 && $("form[name='EquidadIn35Form'] input[name='cul_personas']").val() == 0)
+    {
+        $("form[name='EquidadIn35Form'] input[name='cul_personas']").alerta("amarillo", "El n&uacute;mero debe ser mayor a 0");
+        $("form[name='EquidadIn35Form'] input[name='cul_personas']").removeClass("inputok").addClass("inputalert");
+        return;
+    }else
+    {
+        $("form[name='EquidadIn35Form'] input[name='cul_personas']").removeClass("inputalert").addClass("inputok")
+        $("form[name='EquidadIn35Form'] input[name='cul_personas']").globo("disable");
+    }
+    
+    if($("form[name='EquidadIn35Form'] input[name='com_eventos']").val() != 0 &&  $("form[name='EquidadIn35Form'] input[name='com_personas']").val() == 0)
+    {
+        $("form[name='EquidadIn35Form'] input[name='com_personas']").alerta("amarillo", "El n&uacute;mero debe ser mayor a 0");
+        $("form[name='EquidadIn35Form'] input[name='com_personas']").removeClass("inputok").addClass("inputalert");
+        return;
+    }else
+    {
+        $("form[name='EquidadIn35Form'] input[name='com_personas']").removeClass("inputalert").addClass("inputok")
+        $("form[name='EquidadIn35Form'] input[name='com_personas']").globo("disable");
+    }
+}
+
+
+function operacionesIndicador35(){
+    if($('[name="dep_aspectos"]').val()==""){
+        $('[name="dep_aspectos"]').val("Sin aspectos a resaltar.")
+    }
+    if($('[name="cul_aspectos"]').val()==""){
+        $('[name="cul_aspectos"]').val("Sin aspectos a resaltar.")
+    }
+    if($('[name="com_aspectos"]').val()==""){
+        $('[name="com_aspectos"]').val("Sin aspectos a resaltar.")
+    }
+    var v1 =parseInt($('#i35v1').val());
+    var v2 =parseInt($('#i35v2').val());
+    var v3 =parseInt($('#i35v3').val());
+    var v5 =parseInt($('#i35v5').val());
+    var v6 =parseInt($('#i35v6').val());
+    var v7 =parseInt($('#i35v7').val());
+    var v9 =parseInt($('#i35v9').val());
+    var v10 =parseInt($('#i35v10').val());
+    var v11 =parseInt($('#i35v11').val());
+    var total;
+    //Validaciones y operaciones de los eventos programados y realizados.
+    if (v2!=0 && /^([0-9])*$/.test(v1) && /^([0-9])*$/.test(v2)){
+        total = (v1/v2)*100;
+        total=getDecimal(total);
+        $('[name="PD1"]').val(total + " %");
+    }else{
+        $('[name="PD1"]').val(0 + " %");
+    }
+
+    if (v6!=0 && /^([0-9])*$/.test(v5) && /^([0-9])*$/.test(v6)){
+        total = (v5/v6)*100;
+        total=getDecimal(total);
+        $('[name="PC2"]').val(total + " %");
+    }else{
+        $('[name="PC2"]').val(0 + " %");
+    }
+
+    if (v10!=0 && /^([0-9])*$/.test(v9) && /^([0-9])*$/.test(v10)){
+        total = (v9/v10)*100;
+        total=getDecimal(total);
+        $('[name="PC3"]').val(total + " %");
+    }else{
+        $('[name="PC3"]').val(0 + " %");
+    }
+
+
+    //Trasladar los números de una tabla a la otra.
+    if (/^([0-9])*$/.test(v1)){
+        $('[name="dep_eventos"]').val(v1);
+    }else{
+        $('[name="dep_eventos"]').val(0);
+    }
+    if (/^([0-9])*$/.test(v5)){
+        $('[name="cul_eventos"]').val(v5);
+    }else{
+        $('[name="cul_eventos"]').val(0);
+    }
+    if (/^([0-9])*$/.test(v9)){
+        $('[name="com_eventos"]').val(v9);
+    }else{
+        $('[name="com_eventos"]').val(0);
+    }
+    //Suma de los número de elementos.
+    $('[name="t_eventos"]').val(parseInt($('[name="dep_eventos"]').val())+parseInt($('[name="cul_eventos"]').val())
+        +parseInt($('[name="com_eventos"]').val()));
+
+
+    if (/^([0-9])*$/.test(v3) && /^([0-9])*$/.test(v7) && /^([0-9])*$/.test(v11)){
+        $('[name="t_personas"]').val(v3+v7+v11);
+    }else{
+        $('[name="t_personas"]').val(0);
+    }
+
+}
+
+

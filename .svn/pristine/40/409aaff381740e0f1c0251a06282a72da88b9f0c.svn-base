@@ -1,0 +1,109 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.cgut;
+
+import com.mecasut.conexion.ConexionMySQL;
+import com.mecasut.shared.Coleccion;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+/**
+ *
+ * @author Cuauhtemoc Medina Muñoz
+ * Actualización 2016: Salvador Zamora Arias
+ */
+public class CgutNivelesForm extends org.apache.struts.action.ActionForm {
+
+    private String ask = "";
+    private ArrayList niveles = new ArrayList();
+    private int cboNivel = -2;
+    private String nombreNivel = "";
+    private String nombreDescripcion = "";
+    private String nombreAbreviatura = "";
+    private String NivelActivo ="";
+
+    public String getNivelActivo() {
+        return NivelActivo;
+    }
+
+    public void setNivelActivo(String NivelActivo) {
+        this.NivelActivo = NivelActivo;
+    }
+
+    public String getAsk() {
+        return ask;
+    }
+
+    public void setAsk(String ask) {
+        this.ask = ask;
+    }
+
+    public int getCboNivel() {
+        return cboNivel;
+    }
+
+    public void setCboNivel(int cboNivel) {
+        this.cboNivel = cboNivel;
+    }
+
+    public void setNiveles(ArrayList niveles) {
+        this.niveles = niveles;
+    }
+
+    public ArrayList getNiveles() {
+        return niveles;
+    }
+
+    public String getNombreDescripcion() {
+        return nombreDescripcion;
+    }
+
+    public void setNombreDescripcion(String nombreDescripcion) {
+        this.nombreDescripcion = nombreDescripcion;
+    }
+
+    public String getNombreNivel() {
+        return nombreNivel;
+    }
+
+    public void setNombreNivel(String nombreNivel) {
+        this.nombreNivel = nombreNivel;
+    }
+
+    public String getNombreAbreviatura() {
+        return nombreAbreviatura;
+    }
+
+    public void setNombreAbreviatura(String nombreAbreviatura) {
+        this.nombreAbreviatura = nombreAbreviatura;
+    }
+
+    public final void setNiveles() {
+        ArrayList campos = new ArrayList();
+        ConexionMySQL conexion = new ConexionMySQL();
+
+        int i = 0;
+        try {
+            ResultSet tabla = conexion.Consultar("Select * from nivel_pe");
+            tabla.last();
+            int j = tabla.getRow();
+            tabla.beforeFirst();
+            for (i = 0; i < j; i++) {
+                tabla.next();
+                campos.add(new Coleccion(tabla.getInt("id_nivel"), tabla.getString("abreviatura").concat(" (").concat(tabla.getString("descripcion")).concat(")")));
+            }
+        } catch (SQLException ex) {
+            System.out.println("ERROR BD: Seleccionando Niveles" + ex.getMessage());
+        } finally {
+            conexion.Desconectar();
+        }
+        niveles = campos;
+    }
+
+    public CgutNivelesForm() {
+        super();
+        setNiveles();
+    }
+}

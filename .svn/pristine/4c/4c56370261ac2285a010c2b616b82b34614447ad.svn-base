@@ -1,0 +1,541 @@
+//    Document   : Script PertinenciaIn19
+//    Author     : Daniel RamÃ¬rez Torres
+//    Retoma   : GermÃ n Torres Dorantes
+//    Actualización 2016: Salvador Zamora Arias
+
+function calcularTa2()
+{
+    for(var cuadro=1; cuadro<3; cuadro++){
+        var eva= $("#noProgb"+cuadro+"").val();
+
+        //alert("Numero de Eva: "+eva);
+        //total21
+
+        var tot= $("form[name='PertinenciaIn19Form'] input[name='total2"+cuadro+"']").val();
+
+        //alert(tot);
+
+        var p1=(parseFloat(tot)/parseFloat(eva))*100;
+        p1 = p1.toFixed(2);
+        if(isNaN(p1)){
+            p1="0.0";
+        }    
+        $("#porcentajeCONPEE"+cuadro+"").html("");
+        $("#porcentajeCONPEE"+cuadro+"").html(p1+" %");
+
+        //total31
+
+        var tot2= $("form[name='PertinenciaIn19Form'] input[name='total3"+cuadro+"']").val();
+        var totalAlumnos= $("form[name='PertinenciaIn19Form'] input[name='total1"+cuadro+"']").val();
+
+        //alert(tot2);
+
+        var p2=(parseFloat(tot2)/parseFloat(totalAlumnos))*100;
+        p2 = p2.toFixed(2);
+        if(isNaN(p2)){
+            p2="0.0";
+        }  
+        $("#porcentajeSINPEE"+cuadro+"").html("");
+        $("#porcentajeSINPEE"+cuadro+"").html(p2 +" %");
+    }
+       
+}
+function validarfecha19(cuadro,programa,control){
+    var vigencia;
+    var fecha_inicio;
+    vigencia=$("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+cuadro+""+programa+"']")
+    fecha_inicio=$("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+cuadro+""+programa+"']")
+    
+    if(Date.parse(fecha_inicio.val()) > Date.parse(vigencia.val())){
+         $().alerta("amarillo", "La fecha de inicio de la evaluacion no puede ser mayor a la vigencia de la evaluacion");
+        $(control).removeClass("inputok").addClass("inputerror");
+    }else{
+        $(control).removeClass("inputerror").addClass("inputok");
+    }
+}
+function validarfecha19b(cuadro,programa,control){
+    var vigencia;
+    var fecha_inicio;
+    vigencia=$("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+cuadro+""+programa+"']")
+    fecha_inicio=$("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+cuadro+""+programa+"']")
+    
+    if(Date.parse(fecha_inicio.val()) > Date.parse(vigencia.val())){
+         $().alerta("amarillo", "La fecha de inicio de la evaluacion no puede ser mayor a la vigencia de la evaluacion");
+        $(control).removeClass("inputok").addClass("inputerror");
+    }else{
+        $(control).removeClass("inputerror").addClass("inputok");
+    }
+}
+function calcularTa3()
+{
+   // alert("ta3");
+     for(var cuadro=3; cuadro<5; cuadro++){
+        var eva= $("#totalPEEI"+cuadro+"").val();
+
+        //alert("Numero de Eva: "+eva);
+        //total21
+
+        var tot= $("form[name='PertinenciaIn19Form'] input[name='total2I"+cuadro+"']").val();
+
+        //alert(tot);
+
+        var p1=(parseFloat(tot)/parseFloat(eva))*100;
+        p1 = Math.round((p1)*10)/10;
+
+        $("#porcentajeCONPEEI"+cuadro+"").html("");
+        $("#porcentajeCONPEEI"+cuadro+"").html(p1+"%");
+
+        //total31
+
+        var tot2= $("form[name='PertinenciaIn19Form'] input[name='total3I"+cuadro+"']").val();
+        var totalAlumnos= $("form[name='PertinenciaIn19Form'] input[name='total1I"+cuadro+"']").val();
+
+        //alert(tot2);
+
+        var p2=(parseFloat(tot2)/parseFloat(totalAlumnos))*100;
+        p2 = Math.round((p2)*10)/10;
+
+        $("#porcentajeSINPEEI"+cuadro+"").html("");
+        $("#porcentajeSINPEEI"+cuadro+"").html(p2+"%");
+    }
+    $("#porcentajeSINPEEI3").html("asdasz");
+}
+
+
+
+function operacionesPertinencia19(cuadro){
+    var total1=0,total2=0,total3=0;
+    var noProg=$("form[name='PertinenciaIn19Form'] input[name='noProg"+cuadro+"']").val();
+    for(var j=1;j<=noProg;j++){
+        $("form[name='PertinenciaIn19Form'] select[name='organismo"+cuadro+j+"'] option[value="+$("form[name='PertinenciaIn19Form'] input[name='id_organismo"+cuadro+j+"']").val()+"]").attr('selected', 'selected');
+        if(parseInt($("form[name='PertinenciaIn19Form'] input[name='matricula"+cuadro+j+"']").val())< parseInt($("form[name='PertinenciaIn19Form'] input[name='matricula_acre"+cuadro+j+"']").val())){
+            $("form[name='PertinenciaIn19Form'] input[name='matricula_acre"+cuadro+j+"']").globo("enable").globo("update", "<center>La Matricula Acreditada no puede ser <br/>mayor a la matricula inicial</center>").removeClass("inputok").addClass("inputerror");
+        }
+        else{
+            $("form[name='PertinenciaIn19Form'] input[name='matricula_acre"+cuadro+j+"']").globo("disable").removeClass("inputerror");
+        }
+        total1=parseInt(total1)+parseInt($("form[name='PertinenciaIn19Form'] input[name='matricula"+cuadro+j+"']").val());
+        total3=parseInt(total3)+parseInt($("form[name='PertinenciaIn19Form'] input[name='matricula_acre"+cuadro+j+"']").val());
+        for(var i=0;i<$("form[name='PertinenciaIn19Form'] input[name='option"+cuadro+j+"']").length;i++){
+            if ($("form[name='PertinenciaIn19Form'] input[name='option"+cuadro+j+"']")[i].checked==true){
+                if($("form[name='PertinenciaIn19Form'] input[name='option"+cuadro+j+"']")[i].value==1){
+                    total2=parseInt(total2)+parseInt($("form[name='PertinenciaIn19Form'] input[name='option"+cuadro+j+"']")[i].value);
+                    if($("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+cuadro+j+"']").val()=="null"){
+                        $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+cuadro+j+"']").val("0000-00-00");
+                    }
+                    if($("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+cuadro+j+"']").val()=="null"){
+                        $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+cuadro+j+"']").val("0000-00-00");
+                    }
+                    $("form[name='PertinenciaIn19Form'] select[name='organismo"+cuadro+j+"']").removeAttr("disabled");
+                    $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+cuadro+j+"']").removeAttr("disabled");
+                    $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+cuadro+j+"']").removeAttr("disabled");
+                    if($("form[name='PertinenciaIn19Form'] select[name='organismo"+cuadro+j+"']").val()==-1){
+                        $("form[name='PertinenciaIn19Form'] select[name='organismo"+cuadro+j+"']").globo("enable").globo("update", "<center>Elija un organismo acreditador<br/></center>");
+                    }
+                }
+                else{
+                    total2=parseInt(total2)+parseInt($("form[name='PertinenciaIn19Form'] input[name='option"+cuadro+j+"']")[i].value);
+                    $("form[name='PertinenciaIn19Form'] select[name='organismo"+cuadro+j+"']").attr("disabled","disabled");
+                    $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+cuadro+j+"']").attr("disabled","disabled");
+                    $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+cuadro+j+"']").val("0000-00-00");
+                    $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+cuadro+j+"']").attr("disabled","disabled");
+                    $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+cuadro+j+"']").val("0000-00-00");
+                    $("form[name='PertinenciaIn19Form'] select[name='organismo"+cuadro+j+"'] option[value='-1']").attr('selected', 'selected');
+                }
+            }    
+        }
+       // $("form[name='PertinenciaIn19Form'] input[name='matriculab"+cuadro+j+"']").val($("form[name='PertinenciaIn19Form'] input[name='matricula"+cuadro+j+"']").val());
+        
+        
+        
+    }
+    if (!$("form[name='PertinenciaIn19Form'] input").hasClass("inputerror")){
+        $("form[name='PertinenciaIn19Form'] input[name='total1"+cuadro+"']").val(total1);
+        $("form[name='PertinenciaIn19Form'] input[name='total2"+cuadro+"']").val(total2);
+        $("form[name='PertinenciaIn19Form'] input[name='total3"+cuadro+"']").val(total3);
+        total1=0,total3=0,total2=0;
+    }else{
+        $("form[name='PertinenciaIn19Form'] input[name='total1"+cuadro+"']").val(0);
+        $("form[name='PertinenciaIn19Form'] input[name='total2"+cuadro+"']").val(0);
+        $("form[name='PertinenciaIn19Form'] input[name='total3"+cuadro+"']").val(0);
+    }
+//alert(cadena);
+calcularTa2();
+//calcularTa3();
+
+}
+
+
+function OperacionesPertinenciaCalidad(cuadro3, nivel){  
+    var prog_calidad=0;
+    var programas_evaluables=0;
+    var matricula_evaluable=0, matricula_calidad_tot=0, matricula_ciees=0, matricula_copaes=0, total_matricula_calidad=0, ciees=0, copaes=0, programa_de_calidad=0;
+    var cuadro = $("form[name='PertinenciaIn19Form'] input[name='cuadro1"+nivel+"']").val();
+    var cuadro2 = $("form[name='PertinenciaIn19Form'] input[name='cuadro2"+nivel+"']").val();
+    var aniodecaptura=parseInt($("form[name='PertinenciaIn19Form'] input[name='anio']").val());
+    
+    var noProgramas= $("form[name='PertinenciaIn19Form'] input[name='noProg"+cuadro3+"']").val();
+    var modalidad=parseInt($("form[name='PertinenciaIn19Form'] input[name='modalidad"+nivel+"']").val());
+    for(var i=1; i<=noProgramas; i++){
+        
+        
+       // alert(i+"  ");
+        var texto="";
+        var matricula_calidad_18=$("form[name='PertinenciaIn19Form'] input[name='matricula_calidadguardada"+cuadro3+""+i+"']").val();
+        if(matricula_calidad_18<=0){
+            var matricula_calidad_19=$("form[name='PertinenciaIn19Form'] input[name='matricula_acre"+cuadro+""+i+"']").val();
+            if(matricula_calidad_19<=0){
+                var matricula_calidad_19b=$("form[name='PertinenciaIn19Form'] input[name='matricula_acreb"+cuadro+""+i+"']").val();
+                $("form[name='PertinenciaIn19Form'] input[name='matricula_calidad"+cuadro3+""+i+"']").val(matricula_calidad_19b);
+               
+            }else{
+                $("form[name='PertinenciaIn19Form'] input[name='matricula_calidad"+cuadro3+""+i+"']").val(matricula_calidad_19);
+                
+            }
+        }
+        if($("select[name=organismo"+cuadro+""+i+"] option:selected").val()!=-1){
+         texto=$("select[name=organismo"+cuadro+""+i+"] option:selected").text();
+                $("#organismo_calidad"+cuadro3+""+i).text(texto);
+        }  
+        
+         var matricula_acre=$("form[name='PertinenciaIn19Form'] input[name='matricula_acre"+cuadro+""+i+"']").val();
+         $("form[name='PertinenciaIn19Form'] input[name='tiene_copaes"+cuadro3+""+i+"']").val(matricula_acre);
+         if(matricula_acre>0){
+            var matricula_inicial=$("form[name='PertinenciaIn19Form'] input[name='matricula_inicial"+cuadro3+""+i+"']").val();
+            $("form[name='PertinenciaIn19Form'] input[name='total_calidad"+cuadro3+""+i+"']").val(matricula_inicial);
+        }
+   
+      
+        for(var j=0;j<$("form[name='PertinenciaIn19Form'] input[name='option"+cuadro+i+"']").length;j++){
+            if ($("form[name='PertinenciaIn19Form'] input[name='option"+cuadro+i+"']")[j].checked==true){
+                if($("form[name='PertinenciaIn19Form'] input[name='option"+cuadro+i+"']")[j].value==1){
+                    $("form[name='PertinenciaIn19Form'] input[name='copaes"+cuadro3+i+"']").val("1");
+                    $("form[name='PertinenciaIn19Form'] input[name='prog_calidad"+cuadro3+i+"']").val("1");
+                   // copaes++;
+                   // prog_calidad++;
+                }else{
+                    $("form[name='PertinenciaIn19Form'] input[name='copaes"+cuadro3+i+"']").val("0");
+                }
+            }
+            
+           
+          }
+          // if(parseInt($("form[name='PertinenciaIn19Form'] input[name='prog_calidad"+cuadro3+i+"']").val())==1){
+         //   prog_calidad++;  
+      //  }    
+        //SE VERIFICA MATRICULA PERTINENTE
+        var anio_incorpora=$("form[name='PertinenciaIn19Form'] input[name='anio_inco"+cuadro3+""+i+"']").val();
+        var semandan0=false;
+       if(nivel==1){////PARA TSU
+             if(modalidad==2 || modalidad==1){//REGULAR O 2X3   
+                if(anio_incorpora > (aniodecaptura-2)){
+                    semandan0=true;
+                }
+             } 
+             if(modalidad==3 ){//DESPREZURIZADO   
+                 if(anio_incorpora > (aniodecaptura-3)){
+                    semandan0=true;
+                }
+             } 
+        }
+        if(nivel==3 || nivel==2){////PARA LICENCIATURA O LICENCIA PROFESIONAL
+            if(anio_incorpora >= (aniodecaptura-1)){
+                semandan0=true;
+            }
+        } 
+        if(semandan0){
+            $("form[name='PertinenciaIn19Form'] input[name='matricula_evaluable"+cuadro3+""+i+"']").val("0");
+            $("form[name='PertinenciaIn19Form'] input[name='matricula_calidad"+cuadro3+""+i+"']").val("0");
+            $("#organismo_calidad"+cuadro3+""+i).text("-----");
+            $("form[name='PertinenciaIn19Form'] input[name='tiene_ciees"+cuadro3+""+i+"']").val("0");
+            $("form[name='PertinenciaIn19Form'] input[name='tiene_copaes"+cuadro3+""+i+"']").val("0");
+            $("form[name='PertinenciaIn19Form'] input[name='total_calidad"+cuadro3+""+i+"']").val("0");
+            $("form[name='PertinenciaIn19Form'] input[name='ciees_1"+cuadro3+""+i+"']").val("0");
+            $("form[name='PertinenciaIn19Form'] input[name='copaes"+cuadro3+""+i+"']").val("0");
+            $("form[name='PertinenciaIn19Form'] input[name='prog_calidad"+cuadro3+""+i+"']").val("0");
+            $("form[name='PertinenciaIn19Form'] input[name='prog_evaluable"+cuadro3+""+i+"']").val("0");
+        }
+       // alert(i);
+       programas_evaluables+=parseInt($("form[name='PertinenciaIn19Form'] input[name='prog_evaluable"+cuadro3+""+i+"']").val());
+       matricula_evaluable+=parseInt($("form[name='PertinenciaIn19Form'] input[name='matricula_evaluable"+cuadro3+""+i+"']").val());
+       matricula_calidad_tot+=parseInt($("form[name='PertinenciaIn19Form'] input[name='matricula_calidad"+cuadro3+""+i+"']").val());
+       matricula_ciees+=parseInt($("form[name='PertinenciaIn19Form'] input[name='tiene_ciees"+cuadro3+""+i+"']").val());
+       matricula_copaes+=parseInt($("form[name='PertinenciaIn19Form'] input[name='tiene_copaes"+cuadro3+""+i+"']").val());
+       total_matricula_calidad+=parseInt($("form[name='PertinenciaIn19Form'] input[name='total_calidad"+cuadro3+""+i+"']").val());
+       ciees+=parseInt($("form[name='PertinenciaIn19Form'] input[name='ciees_1"+cuadro3+""+i+"']").val());
+       copaes+=parseInt($("form[name='PertinenciaIn19Form'] input[name='copaes"+cuadro3+""+i+"']").val());
+       programa_de_calidad+=parseInt($("form[name='PertinenciaIn19Form'] input[name='prog_calidad"+cuadro3+""+i+"']").val());
+       
+    }
+    $("form[name='PertinenciaIn19Form'] input[name='tot_1"+cuadro3+"']").val(matricula_evaluable);
+    $("form[name='PertinenciaIn19Form'] input[name='tot_2"+cuadro3+"']").val(matricula_calidad_tot);
+    $("form[name='PertinenciaIn19Form'] input[name='tot_3"+cuadro3+"']").val(matricula_ciees);
+    $("form[name='PertinenciaIn19Form'] input[name='tot_4"+cuadro3+"']").val(matricula_copaes);
+    $("form[name='PertinenciaIn19Form'] input[name='tot_5"+cuadro3+"']").val(total_matricula_calidad);
+    $("form[name='PertinenciaIn19Form'] input[name='tot_6"+cuadro3+"']").val(ciees);
+    $("form[name='PertinenciaIn19Form'] input[name='tot_9"+cuadro3+"']").val(programas_evaluables);
+    $("form[name='PertinenciaIn19Form'] input[name='tot_7"+cuadro3+"']").val(copaes);
+    $("form[name='PertinenciaIn19Form'] input[name='tot_8"+cuadro3+"']").val(programa_de_calidad);
+    var tot8=parseInt($("form[name='PertinenciaIn19Form'] input[name='tot_8"+cuadro3+"']").val());
+    var tot9=parseInt($("form[name='PertinenciaIn19Form'] input[name='tot_9"+cuadro3+"']").val());
+    $("form[name='PertinenciaIn19Form'] input[name='porcevaluable"+cuadro3+"']").val((tot8/tot9)*100);
+       // alert(prog_calidad);
+       
+    //alert($("form[name='PertinenciaIn19Form'] input[name='anio']").val());
+   //var matricula_acre=$("form[name='PertinenciaIn19Form'] input[name='matricula_acre"+cuadro+"']").val(0);
+}
+
+function operacionesPertinencia19G(){
+    var cadena="x";
+    var noCuadros=$("form[name='PertinenciaIn19Form'] input[name='noCuadros']").val();
+    var noCuadrosCalidad=$("form[name='PertinenciaIn19Form'] input[name='noCuadrosCalidad']").val();
+   // alert(noCuadrosCalidad);
+    for(var l=1;l<=noCuadros-noCuadrosCalidad;l++){
+        var noProg=$("form[name='PertinenciaIn19Form'] input[name='noProg"+l+"']").val();
+        for(var j=1;j<=noProg;j++){
+            cadena=cadena.concat($("form[name='PertinenciaIn19Form'] input[name='id"+l+j+"']").val(),",",$("form[name='PertinenciaIn19Form'] input[name='matricula"+l+j+"']").val(),",",$("form[name='PertinenciaIn19Form'] input[name='matricula_acre"+l+j+"']").val(),",");
+            for(var i=0;i<$("form[name='PertinenciaIn19Form'] input[name='option"+l+j+"']").length;i++){
+                if ($("form[name='PertinenciaIn19Form'] input[name='option"+l+j+"']")[i].checked==true){
+                    cadena=cadena.concat($("form[name='PertinenciaIn19Form'] input[name='option"+l+j+"']")[i].value,",");
+                    if($("form[name='PertinenciaIn19Form'] input[name='option"+l+j+"']")[i].value==1){
+                        if($("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+l+j+"']").val()=="0000-00-00" || $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+l+j+"']").val()=="null"){
+                            cadena=cadena.concat("NULL",",");
+                        }else{
+                            cadena=cadena.concat("'",$("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacion"+l+j+"']").val(),"'",","); 
+                        }
+                        if($("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+l+j+"']").val()=="0000-00-00" || $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+l+j+"']").val()=="null"){
+                            cadena=cadena.concat("NULL",",");
+                        }else{
+                            cadena=cadena.concat("'",$("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacion"+l+j+"']").val(),"'",","); 
+                        }
+                    }
+                    else{
+                        cadena =cadena.concat("NULL",",","NULL",",");
+                    }
+                }    
+            }
+            cadena=cadena.concat("'",$("form[name='PertinenciaIn19Form'] select[name='organismo"+l+j+"']").val(),"'",",","x");            
+        }
+    }
+    
+    return(cadena);
+}
+
+function indicador19(control,cuadro,op){
+    if (control.value.replace(/\s/g,"") == "")
+        control.value = 0;
+    if (!/^([0-9])*$/.test(control.value) ){
+        $().alerta("amarillo", "El valor '"+ control.value +"' no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");
+        return;
+    }if (control.name.substring(0,9) == "matricula"  && /^([0-9])*$/.test(control.name.substring(9,11)) &&  control.value == 0){
+        $(control).alerta("amarillo", "El n&uacute;mero debe ser mayor a 0");
+        $(control).removeClass("inputok").addClass("inputerror");
+        return;
+    }else{
+        $(control).removeClass("inputerror").addClass("inputok");
+        control.value=Number(control.value);
+        if(op=="2000"){
+            operacionesPertinencia19b();
+        }else{
+            operacionesPertinencia19(cuadro);
+
+        }
+    }
+
+}
+
+function guardarPertinenciaIn19(){
+    var x="",x1="",x2="",total=0,noCuadros=$("form[name='PertinenciaIn19Form'] input[name='noCuadros']").val();
+    for(var l=1;l<=noCuadros/3;l++){
+        var noProg=$("form[name='PertinenciaIn19Form'] input[name='noProg"+l+"']").val();        
+        for(var j=1;j<=noProg;j++)
+        {
+            total+=parseInt($("form[name='PertinenciaIn19Form'] input[name='matricula"+l+j+"']").val());
+        }   
+        if(total!=0)
+        {
+            if(parseInt($("form[name='PertinenciaIn19Form'] input[name='mat"+l+"']").val())!= parseInt(total))
+            {   var numeracion=$("form[name='PertinenciaIn19Form'] input[name='numeracion"+l+"']").val();
+                $("form[name='PertinenciaIn19Form'] input[name='total1"+l+"']").removeClass("inputok").addClass("inputalert");
+                $().alerta('amarillo', 'La suma total de la matricula por nivel en el cuadro 19.'+numeracion+' no coincide por la matricula "'+$("form[name='PertinenciaIn19Form'] input[name='mat"+l+"']").val()+'" capurada anteriormete . Por favor verifique los datos.');            
+            }else
+            {
+                $("form[name='PertinenciaIn19Form'] input[name='total1"+l+"']").removeClass("inputalert").addClass("inputok");
+            }
+        }
+        total=0;
+    }
+    
+    var existearchivo=verificararchivo("PertinenciaIn19Form");
+    if ($("form[name='PertinenciaIn19Form'] input").hasClass("inputerror") || $("form[name='PertinenciaIn19Form'] input").hasClass("inputalert") ){
+       // $().alerta('rojo', 'Error al guardar. Por favor verifique los datos.');
+        x="Error";
+    }    
+    else{
+          var tamanomaximo=2097152;
+         var enviar = true;
+         if(existearchivo){
+            if($("form[name='PertinenciaIn19Form'] input[name='archivo']")[0].files[0].size > tamanomaximo ){
+                $().alerta('rojo', 'Error al guardar. El tama&ntilde;o del archivo es mayor al permitido.');
+                  $("form[name='PertinenciaIn19Form'] input[name='archivo']").removeClass("inputok").addClass("inputerror");
+               enviar=false;
+           }
+           
+             var filexext=$("form[name='PertinenciaIn19Form'] input[name='archivo']")[0].value;
+                var extension = (filexext.substring(filexext.lastIndexOf("."))).toLowerCase(); 
+                var base64txt="";
+                base64( $("form[name='PertinenciaIn19Form'] input[name='archivo']")[0], function(data){
+                    base64txt=data.base64;
+                  var universidad=$("form[name='PertinenciaIn19Form'] input[name='nomuni']").val();  
+                  var IdUni=$("form[name='PertinenciaIn19Form'] input[name='IdUni']").val();  
+                    var IdPer=$("form[name='PertinenciaIn19Form'] input[name='IdPer']").val();
+                   if(parseInt(data.size) < tamanomaximo){//SI ES MENOR A 2 MB (2097152 BYTES) SE ENVIARA
+                        enviarcorreo(base64txt, universidad, "19", extension, IdUni, IdPer);
+                   }
+               })
+        }else{
+            $().alerta('rojo', 'Error al guardar. Es necesario enviar un archivo.');
+            enviar=false;
+        }
+        if(enviar){
+            x1 = operacionesPertinencia19G();
+            x2= operacionesPertinencia19b();
+            x=x1+x2;
+        }else{x="Error";}
+        
+        
+        
+        
+       // $().alerta('verde', 'Datos guardados correctamente.');
+    }
+    return x;
+}
+function select19(){
+    var noCuadros=$("form[name='PertinenciaIn19Form'] input[name='noCuadros']").val();
+    
+    for(var l=1;l<=noCuadros;l++){
+        var noProg=$("form[name='PertinenciaIn19Form'] input[name='noProg"+l+"']").val();
+        for(var j=1;j<=noProg;j++){
+            if($("form[name='PertinenciaIn19Form'] select[name='organismo"+l+j+"'] option[value="+$("form[name='PertinenciaIn19Form'] input[name='id_organismo"+l+j+"']").val())!=$("form[name='PertinenciaIn19Form'] input[name='id_organismo"+l+j+"']").val()){
+                $("form[name='PertinenciaIn19Form'] input[name='id_organismo"+l+j+"']").val($("form[name='PertinenciaIn19Form'] select[name='organismo"+l+j+"']").val());
+            }
+        }
+    }
+}
+
+function cambiaorganismo(val, cuadro, noProgb){
+    //alert(val+" "+cuadro+" "+noProgb);
+    //$("form[name='PertinenciaIn19Form'] input[name='paises"+(cuadro-2)+""+noProgb+"'] option[text=" + val +"]").attr("selected","selected");
+    //$("form[name='PertinenciaIn19Form'] input[name='paises"+(cuadro-2)+""+noProgb+"'] ").val(val).change();
+    //$("form[name='PertinenciaIn19Form'] input[name='paises"+cuadro+""+noProgb+"'] ").val(30).change();
+    //alert("cambia organismo");
+  //  alert($("#organismob"+(cuadro)+""+noProgb+" option:selected").val());
+    $("form[name='PertinenciaIn19Form'] input[name='id_organismob"+cuadro+""+noProgb+"'] ").val($("#organismob"+(cuadro)+""+noProgb+" option:selected").val());
+    $("form[name='PertinenciaIn19Form'] select[name='paises"+cuadro+""+noProgb+"'] ").val(val);
+    var pais=$("#paises"+(cuadro)+""+noProgb+" option:selected").text();
+    //alert(pais);
+    $("form[name='PertinenciaIn19Form'] input[name='pais"+(cuadro)+""+noProgb+"'] ").val(pais);
+}
+
+function select19b(){
+   // alert("select b");
+    var noCuadrosb=$("form[name='PertinenciaIn19Form'] input[name='noCuadrosb']").val();
+    
+    for(var l=1;l<=noCuadrosb;l++){
+        var noProgb=$("form[name='PertinenciaIn19Form'] input[name='noProgb"+l+"']").val();
+   
+        for(var j=1;j<=noProgb;j++){
+            if($("form[name='PertinenciaIn19Form'] select[name='organismob"+l+j+"'] option[value="+$("form[name='PertinenciaIn19Form'] input[name='id_organismob"+l+j+"']").val()) != $("form[name='PertinenciaIn19Form'] input[name='id_organismob"+l+j+"']").val())
+            {
+                $("form[name='PertinenciaIn19Form'] input[name='id_organismob"+l+j+"']").val($("form[name='PertinenciaIn19Form'] select[name='organismob"+l+j+"']").val());
+            }
+        }
+    }
+}
+
+function operacionesPertinencia19b(){
+    
+    var cadena="z";
+    var total1=0,total2=0,total3=0;
+    var noCuadros=$("form[name='PertinenciaIn19Form'] input[name='noCuadros']").val();
+    var noCuadrosb=parseInt($("form[name='PertinenciaIn19Form'] input[name='noCuadrosb']").val());
+    for(var l=1;l<=noCuadrosb;l++){
+        var noProgb=$("form[name='PertinenciaIn19Form'] input[name='noProgb"+l+"']").val();
+        for(var j=1;j<=noProgb;j++){
+            $("form[name='PertinenciaIn19Form'] select[name='organismob"+l+j+"'] option[value="+$("form[name='PertinenciaIn19Form'] input[name='id_organismob"+l+j+"']").val()+"]").attr('selected', 'selected');
+            cadena=cadena.concat($("form[name='PertinenciaIn19Form'] input[name='idb"+l+j+"']").val(),",",$("form[name='PertinenciaIn19Form'] input[name='matriculab"+l+j+"']").val(),",",$("form[name='PertinenciaIn19Form'] input[name='matricula_acreb"+l+j+"']").val(),",");
+            total1=parseInt(total1)+parseInt($("form[name='PertinenciaIn19Form'] input[name='matriculab"+l+j+"']").val());
+            total3=parseInt(total3)+parseInt($("form[name='PertinenciaIn19Form'] input[name='matricula_acreb"+l+j+"']").val());
+            for(var i=0;i<$("form[name='PertinenciaIn19Form'] input[name='optionb"+l+j+"']").length;i++){
+                if ($("form[name='PertinenciaIn19Form'] input[name='optionb"+l+j+"']")[i].checked==true){
+                    cadena=cadena.concat($("form[name='PertinenciaIn19Form'] input[name='optionb"+l+j+"']")[i].value,",");
+                    if($("form[name='PertinenciaIn19Form'] input[name='optionb"+l+j+"']")[i].value==1){
+                        total2=parseInt(total2)+parseInt($("form[name='PertinenciaIn19Form'] input[name='optionb"+l+j+"']")[i].value);
+                        //cadena=cadena.concat("'",$("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+l+j+"']").val(),"'",",","'",$("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+l+j+"']").val(),"'",",");
+                        $("form[name='PertinenciaIn19Form'] select[name='organismob"+l+j+"']").removeAttr("disabled");
+                        $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+l+j+"']").removeAttr("disabled");
+                        $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+l+j+"']").removeAttr("disabled");
+                        // $("form[name='PertinenciaIn19Form'] select[name='organismob"+l+j+"']").globo("enable").globo("update", "<center>Elija un organismo acreditador<br/></center>");
+                        if($("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+l+j+"']").val()=="0000-00-00" || $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+l+j+"']").val()=="null"){
+                            $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+l+j+"']").val("0000-00-00");
+                            cadena=cadena.concat("NULL",",");
+                        }else{
+                            cadena=cadena.concat("'",$("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+l+j+"']").val(),"'",","); 
+                        }
+                        if($("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+l+j+"']").val()=="0000-00-00" || $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+l+j+"']").val()=="null"){
+                            cadena=cadena.concat("NULL",",");
+                            $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+l+j+"']").val("0000-00-00");
+                        }else{
+                            cadena=cadena.concat("'",$("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+l+j+"']").val(),"'",","); 
+                        }        
+                    }
+                    else{
+                        cadena =cadena.concat("NULL",",","NULL",",");
+                        total2=parseInt(total2)+parseInt($("form[name='PertinenciaIn19Form'] input[name='optionb"+l+j+"']")[i].value);
+                        $("form[name='PertinenciaIn19Form'] select[name='organismob"+l+j+"']").attr("disabled","disabled");
+                        $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+l+j+"']").attr("disabled","disabled");
+                        $("form[name='PertinenciaIn19Form'] input[name='vigencia_acreditacionb"+l+j+"']").val("0000-00-00");
+                        $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+l+j+"']").attr("disabled","disabled");
+                        $("form[name='PertinenciaIn19Form'] input[name='fecha_acreditacionb"+l+j+"']").val("0000-00-00");
+                        $("form[name='PertinenciaIn19Form'] select[name='organismob"+l+j+"'] option[value='-2']").attr('selected', 'selected');
+                    }
+                }
+            }
+            cadena=cadena.concat("'",$("form[name='PertinenciaIn19Form'] select[name='organismob"+l+j+"']").val(),"'",",");
+            cadena =cadena.concat("z");
+        }
+        if (!$("form[name='PertinenciaIn19Form'] input").hasClass("inputerror")){
+            $("form[name='PertinenciaIn19Form'] input[name='total1b"+l+"']").val(total1);
+            $("form[name='PertinenciaIn19Form'] input[name='total2b"+l+"']").val(total2);
+            $("form[name='PertinenciaIn19Form'] input[name='total3b"+l+"']").val(total3);
+            
+            var pea1= ((total2/noProgb)*100).toFixed(1);
+            var pea2= ((total3/total1)*100).toFixed(1);
+             if(isNaN(pea1)){
+                pea1="0.0 %";
+            }  if(isNaN(pea2)){
+                pea2="0.0 %";
+            } 
+            $("form[name='PertinenciaIn19Form'] input[name='peaI"+l+"']").val(pea1+ " %");
+            $("form[name='PertinenciaIn19Form'] input[name='peaI2"+l+"']").val(pea2+" %");
+             
+            total1=0,total3=0,total2=0;
+        }else{
+            $("form[name='PertinenciaIn19Form'] input[name='total1b"+l+"']").val(0);
+            $("form[name='PertinenciaIn19Form'] input[name='total2b"+l+"']").val(0);
+            $("form[name='PertinenciaIn19Form'] input[name='total3b"+l+"']").val(0);
+        }
+        
+   
+    }
+     calcularTa3();    
+    
+    return(cadena);
+}
+
+function blurVal19(){
+    $('form[name="PertinenciaIn19Form"] input[name^="total1"]').each(function(index, domEle) {
+        $(domEle).blur();       
+    });
+}

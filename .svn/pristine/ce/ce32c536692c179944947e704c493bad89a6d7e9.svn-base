@@ -1,0 +1,72 @@
+//    Document   : Script PertinenciaIn25
+//    Author     : Daniel Ramìrez Torres
+function PertinenciaIn25(control){
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("rojo","El valor '"+ control.value + "' no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");
+        return;
+    }else{
+        control.value=Number(control.value);
+        $(control).removeClass("inputerror").addClass("inputok");
+        operacionesPertinenciaIn25();
+
+    }
+}
+function operacionesPertinenciaIn25(){
+    var cadena="-";
+    var total_per=0;
+    var total_per_con=0;
+    var valor1=0;
+    var valores1=0;
+    var valores2=0;
+    var total=0;
+    if ($("form[name='PertinenciaIn25Form'] input").hasClass("inputerror") ){
+        $("form[name='PertinenciaIn25Form'] input[name='total_per_con']").val(0 + " %");
+        $("form[name='PertinenciaIn25Form'] input[name='total_per']").val(0 + " %");
+        for(var k=1;k<5;k++){
+            $("form[name='PertinenciaIn25Form'] input[name='total"+k+"']").val(0 + " %");   
+        }
+    }
+    else{
+        for(var j=1;j<9;j++){
+            valor1=parseInt($("form[name='PertinenciaIn25Form'] input[name='valores"+j+"']").val());
+            cadena=cadena.concat($("form[name='PertinenciaIn25Form'] input[name='valores"+j+"']").val(),",");
+            if(j<5){
+                total_per=parseInt(total_per)+parseInt(valor1);
+            }
+            else{
+                total_per_con=parseInt(total_per_con)+parseInt(valor1);
+            }
+        } 
+        for(var i=1;i<5;i++){  
+            valores1=parseInt($("form[name='PertinenciaIn25Form'] input[name='valores"+i+"']").val()); 
+            valores2=parseInt($("form[name='PertinenciaIn25Form'] input[name='valores"+(i+4)+"']").val());
+            total=getDecimal((valores2/valores1*100));
+            $("form[name='PertinenciaIn25Form'] input[name='total"+i+"']").val(total + " %");
+        }
+        total=0;
+        valores1=0;
+        valores2=0;
+        $("form[name='PertinenciaIn25Form'] input[name='total_per']").val(total_per);
+        $("form[name='PertinenciaIn25Form'] input[name='total_per_con']").val(total_per_con);
+    }
+    for(var l=1;l<5;l++){
+        if($("form[name='PertinenciaIn25Form'] input[name='valores"+l+"']").val()==0){
+            $("form[name='PertinenciaIn25Form'] input[name='total"+l+"']").val(0 + " %")
+        }
+    }
+    cadena=cadena.concat("-");
+    return(cadena);
+}
+
+function guardarPertinenciaIn25(){
+    var cadena="";
+    if ($("form[name='PertinenciaIn25Form'] input").hasClass("inputerror")){
+        //$().alerta('rojo', 'Error al guardar. Por favor verifique los datos.');
+        cadena="Error";
+    }else{
+        cadena = operacionesPertinenciaIn25();
+        //$().alerta('verde', 'Datos guardados correctamente.');
+    }
+    return cadena;
+}

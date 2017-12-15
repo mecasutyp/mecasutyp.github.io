@@ -1,0 +1,125 @@
+/*
+ * @author Daniel Ramìrez Torres
+ *    Actualización 2016: Salvador Zamora Arias
+ */
+
+
+function EficaciaIn11(control){
+     var RE = /^\d*\.?\d*$/;
+     
+   if(!RE.test(control.value))
+   {
+        $().alerta("rojo","El valor '" + control.value + "' no es v&aacute;lido, \n\
+                    debe ser un n&uacute;mero equivalente a una cantidad monetaria.");  
+        $(control).addClass("inputerror").removeClass("inputok");
+       // $(control).val(0)
+       
+        
+        return;
+   }
+   else {
+       //$(control).val(Math.round(control.value.replace(/,/g,"")));
+       
+       $(control).removeClass("inputerror").addClass("inputok");
+       operacionesEficaciaIn11(5);
+       formatearnumero(control);
+       calcularTotales();
+   }
+}
+
+function calcularTotales(){
+        var p_auto_federal= parseFloat($("form[name='EficaciaIn11Form'] input[name='auto_f']").val());   
+        var p_auto_estatal = parseFloat($("form[name='EficaciaIn11Form'] input[name='auto_e']").val());     
+        $("form[name='EficaciaIn11Form'] input[name='preTotalAuto']").val( p_auto_federal + p_auto_estatal );
+        $("form[name='EficaciaIn11Form'] input[name='t_auto_f_e']").val( p_auto_federal + p_auto_estatal );
+        
+        
+        var ejercido_p_estatal= parseFloat($("form[name='EficaciaIn11Form'] input[name='ejer_e']").val());   
+        var ejercido_p_federal = parseFloat($("form[name='EficaciaIn11Form'] input[name='ejer_f']").val());     
+        $("form[name='EficaciaIn11Form'] input[name='preEje']").val( ejercido_p_estatal + ejercido_p_federal );
+        $("form[name='EficaciaIn11Form'] input[name='t_ejer_f_e']").val( ejercido_p_estatal + ejercido_p_federal );
+
+
+        var ampliaciones_p_federal= parseFloat($("form[name='EficaciaIn11Form'] input[name='ampl_f']").val());   
+        var ampliaciones_p_estatal = parseFloat($("form[name='EficaciaIn11Form'] input[name='ampl_e']").val());     
+        $("form[name='EficaciaIn11Form'] input[name='t_ampl_f_e']").val( ampliaciones_p_federal + ampliaciones_p_estatal );
+        
+        
+        var reduccione_p_federal= parseFloat($("form[name='EficaciaIn11Form'] input[name='redd_f']").val());   
+        var reducciones_p_estatal = parseFloat($("form[name='EficaciaIn11Form'] input[name='redd_e']").val());     
+        $("form[name='EficaciaIn11Form'] input[name='t_redd_f_e']").val( reduccione_p_federal + reducciones_p_estatal );
+
+       
+        //console.log(p_auto_federal + " + "+ p_auto_estatal + " = "+ (p_auto_estatal + p_auto_federal) );
+}
+
+function operacionesEficaciaIn11()
+{
+    var preEje = $("form[name='EficaciaIn11Form'] input[name='preEje']").val();
+    var preTA = $("form[name='EficaciaIn11Form'] input[name='preTotalAuto']").val();
+    var orig_f_e= $("form[name='EficaciaIn11Form'] input[name='orig_f_e']").val();
+    var orig_f= $("form[name='EficaciaIn11Form'] input[name='orig_f']").val();
+    var orig_e= $("form[name='EficaciaIn11Form'] input[name='orig_e']").val();
+    var auto_f = $("form[name='EficaciaIn11Form'] input[name='auto_f']").val();
+    var ampl_f = $("form[name='EficaciaIn11Form'] input[name='ampl_f']").val();
+    var redd_f = $("form[name='EficaciaIn11Form'] input[name='redd_f']").val();
+    var ejer_f = $("form[name='EficaciaIn11Form'] input[name='ejer_f']").val();
+    var auto_e = $("form[name='EficaciaIn11Form'] input[name='auto_e']").val();
+    var ampl_e = $("form[name='EficaciaIn11Form'] input[name='ampl_e']").val();
+    var redd_e = $("form[name='EficaciaIn11Form'] input[name='redd_e']").val();
+    var ejer_e = $("form[name='EficaciaIn11Form'] input[name='ejer_e']").val();
+    var t_auto_f_e = $("form[name='EficaciaIn11Form'] input[name='t_auto_f_e']").val();
+    var t_ampl_f_e = $("form[name='EficaciaIn11Form'] input[name='t_ampl_f_e']").val();
+    var t_redd_f_e = $("form[name='EficaciaIn11Form'] input[name='t_redd_f_e']").val();
+    var t_ejer_f_e = $("form[name='EficaciaIn11Form'] input[name='t_ejer_f_e']").val();
+    var valores="";
+    console.log(preEje+ " total a"+ preTA)
+   
+    if(preEje == 0 || preTA == 0 ||
+        $("form[name='EficaciaIn11Form'] input").hasClass("inputerror"))
+    {
+        $("form[name='EficaciaIn11Form'] input[name='promedio']").val(0);
+    }
+    
+    if(parseFloat(preEje) > parseFloat(preTA))
+    {
+        $("form[name='EficaciaIn11Form'] input[name='preEje']\n\
+                ").globo("enable").globo("update", "<center>No puede ser mayor \n\
+                al  <br/> total Autorizado</center>").globo("show").removeClass("inputok\n\
+                ").addClass("inputerror");
+    }else
+    {
+        var promedio =((parseFloat(preEje) / parseFloat(preTA)) * 100).toFixed(2);
+        if(isNaN(promedio)){
+            promedio="0.0 %";
+        }    
+        
+        
+        $("form[name='EficaciaIn11Form'] input[name='promedio']").val(promedio);
+          $("form[name='EficaciaIn11Form'] input[name='preEje']").removeClass("inputerror").addClass("inputok");
+    }
+    valores=valores.concat("-",preEje,",",preTA,",",orig_f_e,",",orig_f,",",orig_e,",",auto_f,",",ampl_f,",",redd_f,",",ejer_f,",",auto_e,",",ampl_e,",",redd_e,",",ejer_e,",",t_auto_f_e,",",t_ampl_f_e,",",t_redd_f_e,",",t_ejer_f_e,"-") ;
+   return  valores;
+    
+   
+}
+
+function guardarEficaciaIn11(){
+    var x="";
+    
+    if ($("form[name='EficaciaIn11Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+        //$().alerta('rojo', 'Error al guardar. Por favor verifique los datos.');
+        x="Error";
+    }else{
+        x = operacionesEficaciaIn11();
+        //$().alerta('verde', 'Datos guardados correctamente.');
+    }
+    return x;
+}
+
+function formatearnumero(control)
+{
+    //$(control).val(accounting.formatNumber(control.value, 0, ""));
+    $(control).val(parseFloat($(control).val()));
+    
+}

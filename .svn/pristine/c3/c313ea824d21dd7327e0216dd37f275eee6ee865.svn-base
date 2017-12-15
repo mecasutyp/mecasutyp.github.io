@@ -1,0 +1,52 @@
+/* 
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+function EficienciaIn12(control){
+    $("form[name='EficienciaIn16Form'] input[name='matricula']").val(control.value);
+    if (!/^([0-9])*$/.test(control.value)){ //SI EL VALOR NO ES VÁLIDO
+        $().alerta("rojo","El valor "+ control.value + " no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");
+        return;
+    }else{
+        control.value=Number(control.value);
+        var presupuesto=$("form[name='EficienciaIn12Form'] input[name='presupuesto']").val();
+        var matricula=$("form[name='EficienciaIn12Form'] input[name='matricula']").val();
+        if (matricula!=0){
+            $(control).removeClass("inputerror").addClass("inputok");
+            $("form[name='EficienciaIn12Form'] [name='costoporalumno']").val(Math.round((presupuesto/matricula)*100)/100);
+            $("form[name='EficienciaIn12Form'] [name='matricula']").globo("disable");
+        }else{
+            $(control).removeClass("inputok").addClass("inputerror");
+            $("form[name='EficienciaIn12Form'] [name='matricula']").globo("enable").globo("update", "Error. La Matr&iacute;cula no puede ser '0'");
+            $("form[name='EficienciaIn12Form'] [name='matricula']").globo("show");
+            $("form[name='EficienciaIn12Form'] [name='costoporalumno']").val(0);
+        }
+    }
+}
+
+function operacionesInd12(){
+    var presupuesto=$("form[name='EficienciaIn12Form'] input[name='presupuesto']").val();
+    var matricula=$("form[name='EficienciaIn12Form'] input[name='matricula']").val();
+    if (matricula!=0){
+        $("form[name='EficienciaIn12Form'] [name='costoporalumno']").val(accounting.formatNumber((presupuesto/matricula), 2, ","));
+    }else{
+        $("form[name='EficienciaIn12Form'] [name='costoporalumno']").val(0);
+    }
+    $("form[name='EficienciaIn12Form'] input[name='presupuesto']").val(accounting.formatNumber(presupuesto, 0, ","));
+    $("form[name='EficienciaIn12Form'] input[name='matricula']").val(accounting.formatNumber(matricula, 0, ","));
+}
+
+function guardarEficIn12(){
+    var matricula=$("form[name='EficienciaIn12Form'] input[name='matricula']").val();
+    
+    if ($("form[name='EficienciaIn12Form'] input").hasClass("inputerror")){
+        $().alerta('rojo', 'Datos NO guardados. Verifiquelos Por favor');
+        return -1; //VALORES MAL
+    }else{
+        $('[name="matricula"]').globo("hide");
+        $().alerta('verde', 'Datos guardados correctamente.');
+        return matricula; //VALORES BIEN
+    }
+}

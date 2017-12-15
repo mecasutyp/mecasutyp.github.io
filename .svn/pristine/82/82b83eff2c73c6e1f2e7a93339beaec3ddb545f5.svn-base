@@ -1,0 +1,86 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.cgut;
+
+import com.mecasut.conexion.ConexionMySQL;
+import com.mecasut.shared.Coleccion;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author DELL
+ */
+public class CgutCausasForm extends org.apache.struts.action.ActionForm {
+
+    private String ask = "";
+    private int cboCausas = -1;
+    private ArrayList causas = new ArrayList();
+    private String nombreCausas = "";
+    private String activo = "";
+    
+    public String getActivo() {
+        return activo;
+    }
+
+    public void setActivo(String activo) {
+        this.activo = activo;
+    }
+
+    public String getAsk() {
+        return ask;
+    }
+
+    public void setAsk(String ask) {
+        this.ask = ask;
+    }
+
+    public int getCboCausas() {
+        return cboCausas;
+    }
+
+    public void setCboCausas(int cboCausas) {
+        this.cboCausas = cboCausas;
+    }
+
+    public ArrayList getCausas() {
+        return causas;
+    }
+
+    public void setCausas(ArrayList causas) {
+        this.causas = causas;
+    }
+
+    public String getNombreCausas() {
+        return nombreCausas;
+    }
+
+    public void setNombreCausas(String nombreCausas) {
+        this.nombreCausas = nombreCausas;
+    }
+
+    public final void setCausas() {
+        ArrayList resultado = new ArrayList();
+        ConexionMySQL con = new ConexionMySQL();
+        try {
+            ResultSet tabla = con.Consultar("select id_causa, descripcion from causas_desercion order by descripcion");
+            while (tabla.next()) {
+                resultado.add(new Coleccion(tabla.getInt(1), tabla.getString(2)));
+            }
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            con.Desconectar();
+        }
+        this.causas = resultado;
+    }
+
+    public CgutCausasForm() {
+        super();
+        setCausas();
+        // TODO Auto-generated constructor stub
+    }
+}

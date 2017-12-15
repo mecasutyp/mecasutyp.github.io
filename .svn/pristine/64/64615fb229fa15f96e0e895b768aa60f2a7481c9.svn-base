@@ -1,0 +1,149 @@
+package com.mecasut.cgut;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+/**
+ * @Daniel Ramírez Torres
+ */
+public class CgutOrganismosAction extends org.apache.struts.action.Action {
+
+    /* forward name="success" path="" */
+    private static final String SUCCESS = "success";
+    ConexionMySQL conexion = new ConexionMySQL();
+
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form,
+            HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        CgutOrganismosForm frm = (CgutOrganismosForm) form;
+        if (frm.getAsk().equals("buscaOrganismo")) {
+            if (frm.getCboOrganismo() > 0) {
+                ResultSet rs = conexion.Consultar("select * from organismos_acreditacion where id_organismo=".concat(String.valueOf(frm.getCboOrganismo())));
+                if (rs.next()) {
+                    frm.setNombreOrganismo(rs.getString("nombre"));
+                    frm.setSigla(rs.getString("sigla"));
+                    frm.setPais(rs.getString("pais"));
+                    frm.setExtranjero(rs.getInt("extranjero"));
+                    if (rs.getBoolean("activo")) {
+                        frm.setOrganismoActivo("Desactivar Organismo");
+                    } else {
+                        frm.setOrganismoActivo("Activar Organismo");
+                    }
+                }
+            } else {
+                nuevoOrganismo(frm);
+            }
+            return mapping.findForward(SUCCESS);
+        }
+
+
+        if (frm.getAsk().equals("bajaOrganismo")) {
+            if (frm.getCboOrganismo() > 0) {
+                String consulta = "select activo from organismos_acreditacion where id_organismo=".concat(String.valueOf(frm.getCboOrganismo()));
+                String update1 = "update organismos_acreditacion set activo=";
+                String update2 = " where id_organismo=";
+                if (bajaDatos(consulta, update1, update2, frm.getCboOrganismo()) == 1) {
+                    frm.setOrganismoActivo("Activar Organismo");
+                } else {
+                    frm.setOrganismoActivo("Desactivar Organismo");
+                }
+            }
+            return mapping.findForward(SUCCESS);
+        }
+        if (frm.getAsk().equals("nuevoOrganismo")) {
+            nuevoOrganismo(frm);
+            return mapping.findForward(SUCCESS);
+        }
+        if (frm.getAsk().equals("cambiarExtranjero")) {
+            frm.setExtranjero(1);
+            frm.setSelpais(1);
+            return mapping.findForward(SUCCESS);
+        }
+        if (frm.getAsk().equals("cambiarNacional")) {
+            frm.setExtranjero(0);
+
+            return mapping.findForward(SUCCESS);
+        }
+//        if (frm.getAsk().equals("selecPais")) {
+//            String selpa=request.getParameter("posi");
+//           System.out.println(selpa);
+//            if (frm.getCboPaises() != -1) {
+//                frm.setSelpais(1);
+//                frm.setPais(selpa);
+//            } else {
+//                frm.setSelpais(0);
+//                frm.setPais("");
+//            }
+//            return mapping.findForward(SUCCESS);
+//        }
+        if (frm.getAsk().equals("guardarOrganismo")) {
+            String country = "México";
+            if (frm.getExtranjero() == 1) {
+                country = frm.getPais();
+            }
+            String update = "update organismos_acreditacion set nombre='".concat(frm.getNombreOrganismo()).concat("', sigla='".concat(frm.getSigla()).concat("', extranjero='".concat(String.valueOf(frm.getExtranjero())).concat("', pais='".concat(country).concat("' where id_organismo=").concat(String.valueOf(frm.getCboOrganismo())))));
+            String insert = "insert into organismos_acreditacion (nombre,sigla,extranjero,pais, activo) values"
+                    + " ('".concat(frm.getNombreOrganismo()).concat("', '".concat(frm.getSigla()).concat("','".concat(String.valueOf(frm.getExtranjero())).concat("','".concat(country).concat("',1)"))));
+            guardarDatos(frm, update, insert);
+            frm.setListaOrganismos();
+            if (frm.getCboOrganismo() < 0) {
+                nuevoOrganismo(frm);
+            }
+            return mapping.findForward(SUCCESS);
+        }
+        return mapping.findForward(SUCCESS);
+    }
+
+    private void nuevoOrganismo(CgutOrganismosForm frm) {
+        frm.setCboOrganismo(-1);
+        frm.setNombreOrganismo("");
+        frm.setOrganismoActivo("");
+        frm.setSigla("");
+        frm.setPais("");
+        frm.setExtranjero(0);
+    }
+
+    private int bajaDatos(String consulta, String update1, String update2, int id) {
+        int activo = 0;
+        try {
+            String update = update1;
+            ResultSet rs = conexion.Consultar(consulta);
+            if (rs.next()) {
+                activo = rs.getInt(1);
+            }
+            if (activo == 1) {
+                update = update.concat("0").concat(update2).concat(String.valueOf(id));
+                conexion.Modificar(update);
+            } else {
+                update = update.concat("1").concat(update2).concat(String.valueOf(id));
+                conexion.Modificar(update);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CgutAreasAction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return activo;
+    }
+
+    private void guardarDatos(CgutOrganismosForm frm, String update, String insert) {
+        try {
+            if (conexion.Modificar(update) == 0) {
+                try {
+                    conexion.Insertar(insert);
+                } catch (SQLException ex1) {
+                    Logger.getLogger(CgutAreasAction.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CgutAreasAction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}

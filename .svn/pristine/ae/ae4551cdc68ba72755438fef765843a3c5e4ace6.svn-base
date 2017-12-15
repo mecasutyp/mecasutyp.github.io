@@ -1,0 +1,78 @@
+<%-- 
+    Document   : CgutAreas
+    Created on : 16-jul-2013, 12:38:28
+    Author     : Daniel Ramírez Torres
+--%>
+
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%
+    HttpSession sesion = request.getSession();
+    String id_periodo = "", id_user = "";
+    if (sesion.getAttribute("usuario") == null) {
+%>
+        <jsp:forward page="/login.msut">
+            <jsp:param name="error" value="true"></jsp:param>
+            <jsp:param name="ask" value="false"></jsp:param>
+            <jsp:param name="errorMessage" value="Sesi&oacute;n caducada o inv&aacute;lida<br/>El recurso al que deseas acceder est&aacute; restringido, debes iniciar sesi&oacute;n para utilizarlo."></jsp:param>
+        </jsp:forward>
+<%  } else {
+        id_periodo = sesion.getAttribute("idPeriodo").toString();
+        id_user = sesion.getAttribute("idUsuario").toString();
+    }
+%>
+
+<html:form action="/CgutAreasAction" onsubmit="return false">
+    <table align="center" border="0px" width="900">
+        <tr>
+            <td colspan="4">
+                <h2>&nbsp;&nbsp;&nbsp;Información de las Áreas:</h2>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="right">
+                <label>Área:</label>
+            </td>
+            <td colspan="2">
+                <span id="comboAreasOriginal">
+                    <html:select onchange="retrieveURL('/CgutAreasAction.msut?ask=buscaArea','CgutAreasForm');" property="cboArea" style="width:auto;" >
+                        <html:option value="-1">Ingresar nueva área...</html:option>
+                        <html:optionsCollection name="CgutAreasForm" property="areas" label="name" value="id"></html:optionsCollection>
+                    </html:select>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4"><h2>Especificaciones:</h2></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="right"><label>Nuevo Nombre del Área:</label></td>
+            <td colspan="2">
+                <span id="nombreAreaS">
+                    <html:text styleId="nombreArea" maxlength="80" property="nombreArea" style="width:400px;"/>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+
+            </td>
+            <td colspan="2" align="left">
+                <span id="areaActiva">
+                    <logic:notEqual name="CgutAreasForm" property="areaActivo" value="">
+                        <a class="green" onclick="bajaArea();">
+                            <i><strong><bean:write name="CgutAreasForm" property="areaActivo"></bean:write></strong></i>
+                        </a>
+                    </logic:notEqual>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" align="right">
+                <a class="green" onclick="retrieveURL('/CgutAreasAction.msut?ask=nuevaArea','CgutAreasForm');">Nuevo registro</a>
+                <a class="green" onclick="validarFormularioAreas();">Guardar cambios</a>
+            </td>
+        </tr>
+    </table>
+</html:form>

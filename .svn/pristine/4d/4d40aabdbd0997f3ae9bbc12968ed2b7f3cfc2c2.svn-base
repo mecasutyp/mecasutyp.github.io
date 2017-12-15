@@ -1,0 +1,93 @@
+<%-- 
+    Document   : CgutMantenimiento
+    Created on : 5/07/2013, 08:07:37 AM
+   Author     : Daniel Ramírez Torres
+--%>
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%
+    HttpSession sesion = request.getSession();
+    String id_periodo = "", id_user = "";
+    String activo = "0";
+    if (sesion.getAttribute("usuario") == null) {
+%>
+<jsp:forward page="/login.msut">
+    <jsp:param name="error" value="true"></jsp:param>
+    <jsp:param name="ask" value="false"></jsp:param>
+    <jsp:param name="errorMessage" value="Sesi&oacute;n caducada o inv&aacute;lida<br/>El recurso al que deseas acceder est&aacute; restringido, debes iniciar sesi&oacute;n para utilizarlo."></jsp:param>
+</jsp:forward>
+<%    } else {
+        id_periodo = sesion.getAttribute("idPeriodo").toString();
+        id_user = sesion.getAttribute("idUsuario").toString();
+        ConexionMySQL con = new ConexionMySQL();
+        con.Conectar();
+        try {
+            String consulta = "select activo from system_mecasut";
+            ResultSet rs = con.Consultar(consulta);
+            if (rs.next()) {
+                activo = rs.getString("activo");
+            }
+        } catch (Exception ex) {
+            System.err.println("Error de Consulta Mantenimiento Mecasut" + ex);
+        }
+    }
+%>
+<html:form action="/CgutMantenimientoMecasutAction" onsubmit="return false"> 
+    <div id="menuMecasut" class="box" align="center">
+        <table align="center">
+            <tr>
+                <td>
+                    <h2>Configuraci&oacute;n</h2>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <div id="radios1" align="center" title="Activo: Permite que las universidades relicen la evaluaci&oacute;n y consulten informaci&oacute;n <br/> Inactivo: Permite &uacute;nicamente que las universidades consulten informaci&oacute;n">
+                        <label>Evaluaci&oacute;n Activa:</label>
+                        <input type="radio" id="radio1" name="radio" value="1" onclick="desplegarDiv();" <%=activo.equals("1") ? "checked='checked'" : ""%>/><label for="radio1" >Si</label>
+                        <input type="radio" id="radio2" name="radio" value="0" onclick="desplegarDiv();" <%=activo.equals("0") ? "checked='checked'" : ""%>/><label for="radio2" >No</label>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div id="mant" style="display: none;">
+            <table align="center">
+                <tr>
+                    <td align="right">
+                        <label>Periodo actual de evaluaci&oacute;n</label>
+                        <span id="comboPeriodos">
+                            <html:select styleId="cboPeriodos" property="cboPeriodos" style="width:auto;" >
+                                <html:optionsCollection name="CgutMantenimientoMecasutForm" property="periodos" label="name" value="id"></html:optionsCollection>
+                            </html:select>
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <a class="green" onclick="validarMantenimiento();">Guardar cambios</a>
+
+        <div id="con_ReiDatGene" title="Reiniciar Datos Generales" style="display: none;"  > 
+            Se va a modificar el estado activo del MECASUT, ¿Desea continuar?    
+        </div>
+        <div id="con_CamDatGene" title="Confirmar,  Reiniciar Datos Generales" style="display: none;"  > 
+            Se va a modificar el periodo actual de evaluacion del MECASUT, es una accion peligrosa si a&uacute;n se estan efectuando cambios en la evaluaci&oacute;n, ¿Desea continuar? <br/>La p&aacute;gina se recargar&aacute; autom&aacuteticamente en 5 s.    
+        </div>                 
+
+    </div>
+</html:form>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("[id^=radio]").buttonset();
+        $("radio").button("refresh"); 
+        if ($("input[id='radio1']").is(':checked')){        
+            $("#mant").slideDown();
+        }else{
+            $("#mant").slideUp();
+        }        
+    });
+</script>

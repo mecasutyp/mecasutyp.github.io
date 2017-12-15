@@ -1,0 +1,465 @@
+<%--
+    Document   : Master
+    Created on : 17/05/2012, 11:22:27 AM
+    Author     : Joshua, Medina Muñoz Cuauhtemoc
+--%>
+<%@taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@page import="com.mecasut.admon.*, com.mecasut.shared.Universidad"%>
+<%@page import="java.sql.ResultSet, com.mecasut.conexion.ConexionMySQL"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Date"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<%
+    SimpleDateFormat formateador = new SimpleDateFormat("dd' de 'MMMM' de 'yyyy");
+    Date fecha = new Date();
+    Universidad uni = new Universidad();
+    String tipo = "";
+    String universidad = "";
+    try {
+        HttpSession sesion = request.getSession();
+        if (sesion.getAttribute("usuario") == null) {
+%>
+<jsp:forward page="/login.msut">
+    <jsp:param name="error" value="true"></jsp:param>
+    <jsp:param name="ask" value="false"></jsp:param>
+    <jsp:param name="errorMessage" value="El recurso al que deseas acceder está restringido, debes iniciar sesión para utilizarlo."></jsp:param>
+</jsp:forward>
+<%            } else {
+        tipo = session.getAttribute("tipoUsuario").toString();
+        //System.out.println(tipo);
+        universidad = uni.getNombreUniversidad(session.getAttribute("idUniversidad").toString());
+    }
+    int iniciado = 0, terminado = 0;
+    ConexionMySQL conexion = new ConexionMySQL();
+    String consulta = "Select mecasut_iniciado, mecasut_terminado from control_universidad where id_universidad = ".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo=").concat(sesion.getAttribute("idPeriodo").toString());
+
+    ResultSet rs = conexion.Consultar(consulta);
+    if (rs.next()) {
+        iniciado = rs.getInt(1);
+        terminado = rs.getInt(2);
+        session.setAttribute("iniciado", iniciado);
+        session.setAttribute("terminado", terminado);
+    } else {
+        iniciado = 0;
+        terminado = 0;
+    }
+
+%>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Pragma" content="no-cache" />
+        <link rel="shortcut icon" href="images/favicon.gif" type="image/x-icon" />
+        <title><tiles:insert attribute="title"/></title>
+        <link rel="stylesheet" type="text/css" href="css/stylesheet.css" />
+        <link rel="stylesheet" type="text/css" href="css/tablestyle.css" />
+        <link rel="stylesheet" type="text/css" href="css/navstyle.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.toastmessage.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.combobox.css" />
+        <link rel="stylesheet" type="text/css" href="css/tip-yellowsimple.css" />
+        <link rel="stylesheet" type="text/css" href="css/menu.css" />
+        <script language="javascript" type="text/javascript" src="js/jquery.js"></script>
+        <script language="javascript" type="text/javascript" src="js/jquery.ui.js"></script>
+        <script language="javascript" type="text/javascript" src="js/jquery.toastmessage.js"></script>
+        <script language="javascript" type="text/javascript" src="js/jquery.poshytip.js"></script>
+        <script language="javascript" type="text/javascript" src="js/jquery.combobox.js"></script>
+        <script language="javascript" type="text/javascript" src="js/menu.js"></script>
+        <script language="javascript" type="text/javascript" src="js/inicializacion.js"></script>
+        <script language="javascript" type="text/javascript" src="js/Ajax.js"></script>
+        <script language="javascript" type="text/javascript" src="js/master.js"></script>
+        <script language="javascript" type="text/javascript" src="js/accounting.js"></script>
+        <script language="javascript" type="text/javascript">
+            var idUniSes = "";
+        </script>
+        <tiles:insert attribute="scripts"/>
+        <style>
+            .ui-menu { position: absolute; width: 100px; }
+        </style>
+    </head>
+    <body>
+        <div align="center" id="dialog-cargando" title="Cargando..." style="z-index :1000">
+            <img alt="MECASUT" src="images/ajax-loader.gif" />
+            <br/>Por favor espere...<br/><br/>
+        </div>
+        <div align="center" id="dialog-modal" title="Cargando..." style="z-index :1001">
+        </div>
+        <script type="text/javascript">
+            cargando();
+        </script>
+        <%
+            if ((iniciado == 1) && (terminado == 0)) {
+        %>
+        <div id="formEnvio" title="Confirme el env&iacute;o de los datos" style="display: none;">
+            <div id="textoEnvio">
+                <p>Despu&eacute;s de enviar los datos no se podr&aacute; hacer ning&uacute;n cambio a ninguno de los indicadores.
+                    Esta acci&oacute;n s&oacute;lo debe ser efectuada cuando todos los indicadores sean completados y la informaci&oacute;n sea revisada cuidadosamente.
+                </p>
+                <p id="progresoUniversidad" style="display: none; color: tomato;">
+                    Atenci&oacute;n, los siguientes indicadores no han sido capturados o est&aacute;n incompletos.
+                </p>
+                <ul id="indFaltantes" style="width: 95%; display: none; color: tomato;"></ul>
+                <br/>
+            </div>
+            <html:form action="/EnvioDatos" >
+                <p style="clear: both;">
+                    Para confirmar el env&iacute;o de los datos por favor introduzca su nombre de usuario y contrase&ntilde;a
+                </p>
+                <p class="validateTips"></p>
+                <span id="confirmacionEnvio">
+                    <p>Est&aacute; a punto de enviar los datos, esta acci&oacute;n no se puede deshacer.</p><br/><center>&iquest;Seguro que desea enviarlos?</center>
+                </span>
+                <br/>
+                <span id="formularioEnvio">
+                    <label for="name">Usuario:</label>
+                    <html:text property="name" styleId="name" styleClass="text ui-widget-content ui-corner-all" />
+                    <label for="password">Contrase&ntilde;a:</label>
+                    <html:password property="password" name="password" value="" styleId="password" styleClass="text ui-widget-content ui-corner-all" />
+                </span>
+                <span id="submitButton">
+                    <br/>
+                    <br/>
+                    <html:submit styleId="botonEnviarFinal">Enviar Datos</html:submit>
+                    </span>
+            </html:form>
+        </div><!--Formulario de Envío-->
+        <%                       } else if ((iniciado == 1) && (terminado == 1)) {
+
+        %>
+       
+             
+        <%                       } else {
+        %>
+        <div id="dialog-confirm" title="¿Seguro que desea iniciar la evaluaci&oacute;n?" style="display: none;">
+            <p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>Antes de comenzar, debe asegurarse de que los datos de la Universidad, el domicilio, los datos de contacto, y los datos acad&eacute;micos sean correctos y se hayan guardado. <br/><br/><span style="color: #cd0a0a">Una vez iniciada la evaluaci&oacute;n los datos NO podr&aacute;n ser modificados.</span> <br/><br/> ¿Desea proceder con la revisi&oacute;n ahora?</p>
+        </div>
+        <%            }
+            if (tipo.equals("UT")) {
+        %>
+       
+        <%} else if (tipo.equals("CG")) {%>
+        <div id="formReportes" title="Consulta de informaci&oacute;n" style="display: none;">
+            <table align="center" border="none">
+                <tr>
+                    <td>
+                        <label for="report">Reporte:</label>
+                        <select name="report" id="report" onchange="validar();">
+                            <option value="forllenNuevo">Formato original de llenado MECASUT </option>
+                            <option value="cat_Eficacia">Formato Eficacia MECASUT</option>
+                            <option value="cat_Eficiencia">Formato Eficiencia MECASUT</option>
+                            <option value="cat_Pertinencia">Formato Pertinencia MECASUT</option>
+                            <option value="cat_Vinculacion">Formato Vinculaci&oacute;n MECASUT</option>
+                            <option value="cat_Equidad">Formato Equidad MECASUT</option>
+                            <option value="sabana">SABANA</option>
+                            <option value="directorio">Directorio</option>
+                            <option value="repprog">Reporte de programas</option>
+                            
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="univ">Universidad:</label>
+                        <select name="univ" id="univ" >
+                            <%
+                                ResultSet rsRep = conexion.Consultar("Select id_universidad, nombre_universidad from universidades where activo = 1 and id_universidad>0");
+                                while (rsRep.next()) {
+                            %>
+                            <option value="<%=rsRep.getString(1)%>"><%=rsRep.getString(2)%></option>
+                            <%
+                                }
+                            %>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="perio">Periodo</label>
+                        <select name="perio" id="perio">
+                            <%
+                                rsRep = conexion.Consultar("Select id_periodo, anio from periodos where id_periodo <= " + sesion.getAttribute("idPeriodo").toString().concat(" ORDER BY anio desc"));
+                                while (rsRep.next()) {
+                            %>
+                            <option value="<%=rsRep.getString(1)%>"><%=rsRep.getString(2)%></option>
+                            <%
+                                }
+                            %>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div><!--Formulario de Envío-->
+        
+        <%}%>
+
+        <img alt="MECASUT" src="images/mecasut.png"/>
+        <div style="position: absolute; left: 0px; top: 23px; width: 100%; font-family: serif; text-shadow: -0.2em 0.2em 0.5em black; color:#85e1ff; font-size: large;" align="center"><%=universidad%><br/><%=formateador.format(fecha)%></div>
+        <img style=" position: absolute; right: 15px; top: 0px;  " alt="MECASUT" src="images/Logo-UTyVll.png" align="right"/>
+        <!--Menú superior dinámico-->
+        <div id="nav" align="" style="display: none; ">
+        </div><!--Termina menú superior dinámico-->
+        <!--Comienza Menú de Sesión-->
+        <%
+            //System.out.println("idResponsable = " + sesion.getAttribute("idResponsable").toString());
+            String sql = "Select * from responsables where id_responsable = "
+                    .concat(sesion.getAttribute("idResponsable").toString());
+            String nombre = "", apellidos = "", mail = "", cargo = "";
+            try {
+                rs = conexion.Consultar(sql);
+                rs.next();
+                nombre = rs.getString("nombre");
+                apellidos = rs.getString("apaterno") + " " + rs.getString("amaterno");
+                cargo = rs.getString("cargo");
+                mail = rs.getString("mail");
+            } catch (Exception ex) {
+                System.err.println("ERROR MENU DE SESION " + ex.getMessage());
+            }
+        %>
+        <div align="right">
+            <div style="height: 25px; width: 230px; position: inherit; top: 128px;">
+                <div class="sesionMenu">
+                    <table width="230px">
+                        <tr>
+                            <td>
+                                <div class="bienvenido">
+                                    <span>Bienvenido</span>
+                                </div>
+                            </td>
+                            <td align="right" class="red">
+                                <a href="registroUniversidad.msut?ask=logout">
+                                    <span style="float:right;">Cerrar Sesi&oacute;n</span>
+                                    <span class="ui-icon ui-icon-circle-close" style="float:right;"></span>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="nombre" ><%=nombre%>
+                        <%
+                            if (!sesion.getAttribute("idResponsable").toString().equals("0")) {
+                        %>
+                        <span class="blue" style="float:right;">
+                            <a href="global.msut?ask=perfil">Ver Perfil</a>
+                        </span>
+                        <%                           }
+                        %>
+                    </div>
+                    <div class="apellidos" ><%=apellidos%>
+                        <span class="blue">
+                            &nbsp;&nbsp;(<%=sesion.getAttribute("usuario")%>)
+                        </span>
+                        <div id="mensajes" style="float:right;">
+                            <a href='global.msut?ask=mensajes'>
+                                <span class="ui-icon ui-icon-mail-open" style="float:right;"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Termina Menú de Sesión-->
+
+
+
+
+        <!--Comienza Menú Principal-->
+        <div id="menu" style="width: 70%; position: absolute; top: 128px; z-index :98" >
+            <ul class="menu">
+                <%
+                    if (tipo.equals("UT") || tipo.equals("CGenUT")) {
+                %>
+                <li><a href="#" class="parent"><span>Inicio</span></a>
+                    <div>
+                        <ul>
+                            <li><a href="/" onclick="cargando()"><span>Informaci&oacute;n de la Universidad</span></a></li>
+                            <li><a href="#" onclick="$( '#formErrores' ).dialog( 'open' );"><span>Reportar un fallo en la Aplicaci&oacute;n</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+                <%
+                    if ((iniciado == 1) && (terminado == 0)) {
+                %>
+                <li><a href="#" class="parent"><span>Indicadores</span></a>
+                    <div>
+                        <ul>
+                            <li><a href="global.msut?ask=eficacia" onclick="cargando()"><span>Eficacia</span></a></li>
+                            <li><a href="global.msut?ask=eficiencia" onclick="cargando()"><span>Eficiencia</span></a></li>
+                            <li><a href="global.msut?ask=pertinencia" onclick="cargando()"><span>Pertinencia</span></a></li>
+                            <li><a href="global.msut?ask=vinculacion" onclick="cargando()"><span>Vinculaci&oacute;n</span></a></li>
+                            <li><a href="global.msut?ask=equidad" onclick="cargando()"><span>Equidad</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li><a href="#" class="parent"><span>Reportes</span></a>
+                    <div>
+                        <ul>
+                            <li><a href="#" onclick="window.open('/descargarGuia','_blank');"><span>Gu&iacute;a del Sistema (PDF)</span></a></li>
+                            <li><a href="#" onclick="window.open('/descargarGuiaGeneral','_blank');"><span>Gu&iacute;a General MECASUT (PDF)</span></a></li>
+                            <li><a href="#" onclick="window.open('PDF.msut?ask=Info');"><span>Informaci&oacute;n actual<br> de la Universidad (PDF)</span></a></li>
+                            <li><a href="#" onclick="window.open('Excel_Reporte_Borrador.msut?ask=forllenNuevo');"><span>Formato MECASUT (Excel)</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li><a href="#" class="parent"><span>Finalizar Evaluaci&oacute;n</span></a>
+                    <!--
+                    <div>
+                        <ul>
+                            <li><a class="parent"><span>Enviar Datos</span></a>
+                    -->
+                    <div>
+                        <ul>
+                            <li><a id="envioDatos" href="#" onclick="progresoUniversidad(<%=session.getAttribute("idUniversidad")%>);$( '#formEnvio' ).dialog( 'open' );"><span>Enviar Ahora</span></a></li>
+                        </ul>
+                    </div>
+                    <!--
+                            </li>
+                        </ul>
+                    </div>
+                    -->
+                </li>
+                <%                    } else if ((iniciado == 1) && (terminado == 1)) {
+                %>
+                <li><a href="#" class="parent"><span>Ver Indicadores</span></a>
+                    <div>
+                        <ul>
+                            <li><a href="global.msut?ask=eficacia" onclick="cargando()"><span>Eficacia</span></a></li>
+                            <li><a href="global.msut?ask=eficiencia" onclick="cargando()"><span>Eficiencia</span></a></li>
+                            <li><a href="global.msut?ask=pertinencia" onclick="cargando()"><span>Pertinencia</span></a></li>
+                            <li><a href="global.msut?ask=vinculacion" onclick="cargando()"><span>Vinculaci&oacute;n</span></a></li>
+                            <li><a href="global.msut?ask=equidad" onclick="cargando()"><span>Equidad</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+                </li>
+                <li><a href="#" class="parent"><span>Reportes</span></a>
+                    <div>
+                        <ul>
+                            <li><a href="#" onclick="window.open('/descargarGuia','_blank');"><span>Gu&iacute;a del Sistema (PDF)</span></a></li>
+                            <li><a href="#" onclick="window.open('PDF.msut?ask=Info');"><span>Informaci&oacute;n actual<br> de la Universidad (PDF)</span></a></li>
+                            <li><a href="#" onclick="window.open('Excel_Reporte_Borrador.msut?ask=forllenNuevo');"><span>Formato MECASUT (Excel)</span></a></li>
+                            <li><a href="#" onclick="window.open('AcusePDF.msut?ask=sendInf');"><span>Formato t&eacute;rmino de Evaluaci&oacute;n MECASUT (PDF)</span></a></li>
+                            
+                        </ul>
+                    </div>
+                </li>
+                <%} else {%>
+                <li id="iniEv"><a href="#" class="parent"><span>Iniciar Evaluaci&oacute;n</span></a>
+                    <div>
+                        <ul>
+                            <li><a id="envioDatos" href="#" onclick="$( '#dialog-confirm' ).dialog( 'open' );"><span>Iniciar Ahora</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+                <%}
+                } else if (tipo.equals("CG")) {
+                %>
+                <li><a href="#" class="parent"><span>Inicio</span></a>
+                    <div>
+                        <ul>
+                            <li><a href="/" onclick="cargando()"><span>Men&uacute; de Administraci&oacute;n</span></a></li>
+                            <!--<li><a href="#" onclick="$( '#formErrores' ).dialog( 'open' );"><span>Reportar un fallo en la Aplicaci&oacute;n</span></a></li>-->
+                        </ul>
+                    </div>
+                </li>
+                <li><a href="#" class="parent"><span>Reportes</span></a>
+                    <div>
+                        <ul>
+                            <li><a href="#" onclick="$( '#formReportes' ).dialog( 'open' );"><span>Excel</span></a></li>
+                        </ul>
+                    </div>
+                </li>
+                <%}%>
+                <li><a href="registroUniversidad.msut?ask=logout" onclick="cargando()"><span>Cerrar Sesi&oacute;n</span></a></li>
+            </ul>
+        </div><!--Termina Menú Principal-->
+
+
+        <%
+            try {
+                if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+        %>
+        <div id="opcionesPersonalizables">
+            <div id="opcAutoGuardar" style="z-index: 100; position: absolute; right: 20.5%; top: 85px;">
+                <div>
+                    <label style="font-size: small; font-weight: normal;" for="chkAutoGuardado" id="lblAutoGuardado">&nbsp;&nbsp;<span class="ui-icon ui-icon-disk" style="float:right;"></span></label>
+                    <button type="checkbox" id="chkAutoGuardado"></button>
+                    <button style="font-size: small; font-weight: normal;" id="select">Selecciona el tiempo para guardar automaticamente la informaci&oacute;n. (S&oacute;lo aplica para guardar los indicadores y para el indicador actual)</button>
+                </div>
+                <ul>
+                    <!--li><a style="font-size: small; font-weight: normal;" onclick="tiempoAutoSave = 30; lblTiempoAutoSave = '(30 seg.)'; $('#lblAutoGuardado').addClass('ui-state-active'); $( '#chkAutoGuardado' ).trigger('click');" >30 segundos</a></li-->
+                    <li><a style="font-size: small; font-weight: normal;" onclick="tiempoAutoSave = 60; lblTiempoAutoSave = '(1 min.)'; $('#lblAutoGuardado').addClass('ui-state-active'); $( '#chkAutoGuardado' ).trigger('click');" >1 minuto</a></li>
+                    <li><a style="font-size: small; font-weight: normal;" onclick="tiempoAutoSave = 120; lblTiempoAutoSave = '(2 min.)'; $('#lblAutoGuardado').addClass('ui-state-active'); $( '#chkAutoGuardado' ).trigger('click');" >2 minutos</a></li>
+                    <li><a style="font-size: small; font-weight: normal;" onclick="tiempoAutoSave = 350; lblTiempoAutoSave = '(5 min.)'; $('#lblAutoGuardado').addClass('ui-state-active'); $( '#chkAutoGuardado' ).trigger('click');" >5 minutos</a></li>
+                    <li><a style="font-size: small; font-weight: normal;" onclick="tiempoAutoSave = 600; lblTiempoAutoSave = '(10 min.)'; $('#lblAutoGuardado').addClass('ui-state-active'); $( '#chkAutoGuardado' ).trigger('click');" >10 minutos</a></li>
+                </ul>
+            </div>
+           
+        </div><!--Opciones-->
+        <%                }
+            } catch (Exception ex) {
+            }%>
+        <tiles:insert attribute="body"/>
+        <div align="center" id="dialog-procesando" title="Procesando..." style="display: none; z-index :999">
+            <img alt="MECASUT" src="images/ajax-loader.gif" />
+            <br/>Por favor espere...<br/><br/>
+            Se está procesando su solicitud
+        </div>
+        <input type="hidden" id="tU" value="<%=sesion.getAttribute("tipoUsuario").toString()%>" />
+        <div style="filter:alpha(opacity=50); opacity:0.5;position: static; bottom: 10px; right: 10px" align="right">
+            <div>MECASUT Version 1.2.336-&beta;eta1 (Steiner)</div>
+            <div>Revisi&oacute;n 336.30042013-09:00</div>
+        </div>
+        <div style="display: none;" id="copyright">Copyright &copy; 2012 <a href="http://www.apycom.com">Apycom jQuery Menus</a></div>
+        <div id="formErrores" title="Reportar un error en la aplicaci&oacute;n" style="display: none;">
+            <p>Puede reportar un error en la aplicaci&oacute;n o enviar un comentario o sugerencia.
+                <br/>
+                Primero debe elegir hacia qui&eacute;n va dirigido el reporte, si es a un administrador de la aplicaci&oacute;n o a los desarrolladores.
+            </p>
+            Los administradores de la aplicaci&oacute;n son personas de la CGUT que conocen el proceso del MECASUT y pueden solucionar cuestiones como las siguentes:
+            <ul>
+                <li>No es correcta la informaci&oacute;n inicial de la universidad</li>
+                <li>No encuentra en los listados la informaci&oacute;n que necesita (Programas Educativos, Servicios, Responsables, etc.)</li>
+                <li>Tiene problemas para iniciar sesi&oacute;n</li>
+                <li>Informaci&oacute;n, como el total de egresados de bachillerato, es incorrecto</li>
+                <li>Tiene dudas con el proceso de llenado o con el manual del MECASUT</li>
+            </ul>
+            Los desarrolladores son las personas que crearon la aplicaci&oacute;n y pueden resolver problemas t&eacute;cnicos o cuestiones como las siguentes:
+            <ul>
+                <li>No puede guardar los datos</li>
+                <li>Ocurre alg&uacute;n error en el env&iacute;o de informaci&oacute;n</li>
+                <li>Existen errores de ortograf&iacute;a y/o gram&aacute;tica</li>
+                <li>Los controles no le permiten realizar alguna acci&oacute;n</li>
+                <li>Hay errores en las operaciones de alg&uacute;n indicador o los totales no se muestran de forma correcta</li>
+                <li>Las validaciones para el env&iacute;o de los datos son incorrectas</li>
+                <li>No se puede cargar alg&uacute;n indicador o se queda la aplicaci&oacute;n mostrando un mensaje que no se puede cerrar</li>
+                <li>Sugerencias para una mejor visualizaci&oacute;n</li>
+                <li>Cualquier falla con la conexi&oacute;n o fallas t&eacute;cnicas que no puede resolver un administrador</li>
+            </ul>
+            <p class="validateTips"></p>
+            <form>
+                <span id="formularioEnvio">
+                    <div id="raTipoEnvio" align="center">
+                        <input type="radio" id="raAd"  name="radio" checked="checked"/><label for="raAd" >Enviar a un Administrador</label>
+                        <input type="radio" id="raDes" name="radio" /><label for="raDes" >Enviar a un Desarrollador</label>
+                    </div>
+                    <label for="asunto">Asunto</label>
+                    <textarea style="width:100%" id="asunto" class="text ui-widget-content ui-corner-all"></textarea>
+                    <label for="comentario">Mensaje:</label>
+                    <textarea style="width:100%" id="comentario" value="" class="text ui-widget-content ui-corner-all"></textarea>
+                </span>
+            </form>
+        </div><!--Formulario de Errores-->
+    </body>
+</html>
+<%
+} catch (NullPointerException exNull) {
+%>
+<jsp:forward page="/login.msut">
+    <jsp:param name="error" value="true"></jsp:param>
+    <jsp:param name="ask" value="false"></jsp:param>
+    <jsp:param name="errorMessage" value="El recurso al que deseas acceder está restringido, debes iniciar sesión para utilizarlo."></jsp:param>
+</jsp:forward>
+<%            }
+%>

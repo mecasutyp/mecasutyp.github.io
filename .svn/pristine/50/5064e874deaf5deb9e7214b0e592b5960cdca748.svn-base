@@ -1,0 +1,254 @@
+//* @author Daniel Ramìrez Torres
+function noControles6(){
+    var i = 0;
+    while(document.forms['EficaciaIn6Form'][i].name != "fin"){
+        i++;
+    }
+    return i;
+}
+function indicador6(control)
+{
+    if (control.value == ""){
+        control.value = 0;
+    }
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("amarillo", "El valor '"+ control.value +"' no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");
+        nulosEficacia6();
+        return;
+    }else {
+        obtenervalores6();
+    }
+    
+    var num_niveles=$("form[name='EficaciaIn6Form'] input[name='niveles']").val();
+    for(var i=0; i< num_niveles;i++){
+       var  e_trabajando = parseInt($("form[name='EficaciaIn6Form'] input[name='e_trabajando" + i + "']").val());            
+       $("form[name='EficaciaIn6Form'] input[name='e_trabajando" + i + "']").val(e_trabajando);
+        var  afin = parseInt($("form[name='EficaciaIn6Form'] input[name='afin" + i + "']").val());            
+       $("form[name='EficaciaIn6Form'] input[name='afin" + i + "']").val(afin);
+       var  totalegresados = $("form[name='EficaciaIn6Form'] input[name='totalegresados" + i + "']").val();
+        
+        if(e_trabajando > totalegresados){
+            $().alerta("rojo","El valor Egresados trabajando a seis meses de egreso no puede ser mayor al total de egresados");
+             $("form[name='EficaciaIn6Form'] input[name='e_trabajando"+i+"']").removeClass("inputok").addClass("inputerror");
+        }else{
+              $("form[name='EficaciaIn6Form'] input[name='e_trabajando"+i+"']").removeClass("inputerror").addClass("inputok");
+        }
+        if(afin > e_trabajando){
+            $().alerta("rojo","El valor Egresados cuya actividad laboral es acorde a su formaci&oacute;n acad&eacute;mica no puede ser mayor a egresados trabajando a seis meses de egreso");
+             $("form[name='EficaciaIn6Form'] input[name='afin"+i+"']").removeClass("inputok").addClass("inputerror");
+        }else{
+              $("form[name='EficaciaIn6Form'] input[name='afin"+i+"']").removeClass("inputerror").addClass("inputok");
+        }
+    }
+    
+}
+
+function obtenervalores6()
+{
+    var e_trabajando = 0;
+    var totalegresados = 0;
+    var afin = 0;
+    var esp = 0;
+    var ess = 0;
+    var est = 0;
+    var cadena = "";
+    // El valor  del for es saber cuantos programas educativos estan configurados se cargan en este indicador. 
+    for(i = 0; i < $("form[name='EficaciaIn6Form'] input[name='nivelesuniversidad']").val(); i++)
+    {
+        //Programa educativo
+        cadena =  cadena.concat($("form[name='EficaciaIn6Form'] input[name='programaeducativo" + i + "']").val(),",");
+        //Indicador 6.1
+        e_trabajando = $("form[name='EficaciaIn6Form'] input[name='e_trabajando" + i + "']").val();            
+        totalegresados = $("form[name='EficaciaIn6Form'] input[name='totalegresados" + i + "']").val();
+        afin = $("form[name='EficaciaIn6Form'] input[name='afin" + i + "']").val();
+        
+        //Primeros datos de la tabla eficaciain6
+        cadena = cadena.concat( e_trabajando, ",")
+        cadena = cadena.concat( afin, ",")
+        
+        $("form[name='EficaciaIn6Form'] input[name='eml" + i + "']").val((parseInt(e_trabajando) / parseInt(totalegresados) * 100).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='eta" + i + "']").val((parseInt(afin) / parseInt(e_trabajando) * 100).toFixed(1))
+        
+        //Indicador 6.2
+        esp = $("form[name='EficaciaIn6Form'] input[name='esp" + i + "']").val();
+        ess = $("form[name='EficaciaIn6Form'] input[name='ess" + i + "']").val();
+        est = $("form[name='EficaciaIn6Form'] input[name='est" + i + "']").val();
+        
+        //Segundos datos de la tabla eficaciain6
+        cadena = cadena.concat( esp, ",")
+        cadena = cadena.concat( ess, ",")
+        cadena = cadena.concat( est, ",")
+        
+        
+        var total = parseInt(esp)+parseInt(ess)+parseInt(est);
+        $("form[name='EficaciaIn6Form'] input[name='tegresadossector" + i + "']").val(total)
+        
+        var totemlsp = ((parseInt(esp) / parseInt(total))*100).toFixed(1);
+        var totemlss = ((parseInt(ess) / parseInt(total))*100).toFixed(1);
+        var totemlst = ((parseInt(est) / parseInt(total))*100).toFixed(1);
+      if(!isNaN(totemlsp)){    
+        $("form[name='EficaciaIn6Form'] input[name='totemlsp" + i + "']").val(totemlsp)
+        $("form[name='EficaciaIn6Form'] input[name='totemlss" + i + "']").val(totemlss)
+        $("form[name='EficaciaIn6Form'] input[name='totemlst" + i + "']").val(totemlst)
+           
+        $("form[name='EficaciaIn6Form'] input[name='totalsector" + i + "']").val(parseFloat(totemlsp)+parseFloat(totemlss)+parseFloat(totemlst))
+    }     
+        //Indicador 6.3   
+        var emleag = $("form[name='EficaciaIn6Form'] input[name='emleag" + i + "']").val();
+        var emlmin = $("form[name='EficaciaIn6Form'] input[name='emlmin" + i + "']").val();
+        var emlatc = $("form[name='EficaciaIn6Form'] input[name='emlatc" + i + "']").val();
+        var emlaco = $("form[name='EficaciaIn6Form'] input[name='emlaco" + i + "']").val();
+        var emlsfs = $("form[name='EficaciaIn6Form'] input[name='emlsfs" + i + "']").val();
+        var emlaim = $("form[name='EficaciaIn6Form'] input[name='emlaim" + i + "']").val();
+        var emlapa = $("form[name='EficaciaIn6Form'] input[name='emlapa" + i + "']").val();
+        var emlasp = $("form[name='EficaciaIn6Form'] input[name='emlasp" + i + "']").val();
+        var emlacm = $("form[name='EficaciaIn6Form'] input[name='emlacm" + i + "']").val();
+        
+        //Segundos datos de la tabla eficaciain6
+        cadena = cadena.concat( emleag, ",")
+        cadena = cadena.concat( emlmin, ",")
+        cadena = cadena.concat( emlatc, ",")
+        cadena = cadena.concat( emlaco, ",")
+        cadena = cadena.concat( emlsfs, ",")
+        cadena = cadena.concat( emlaim, ",")
+        cadena = cadena.concat( emlapa, ",")
+        cadena = cadena.concat( emlasp, ",")
+        cadena = cadena.concat( emlacm, "-")
+        
+        
+        var total = parseInt(emleag) + parseInt(emlmin) + parseInt(emlatc) + 
+               parseInt(emlaco) + parseInt(emlsfs) + parseInt(emlaim) + 
+               parseInt(emlapa) + parseInt(emlasp)+ parseInt(emlacm);
+        $("form[name='EficaciaIn6Form'] input[name='tegresadoseconomica" + i + "']").val(total)
+           
+        var totemleag = ((parseInt(emleag) / parseInt(total))*100);
+        var totemlmin = ((parseInt(emlmin) / parseInt(total))*100);
+        var totemlatc = ((parseInt(emlatc) / parseInt(total))*100);
+        var totemlaco = ((parseInt(emlaco) / parseInt(total))*100);
+        var totemlsfs = ((parseInt(emlsfs) / parseInt(total))*100);
+        var totemlaim = ((parseInt(emlaim) / parseInt(total))*100);
+        var totemlapa = ((parseInt(emlapa) / parseInt(total))*100);
+        var totemlasp = ((parseInt(emlasp) / parseInt(total))*100);
+        var totemlacm = ((parseInt(emlacm) / parseInt(total))*100);
+    if(!isNaN(totemleag)){
+        $("form[name='EficaciaIn6Form'] input[name='poremleag" + i + "']").val((totemleag).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='poremlmin" + i + "']").val((totemlmin).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='poremlatc" + i + "']").val((totemlatc).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='poremlaco" + i + "']").val((totemlaco).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='poremlsfs" + i + "']").val((totemlsfs).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='poremlaim" + i + "']").val((totemlaim).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='poremlapa" + i + "']").val((totemlapa).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='poremlasp" + i + "']").val((totemlasp).toFixed(1))
+        $("form[name='EficaciaIn6Form'] input[name='poremlacm" + i + "']").val((totemlacm).toFixed(1))
+      
+        $("form[name='EficaciaIn6Form'] input[name='totaleconomica" + i + "']").val((
+            parseFloat(totemleag) + parseFloat(totemlmin) + parseFloat(totemlatc) + 
+            parseFloat(totemlaco) + parseFloat(totemlsfs) + parseFloat(totemlaim) + 
+            parseFloat(totemlapa) + parseFloat(totemlasp) + parseFloat(totemlacm)).toFixed(0))           
+    }   
+}
+    
+    return cadena;
+}
+/*
+function obtenervalores6(){
+   
+    var cadena = "";
+    for(i = 0; i < noControles6(); i++)
+    {
+        //alert(document.forms['EficaciaIn6Form'][i].value)
+        if (document.forms['EficaciaIn6Form'][i].name.indexOf("val") != -1)
+        {
+            var nivel = document.forms['EficaciaIn6Form'][i].name.indexOf("_");
+            
+            var x = document.forms['EficaciaIn6Form'][i].name.substring(3, nivel);
+          
+            x = x.concat(",", document.forms['EficaciaIn6Form'][i].value,",", document.forms['EficaciaIn6Form'][i+2].value);
+            //se recuperan los valores para poder realizar las operaciones
+            if(document.forms['EficaciaIn6Form'][i].value==0 || document.forms['EficaciaIn6Form'][i+1].value==0)
+            {
+                document.forms['EficaciaIn6Form'][i+3].value=0;
+            }
+            else
+            {
+                document.forms['EficaciaIn6Form'][i+3].value =Math.round((parseFloat(document.forms['EficaciaIn6Form'][i].value)/parseFloat(document.forms['EficaciaIn6Form'][i+1].value)*100)*10)/10;
+            }
+            
+            if(parseInt(document.forms['EficaciaIn6Form'][i].value) > parseInt(document.forms['EficaciaIn6Form'][i+1].value)){
+                $("form[name='EficaciaIn6Form'] input[name='"+document.forms['EficaciaIn6Form'][i].name+'"]').globo("enable").globo("update", "<center>No puede ser mayor al <br/> total de Egresados</center>").removeClass("inputok").addClass("inputerror");
+            }
+            
+            if(parseInt(document.forms['EficaciaIn6Form'][i].value) <= parseInt(document.forms['EficaciaIn6Form'][i+1].value)){
+                $("form[name='EficaciaIn6Form'] input[name='"+document.forms['EficaciaIn6Form'][i].name+'"]').globo("disable").removeClass("inputerror").addClass("inputok");
+            }
+            
+            if(document.forms['EficaciaIn6Form'][i].value==0 || document.forms['EficaciaIn6Form'][i+2].value==0){
+                document.forms['EficaciaIn6Form'][i+4].value=0;
+            }
+            else{
+                document.forms['EficaciaIn6Form'][i+4].value =Math.round((parseFloat(document.forms['EficaciaIn6Form'][i+2].value)/parseFloat(document.forms['EficaciaIn6Form'][i].value)*100)*10)/10;
+            }
+            
+            if(parseInt(document.forms['EficaciaIn6Form'][i+2].value) > parseInt(document.forms['EficaciaIn6Form'][i].value)){
+                $("form[name='EficaciaIn6Form'] input[name='"+document.forms['EficaciaIn6Form'][i+2].name+'"]').globo("enable").globo("update", "<center>No puede ser mayor al n&uacute;mero<br/> total de egresados trabajando <br/> a seis meses</center>").removeClass("inputok").addClass("inputerror");
+            }
+            
+            if(parseInt(document.forms['EficaciaIn6Form'][i+2].value) <= parseInt(document.forms['EficaciaIn6Form'][i].value)){
+                $("form[name='EficaciaIn6Form'] input[name='"+document.forms['EficaciaIn6Form'][i+2].name+'"]').globo("disable").removeClass("inputerror").addClass("inputok");
+            } 
+            
+            cadena = cadena.concat(x,"-");
+            
+            i += 4;          
+        }        
+    } 
+    return cadena;
+}/*/
+/*
+function indicador6(control){
+    if (control.value == ""){
+        control.value = 0;
+    }
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("amarillo", "El valor '"+ control.value +"' no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");
+        nulosEficacia6();
+        return;
+    }else{
+        $(control).addClass("inputok").removeClass("inputerror");
+        $(control).val(Number(control.value));
+        obtenervalores6();
+        nulosEficacia6();
+    }
+    if ($('form[name="EficaciaIn6Form"] input').hasClass("inputerror")){
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("update", "<center>Indicador con <br/> errores, favor <br/> de revisar.</center>").globo("show");
+    }else{
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide");
+    }
+}
+*/
+function nulosEficacia6(){
+    if ($("form[name='EficaciaIn6Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+        for(i = 0; i < noControles6("EficaciaIn6Form"); i++){
+            document.forms["EficaciaIn6Form"][i+3].value=0;
+            document.forms["EficaciaIn6Form"][i+4].value=0;
+            i+=4;
+        }
+    }
+}
+
+function guardarEficaciaIn6(){
+    var x="";
+    if ($("form[name='EficaciaIn6Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+        //$().alerta('rojo', 'Error al guardar. Por favor verifique los datos.');
+        x="Error";
+    }else{
+        x = obtenervalores6();
+        //$().alerta('verde', 'Datos guardados correctamente.');
+    }
+    return x;
+}
+
+
+

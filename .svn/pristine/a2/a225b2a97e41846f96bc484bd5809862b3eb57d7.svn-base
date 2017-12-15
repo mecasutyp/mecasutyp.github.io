@@ -1,0 +1,1444 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.reportes.sabana;
+
+import java.sql.SQLException;
+
+/**
+ *
+ *
+ * @author Cuauhtemoc Medina Muñoz
+ */
+public class SabanaEficacia extends SabanaCategorias {
+
+    ListaCausas causas;
+    ListaModalidades modalidades;
+    int contCol = 0;
+    int c = 0;
+    int f = 5;
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        System.err.println("Sabana Eficacia Eliminada :)");
+    }
+
+    public SabanaEficacia(String anio, HojaCalculo obj, String periodo, ListaUniversidades univs, ListaNiveles niveles) {
+        super(periodo, obj, univs, niveles, anio);
+        this.obj = obj;
+        this.f += univs.size();
+        this.causas = new ListaCausas();
+        this.modalidades = new ListaModalidades();
+    }
+
+    public HojaCalculo hacerEficacia() {
+        matriculaPE();
+        programasEducativosPorNivel();
+        matriculaTotal();
+        nuevoIngreso();
+        indicador1();
+        indicador2();
+        indicador3();
+        indicador4();
+        indicador4b();
+        indicador5();
+        indicador6();
+        indicador7();
+        indicador7b();
+        indicador8();
+        indicador9();
+        indicador10();
+        indicador10b();
+        indicador11();
+
+        niveles = null;
+        con.Desconectar();
+        return obj;
+    }
+
+    private void matriculaPE() {
+        ListaProgramasEducativos pes = new ListaProgramasEducativos();
+        //System.out.println("\n\n\n\n\n El tamaño del PES es : " + pes.size());
+        c = 2 + pes.size();
+        obj.crearHoja("Programas Educativos ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 5000);
+        }
+        columnasPrincipales(2);
+        obj.setAlturaFilas(2, 57);
+        contCol = 2;
+        try {
+            for (int pe = 0; pe < pes.size(); pe++) {
+                obj.val(contCol, 2, pes.getNombre(pe), "h1");
+                obj.combinarCeldas(pes.getNombre(pe), contCol, contCol, 1, 2, "h1");
+                for (int unis = 0; unis < univs.size(); unis++) {
+                    consulta = "SELECT id_universidad, ingreso_hombres+ingreso_mujeres+reingreso_hombres+reingreso_mujeres as 'matricula' "
+                            .concat(" from equidadin34 ind")
+                            .concat(" WHERE id_pe=").concat(pes.getId(pe))
+                            .concat(" AND id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                            .concat(" AND id_periodo=").concat(periodo);
+                    rs = con.Consultar(consulta);
+                    if (rs.next()) { //si hay una respuesta de la consulta
+                        obj.val(contCol, unis + 3, rs.getInt("matricula"), "datos");
+                    } else {
+                        obj.val(contCol, unis + 3, "SIN DATOS", "error");
+                    }
+                }
+                contCol += 1;
+            }
+        } catch (Exception x) {
+            System.err.println("ERROR BD: Sabana general, Eficacia, matriculaPE() " + x.getMessage());
+        }
+    }
+
+    private void programasEducativosPorNivel() {/*PE X NIVEL X UT*/
+        c = 2 + niveles.size() + 1;
+        obj.crearHoja("PE's por Nivel ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        columnasPrincipales(2);
+        contCol = 2;
+
+        try {
+            obj.combinarCeldas("PROGRMAS EDUCATIVOS ", contCol, contCol + niveles.size() - 1, 1, 1, "h1");
+            for (int i = 0; i < niveles.size(); i++) { //MUEVE LOS NIVELES
+                //ENCABEZADOS
+                obj.val(contCol, 2, niveles.getNombre(i), "h2");
+                for (int unis = 0; unis < univs.size(); unis++) {
+                    consulta = "SELECT COUNT(*) FROM pe_universidad u "
+                            .concat(" INNER JOIN programa_educativo pe on u.id_pe=pe.id_pe")
+                            .concat(" WHERE u.id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                            .concat(" AND u.id_periodo=").concat(periodo)
+                            .concat(" AND pe.id_nivel=").concat(String.valueOf(niveles.getId(i)));
+                    rs = con.Consultar(consulta);
+                    if (rs.next()) { //si hay una respuesta de la consulta
+                        obj.val(contCol, unis + 3, rs.getInt(1), "datos");
+                    }
+                }
+                contCol += 1;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general, Eficacia, matriculaTotal() " + ex.getMessage());
+        }
+    }
+
+    private void matriculaTotal() {
+        c = 2 + niveles.size();
+        obj.crearHoja("Matrícula Total ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(2);
+        contCol = 2;
+
+        try {
+            obj.combinarCeldas("MATRÍCULA TOTAL ", contCol, contCol + niveles.size() - 1, 1, 1, "h1");
+            for (int i = 0; i < niveles.size(); i++) { //MUEVE LOS NIVELES
+                //ENCABEZADOS
+                obj.val(contCol, 2, niveles.getNombre(i), "h2");
+                for (int unis = 0; unis < univs.size(); unis++) {
+                    consulta = "SELECT matricula FROM mat_total_universidad "
+                            .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                            .concat(" AND id_periodo=").concat(periodo)
+                            .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(i)));
+                    rs = con.Consultar(consulta);
+                    if (rs.next()) { //si hay una respuesta de la consulta
+                        obj.val(contCol, unis + 3, rs.getInt("matricula"), "datos");
+                    }
+                }
+                contCol += 1;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general, Eficacia, matriculaTotal() " + ex.getMessage());
+        }
+    }
+
+    private void nuevoIngreso() {
+        c = 3;
+        obj.crearHoja("Nuevo Ingreso", f, c);
+        obj.setAnchoColumna(1, 17500);
+        obj.setAnchoColumna(1, 10000);
+        columnasPrincipales(2);
+        try {
+            obj.combinarCeldas("NUEVO INGRESO", 2, 2, 1, 2, "h1");
+            for (int unis = 0; unis < univs.size(); unis++) { //MUEVE LOS NIVELES
+                //ENCABEZADOS
+                consulta = "SELECT nuevo_ingreso FROM datos_universidad "
+                        .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                        .concat(" AND id_periodo=").concat(periodo);
+                rs = con.Consultar(consulta);
+                if (rs.next()) { //si hay una respuesta de la consulta
+                    obj.val(2, unis + 3, rs.getInt("nuevo_ingreso"), "datos");
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general, Eficacia, nuevoIngreso() " + ex.getMessage());
+        }
+    }
+
+    private void indicador1() {
+        c = 9;
+        obj.crearHoja("Ind. 01 ", f, c);
+        obj.setAlturaFilas(1, 30);
+        obj.setAlturaFilas(2, 60);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        obj.combinarCeldas("NO", 0, 0, 1, 2, "h1");
+        obj.combinarCeldas("UNIVERSIDAD", 1, 1, 1, 2, "h1");
+        obj.combinarCeldas("1. ALUMNOS DE NUEVO INGRESO CON EXANI II", 2, 8, 1, 1, "h1");
+        obj.val(2, 2, "Egresados de bachillerato que presentaron el EXANI - II en la UT", "h2");
+        obj.val(3, 2, "Alumnos de nuevo ingreso a la UT", "h2");
+        obj.val(4, 2, "Alumnos de nuevo ingreso que presentaron el EXANI - II y lograron 1,101 a 1,300 puntos de calificación", "h2");
+        obj.val(5, 2, "Alumnos de nuevo ingreso que presentaron el EXANI - II y lograron 901 a 1,100 puntos de calificación", "h2");
+        obj.val(6, 2, "Alumnos de nuevo ingreso que presentaron el EXANI - II y lograron 700 a 900 puntos de calificación", "h2");
+        obj.val(7, 2, "Alumnos de nuevo ingreso inscritos a la UT que presentaron el EXANI II en el ciclo escolar", "h2");
+        obj.val(8, 2, "Alumnos de nuevo ingreso inscritos a la UT que no presentaron EXANI - II", "h2");
+        for (int i = 0; i <= univs.size() - 1; i++) {
+            obj.val(0, i + 3, String.valueOf((i + 1)), "resultado");//CONSECUTIVO
+            obj.val(1, i + 3, univs.getNombre(i), "resultado");//NOMBRE DE LA UNIVERSIDAD
+            try {
+                consulta = "SELECT aplica, c1, c2, c3, (c1+c2+c3) as ingreso, egresados_bachillerato, nuevo_ingreso "
+                        .concat(" FROM eficaciain1 WHERE id_universidad=").concat(String.valueOf(univs.getId(i)))
+                        .concat(" AND id_periodo=").concat(periodo);
+                rs = con.Consultar(consulta);
+                if (rs.next()) {
+                    if (rs.getBoolean("aplica")) {
+                        /*ASIGNAR VALORES*/
+                        obj.val(2, i + 3, rs.getInt("egresados_bachillerato"), "datos");
+                        obj.val(3, i + 3, rs.getInt("nuevo_ingreso"), "datos");
+                        obj.val(4, i + 3, rs.getInt("c1"), "datos");
+                        obj.val(5, i + 3, rs.getInt("c2"), "datos");
+                        obj.val(6, i + 3, rs.getInt("c3"), "datos");
+                        obj.val(7, i + 3, rs.getInt("ingreso"), "datos");
+                        obj.val(8, i + 3, rs.getInt("nuevo_ingreso") - rs.getInt("ingreso"), "datos");
+                    } else {/*NO APLICA*/
+                        obj.combinarCeldas("NO APLICA", 2, 8, i + 3, i + 3, "error");
+                    }
+                } else { // no devolvió nada la consulta, por lo tanto la universidad no ha llenado el indicador
+                    obj.combinarCeldas("NO CONCLUIDO", 2, 8, i + 3, i + 3, "error");
+                }
+            } catch (SQLException ex) {
+                System.err.println("ERROR BD: Sabana general, Eficacia, Indicador 1 " + ex.getMessage());
+            }
+        }
+    }
+
+    private void indicador2() {
+        c = 2 + 3 * (niveles.size() + 1);
+        obj.crearHoja("Ind. 02 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(2);
+        contCol = 2;
+        int noSep = 0;
+        int noEne = 0;
+        int noMay = 0;
+        float sumSep = 0;
+        float sumEne = 0;
+        float sumMay = 0;
+        boolean bandera = false;
+        try {
+            //ENCABEZADOS
+            obj.combinarCeldas("2. APROVECHAMIENTO ACADÉMICO NIVEL 5B Versión 2004", contCol, contCol + 2, 1, 1, "h1");
+            obj.val(contCol, 2, "sep-dic", "h2");
+            obj.val(contCol + 1, 2, "ene-abr", "h2");
+            obj.val(contCol + 2, 2, "may-ago", "h2");
+            for (int x = 0; x < univs.size(); x++) {
+                consulta = "SELECT id_pe FROM pe_universidad WHERE id_universidad=".concat(String.valueOf(univs.getId(x)))
+                        .concat(" AND id_periodo=").concat(periodo)
+                        .concat(" AND id_pe IN(select id_pe from programa_educativo where id_nivel=1 AND version=2004)");
+                rs = con.Consultar(consulta);
+                if (rs.next()) {
+                    consulta = "SELECT sep, ene, may"
+                            .concat(" FROM eficaciain2 WHERE id_universidad="
+                            + "").concat(String.valueOf(univs.getId(x)))
+                            .concat(" AND id_periodo=").concat(periodo)
+                            .concat(" AND id_pe IN (select id_pe from programa_educativo where version=2004)");
+                    rs = con.Consultar(consulta);
+                    sumSep = 0;
+                    noSep = 0;
+                    sumEne = 0;
+                    noEne = 0;
+                    sumMay = 0;
+                    noMay = 0;
+                    bandera = false;
+                    while (rs.next()) {
+                        bandera = true;
+                        if (rs.getFloat("sep") > 0) {
+                            noSep++;
+                            sumSep += rs.getFloat("sep");
+                        }
+                        if (rs.getFloat("ene") > 0) {
+                            noEne++;
+                            sumEne += rs.getFloat("ene");
+                        }
+                        if (rs.getFloat("may") > 0) {
+                            noMay++;
+                            sumMay += rs.getFloat("may");
+                        }
+                    }
+                    if (bandera) {
+                        if (noSep > 0) {
+                            obj.val(contCol, x + 3, sumSep / noSep, "datos2");
+                        } else {
+                            obj.val(contCol, x + 3, 0, "datos2");
+                        }
+                        if (noEne > 0) {
+                            obj.val(contCol + 1, x + 3, sumEne / noEne, "datos2");
+                        } else {
+                            obj.val(contCol + 1, x + 3, 0, "datos2");
+                        }
+                        if (noMay > 0) {
+                            obj.val(contCol + 2, x + 3, sumMay / noMay, "datos2");
+                        } else {
+                            obj.val(contCol + 2, x + 3, 0, "datos2");
+                        }
+                    } else {
+                        obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 2, x + 3, x + 3, "error");
+                    }
+                } else { // NO TIENE EL NIVEL
+                    obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 2, x + 3, x + 3, "error");
+                }
+            }
+            contCol += 3;
+            for (int i = 0; i < niveles.size(); i++) {
+                //ENCABEZADOS
+                obj.combinarCeldas("2. APROVECHAMIENTO ACADÉMICO DEL NIVEL " + niveles.getNombre(i), contCol, contCol + 2, 1, 1, "h1");
+                obj.val(contCol, 2, "sep-dic", "h2");
+                obj.val(contCol + 1, 2, "ene-abr", "h2");
+                obj.val(contCol + 2, 2, "may-ago", "h2");
+                for (int x = 0; x < univs.size(); x++) {
+                    if (contieneNivel(String.valueOf(niveles.getId(i)), String.valueOf(univs.getId(x)))) {
+                        consulta = "SELECT sep, ene, may"
+                                .concat(" FROM eficaciain2 WHERE id_universidad=").concat(String.valueOf(univs.getId(x)))
+                                .concat(" AND id_periodo=").concat(periodo)
+                                .concat(" AND id_pe IN (SELECT id_pe FROM programa_educativo WHERE id_nivel=")
+                                .concat(String.valueOf(niveles.getId(i))).concat(")");
+                        rs = con.Consultar(consulta);
+                        sumSep = 0;
+                        noSep = 0;
+                        sumEne = 0;
+                        noEne = 0;
+                        sumMay = 0;
+                        noMay = 0;
+                        bandera = false;
+                        while (rs.next()) {
+                            bandera = true;
+                            if (rs.getFloat("sep") > 0) {
+                                noSep++;
+                                sumSep += rs.getFloat("sep");
+                            }
+                            if (rs.getFloat("ene") > 0) {
+                                noEne++;
+                                sumEne += rs.getFloat("ene");
+                            }
+                            if (rs.getFloat("may") > 0) {
+                                noMay++;
+                                sumMay += rs.getFloat("may");
+                            }
+                        }
+                        if (bandera) {
+                            if (noSep > 0) {
+                                obj.val(contCol, x + 3, sumSep / noSep, "datos2");
+                            } else {
+                                obj.val(contCol, x + 3, 0, "datos2");
+                            }
+                            if (noEne > 0) {
+                                obj.val(contCol + 1, x + 3, sumEne / noEne, "datos2");
+                            } else {
+                                obj.val(contCol + 1, x + 3, 0, "datos2");
+                            }
+                            if (noMay > 0) {
+                                obj.val(contCol + 2, x + 3, sumMay / noMay, "datos2");
+                            } else {
+                                obj.val(contCol + 2, x + 3, 0, "datos2");
+                            }
+                        } else {
+                            obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 2, x + 3, x + 3, "error");
+                        }
+                    } else {
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 2, x + 3, x + 3, "error");
+                    }
+                }
+                contCol += 3;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general, Eficacia, Indicador 2. << " + ex.getMessage());
+        }
+    }
+
+    private void indicador3() {
+        c = 2 + 6 * niveles.size();
+        obj.crearHoja("Ind. 03 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(2);
+        contCol = 2;
+
+        try {
+            for (int i = 0; i < niveles.size(); i++) { //MUEVE LOS NIVELES
+                //ENCABEZADOS
+                obj.combinarCeldas("3. REPROBACIÓN CUATRIMESTRAL ".concat(niveles.getNombre(i)), contCol, contCol + 5, 1, 1, "h1");
+                obj.val(contCol, 2, "Número de alumnos reprobados por primer examen extraordinario del cuatrimestre Sep-Dic ", "h2");
+                obj.val(contCol + 1, 2, "Matrícula inicial atendida cuatrimestre Sep-Dic", "h2");
+                obj.val(contCol + 2, 2, "Número de alumnos reprobados por primer examen extraordinario del cuatrimestre Ene-Abr ", "h2");
+                obj.val(contCol + 3, 2, "Matrícula inicial atendida cuatrimestre Ene-Abr", "h2");
+                obj.val(contCol + 4, 2, "Número de alumnos reprobados por primer examen extraordinario del cuatrimestre May-Ago ", "h2");
+                obj.val(contCol + 5, 2, "Matrícula inicial atendida cuatrimestre May-Ago", "h2");
+                for (int unis = 0; unis < univs.size(); unis++) {
+                    if (contieneNivel(String.valueOf(niveles.getId(i)), String.valueOf(univs.getId(unis)))) { //la universidad si tiene el nivel
+                        consulta = "SELECT rep_sep, mat_sep, rep_ene, mat_ene, rep_may, mat_may FROM eficaciain3 "
+                                .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_periodo=").concat(periodo)
+                                .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(i)));
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) { //si hay una respuesta de la consulta
+                            obj.val(contCol, unis + 3, rs.getInt("rep_sep"), "datos");
+                            obj.val(contCol + 1, unis + 3, rs.getInt("mat_sep"), "datos");
+                            obj.val(contCol + 2, unis + 3, rs.getInt("rep_ene"), "datos");
+                            obj.val(contCol + 3, unis + 3, rs.getInt("mat_ene"), "datos");
+                            obj.val(contCol + 4, unis + 3, rs.getInt("rep_may"), "datos");
+                            obj.val(contCol + 5, unis + 3, rs.getInt("mat_may"), "datos");
+                        } else { //si no hay una respuesta de la consulta
+                            obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 5, unis + 3, unis + 3, "error");
+                        }
+                    } else {//la universidad no tiene el nivel
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 5, unis + 3, unis + 3, "error");
+                    }
+                }
+                contCol += 6;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general, Eficacia, Indicador 3 " + ex.getMessage());
+        }
+    }
+
+    private void indicador4() {
+        c = 2 + 6 * niveles.size();
+        obj.crearHoja("Ind. 04 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(2);
+        contCol = 2;
+
+        int mat_ene = 0, mat_sep = 0, mat_may = 0;
+
+        try {
+            for (int nivel = 0; nivel < niveles.size(); nivel++) { //MUEVE LOS NIVELES
+                //ENCABEZADOS
+                obj.combinarCeldas("4. DESERCIÓN CUATRIMESTRAL ".concat(niveles.getNombre(nivel)), contCol, contCol + 5, 1, 1, "h1");
+                obj.val(contCol, 2, "Alumnos desertores definitivos del cuatrimestre Sep-Dic", "h2");
+                obj.val(contCol + 1, 2, "Matrícula inicial atendida cuatrimestre Sep-Dic", "h2");
+                obj.val(contCol + 2, 2, "Alumnos desertores definitivos del cuatrimestre Ene-Abr ", "h2");
+                obj.val(contCol + 3, 2, "Matrícula inicial atendida cuatrimestre Ene-Abr", "h2");
+                obj.val(contCol + 4, 2, "Alumnos desertores definitivos del cuatrimestre May-Ago", "h2");
+                obj.val(contCol + 5, 2, "Matrícula inicial atendida cuatrimestre May-Ago", "h2");
+                for (int unis = 0; unis < univs.size(); unis++) {
+                    if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) { //la universidad si tiene el nivel
+                        consulta = "SELECT mat_sep, mat_ene, mat_may FROM eficaciain3 "
+                                .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_periodo=").concat(periodo)
+                                .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)));
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {//si ya llenaron el indicador 3
+                            mat_sep = rs.getInt("mat_sep");
+                            mat_ene = rs.getInt("mat_ene");
+                            mat_may = rs.getInt("mat_may");
+                            consulta = "SELECT tot_deser_sep, tot_deser_ene, tot_deser_may FROM eficaciain4_1"
+                                    .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                    .concat(" AND id_periodo=").concat(periodo)
+                                    .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)));
+                            rs = con.Consultar(consulta);
+                            if (rs.next()) { //está llenado el ind 3, pero no el 4
+                                obj.val(contCol, unis + 3, rs.getInt("tot_deser_sep"), "datos");
+                                obj.val(contCol + 1, unis + 3, mat_sep, "datos");
+                                obj.val(contCol + 2, unis + 3, rs.getInt("tot_deser_ene"), "datos");
+                                obj.val(contCol + 3, unis + 3, mat_ene, "datos");
+                                obj.val(contCol + 4, unis + 3, rs.getInt("tot_deser_may"), "datos");
+                                obj.val(contCol + 5, unis + 3, mat_may, "datos");
+                            } else { /*NO CONCLUIDO*/
+                                obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 5, unis + 3, unis + 3, "error");
+                            }
+                        } else { /*NO CONCLUIDO*/
+                            obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 5, unis + 3, unis + 3, "error");
+                        }
+                    } else { /*NO TIENE EL NIVEL*/
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 5, unis + 3, unis + 3, "error");
+                    }
+                }
+                contCol += 6;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 4 " + ex.getMessage());
+        }
+    }
+
+    private void indicador4b() {
+        c = 2 + 3 * causas.size() * niveles.size();
+        obj.crearHoja("Ind. 04 b ", f + 1, c);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 1500);
+        }
+        /*COLUMNAS PRINCIPALES*/
+        obj.setAnchoColumna(1, 17500);
+        obj.combinarCeldas("NO", 0, 0, 1, 3, "h1");
+        obj.combinarCeldas("UNIVERSIDAD", 1, 1, 1, 3, "h1");
+        obj.setAlturaFilas(2, 40);
+        for (int i = 0; i <= univs.size() - 1; i++) {
+            obj.val(0, i + 4, String.valueOf((i + 1)), "resultado");//CONSECUTIVO
+            obj.val(1, i + 4, univs.getNombre(i).toString(), "resultado");//NOMBRE DE LA UNIVERSIDAD
+        }
+        /* FIN COLUMNAS PRINCIPALES*/
+        contCol = 2;
+        try {
+            for (int nivel = 0; nivel < niveles.size(); nivel++) { //MUEVE LOS NIVELES
+                obj.combinarCeldas("4. PRINCIPALES CAUSAS DE DESERCIÓN NIVEL " + niveles.getNombre(nivel),
+                        contCol, (contCol + (3 * causas.size()) - 1), 1, 1, "h1");
+                for (int causa = 0; causa < causas.size(); causa++) {
+                    obj.combinarCeldas(causas.getNombre(causa), contCol, contCol + 2, 2, 2, "h1");
+                    obj.val(contCol, 3, "sep", "h2");
+                    obj.val(contCol + 1, 3, "ene", "h2");
+                    obj.val(contCol + 2, 3, "may", "h2");
+                    for (int unis = 0; unis < univs.size(); unis++) { //MUEVE LAS UNIVERSIDADES 
+                        if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                            consulta = "SELECT sep, ene, may FROM eficaciain4"
+                                    .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                    .concat(" AND id_periodo=").concat(periodo)
+                                    .concat(" AND id_causa=").concat(String.valueOf(causas.getId(causa)))
+                                    .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)));
+                            rs = con.Consultar(consulta);
+                            if (rs.next()) {
+                                obj.val(contCol, unis + 4, rs.getInt("Sep"), "datos");
+                                obj.val(contCol + 1, unis + 4, rs.getInt("Ene"), "datos");
+                                obj.val(contCol + 2, unis + 4, rs.getInt("May"), "datos");
+                            } else {/*NO HAY RESPUESTA, PONER CEROS*/
+                                for (int i = 0; i < 3; i++) {
+                                    obj.val(contCol + i, unis + 4, 0, "datos");
+                                }
+                            }
+                        } else {/*NO TIENE EL NIVEL*/
+                            if (causa == 0) {
+                                obj.combinarCeldas("NO TIENE EL NIVEL", contCol, (contCol + (3 * causas.size()) - 1), unis + 4, unis + 4, "error");
+                            }
+                        }
+                    }
+                    contCol += 3;
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("\n\n\nERROR: Sabana general Indicador 4 B " + ex.getMessage());
+        } finally {
+            causas = null;
+        }
+    }
+
+    private void indicador5() {
+        c = 2 + niveles.size() * modalidades.size() * 3 * 2;
+        obj.crearHoja("Ind. 05 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(3);
+        obj.setAlturaFilas(3, 57);
+        contCol = 2;
+        try {
+            for (int nivel = 0; nivel < niveles.size(); nivel++) { //MUEVE LOS NIVELES
+                for (int an = 2; an >= 1; an--) {
+                    if (an == 2) {//año actual
+                        obj.combinarCeldas("5. TASA DE EGRESO Y TITULACIÓN " + niveles.getDescripcion(nivel) + " (" + (Integer.parseInt(anio) + 1) + ")", contCol, contCol + modalidades.size() * 3 - 1, 1, 1, "h1");
+                    } else {//año actual -1
+                        if (niveles.getId(nivel) != 3) {
+                            obj.combinarCeldas("5. TASA DE EGRESO Y TITULACIÓN " + niveles.getDescripcion(nivel) + " (" + (anio) + ")", contCol, contCol + modalidades.size() * 3 - 1, 1, 1, "h1");
+                        }
+                    }
+                    if (niveles.getId(nivel) == 3 && an == 1) {
+                        /*no debe hacer nada porque cuando el nivel es 3 (Lic) y el año es 1 (actual menos 1)
+                         * no hay nada registrado en la base de datos.
+                         */
+                    } else {
+                        for (int mod = 0; mod < modalidades.size(); mod++) {
+                            obj.combinarCeldas(modalidades.getNombre(mod), contCol, contCol + 2, 2, 2, "h1");
+                            obj.val(contCol, 3, "INGRESO", "h2");
+                            obj.val(contCol + 1, 3, "EGRESO", "h2");
+                            obj.val(contCol + 2, 3, "TITULADOS", "h2");
+                            for (int unis = 0; unis < univs.size(); unis++) {
+                                if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                                    if (contieneModalidad(String.valueOf(modalidades.getId(mod)), String.valueOf(univs.getId(unis)), String.valueOf(niveles.getId(nivel)))) {
+                                        consulta = "SELECT SUM(ingreso) as 'ingreso', SUM(egresados) AS 'egresados', SUM(titulados) as'titulados' FROM eficaciain5"
+                                                .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                                .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                                .concat(" AND id_periodo=").concat(periodo)
+                                                .concat(" AND id_modelo=").concat(String.valueOf(modalidades.getId(mod)))
+                                                .concat(" AND anio=").concat(String.valueOf(an));
+                                        rs = con.Consultar(consulta);
+                                        if (rs.next()) {
+                                            obj.val(contCol, unis + 4, rs.getInt("ingreso"), "datos");
+                                            obj.val(contCol + 1, unis + 4, rs.getInt("egresados"), "datos");
+                                            obj.val(contCol + 2, unis + 4, rs.getInt("titulados"), "datos");
+                                        } else {//devuelve 0 filas
+                                            obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 2, unis + 4, unis + 4, "error");
+                                        }
+                                    } else {//el nivel no tiene la modalidad
+                                        obj.combinarCeldas("SIN MODALIDAD", contCol, contCol + 2, unis + 4, unis + 4, "error");
+                                    }
+                                } else {//no tiene nivel
+                                    obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 2, unis + 4, unis + 4, "error");
+                                }
+                            }
+                            contCol += 3;
+                        }
+                    }
+                }
+            }
+            //ENCABEZADOS
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 5 " + ex.getMessage());
+        } finally {
+            modalidades = null;
+        }
+    }
+
+    private void indicador6() {
+        c = (2 + 3 * niveles.size())*5;
+        obj.crearHoja("Ind. 06 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(3);
+        obj.setAlturaFilas(3, 57);
+        contCol = 2;
+        try {
+            //ENCABEZADOS
+            obj.combinarCeldas("6.1 EGRESADOS EN EL MARCADO LABORAL Y TRABAJANDO EN ÁREA AFÍN ", contCol, contCol + (niveles.size() * 3) - 1, 1, 1, "h1");
+            int inicia62=(contCol + (niveles.size() * 3))+1;
+             obj.combinarCeldas("6.2 EGRESADOS DEL CICLO ESCOLAR ANTERIOR TRABAJANDO A SEIS MESES DE EGRESO POR SECTOR", inicia62 , inicia62 +(niveles.size() * 3 ) -1 , 1, 1, "h1");
+            int inicia63=(inicia62 + (niveles.size() * 3))+1; 
+              obj.combinarCeldas("6.3 EGRESADOS DEL CICLO ESCOLAR ANTERIOR TRABAJANDO A SEIS MESES DE EGRESO POR ACTIVIDAD ECONOMICA", inicia63 , inicia63 +(niveles.size() * 9 ) -1 , 1, 1, "h1");
+              
+            for (int nivel = 0; nivel < niveles.size(); nivel++) {
+                obj.combinarCeldas("Egresados del sector primario " + niveles.getNombre(nivel) + " en el mercado laboral", contCol, contCol + 2, 2, 2, "h1");
+                if (niveles.getId(nivel) == 3) {//LICENCIATURA, OSEA EGRESADOS EN ABRIL
+                    obj.val(contCol, 3, "Egresados en el Sector secundario " + (Integer.parseInt(anio) + 1) + " trabajando a seis meses de su egreso", "h2");
+                    obj.val(contCol + 1, 3, "Egresados en el Sector terciario " + (Integer.parseInt(anio) + 1), "h2");
+                    obj.val(contCol + 2, 3, "Egresados abril " + (Integer.parseInt(anio) + 1) + " cuya actividad laboral es acorde a su formación académica por programa educativo", "h2");
+                } else {
+                    obj.val(contCol, 3, "Egresados de agosto " + (anio) + " trabajando a seis meses de su egreso", "h2");
+                    obj.val(contCol + 1, 3, "Total de egresados de agosto " + (anio), "h2");
+                    obj.val(contCol + 2, 3, "Egresados agosto " + (anio) + " cuya actividad laboral es acorde a su formación académica por programa educativo", "h2");
+                }
+                 for (int unis = 0; unis < univs.size(); unis++) {
+                    if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                        consulta = "SELECT sum(egresados) as suma from eficaciain5 "
+                                .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                .concat(" AND id_periodo=").concat(periodo);
+                        if (niveles.getId(nivel) != 3) {
+                            consulta = consulta.concat(" AND anio=1");
+                        } else {
+                            consulta = consulta.concat(" AND anio=2");
+                        }
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {
+                            obj.val(contCol + 1, unis + 4, rs.getInt("suma"), "datos");
+                            consulta = "SELECT e_trabajando, afin FROM eficaciain6 "
+                                    .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                    .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                    .concat(" AND id_periodo=").concat(periodo);
+                            rs = con.Consultar(consulta);
+                            if (rs.next()) { //si hay una respuesta de la consulta
+                                obj.val(contCol, unis + 4, rs.getInt("e_trabajando"), "datos");
+                                obj.val(contCol + 2, unis + 4, rs.getInt("afin"), "datos");
+                            } else { //si no hay una respuesta de la consulta
+                                obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 2, unis + 4, unis + 4, "error");
+                            }
+                        } else {
+                            obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 2, unis + 4, unis + 4, "error");
+                        }
+                    } else {
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 2, unis + 4, unis + 4, "error");
+                    }
+                }
+                contCol += 3;
+            }
+            
+            ///LLENA DATOS DEL CUADRO 6.2
+            for (int nivel = 0; nivel < niveles.size(); nivel++) {
+                obj.combinarCeldas("Egresados del nivel " + niveles.getNombre(nivel) + " trabajando a seis meses de su egreso", inicia62, inicia62 + 2, 2, 2, "h1");
+                    obj.val(inicia62, 3, "Egresados en el sector primario " + (Integer.parseInt(anio) ) + " ", "h2");
+                    obj.val(inicia62 + 1, 3, "Egresados en el sector secundario " + (Integer.parseInt(anio) ), "h2");
+                    obj.val(inicia62 + 2, 3, "Egresados en el sector terciario" + (Integer.parseInt(anio)) + " ", "h2");
+               
+                 for (int unis = 0; unis < univs.size(); unis++) {
+                    if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                        consulta = "SELECT sum(egresados) as suma from eficaciain5 "
+                                .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                .concat(" AND id_periodo=").concat(periodo);
+                        if (niveles.getId(nivel) != 3) {
+                            consulta = consulta.concat(" AND anio=1");
+                        } else {
+                            consulta = consulta.concat(" AND anio=2");
+                        }
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {
+                            //obj.val(inicia62 + 1, unis + 4, rs.getInt("suma"), "datos");
+                            consulta = "SELECT esprimario,essecundario, esterciario FROM eficaciain6 "
+                                    .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                    .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                    .concat(" AND id_periodo=").concat(periodo);
+                            rs = con.Consultar(consulta);
+                            if (rs.next()) { //si hay una respuesta de la consulta
+                                obj.val(inicia62 + 1, unis + 4, rs.getInt("essecundario"), "datos");
+                                obj.val(inicia62, unis + 4, rs.getInt("esprimario"), "datos");
+                                obj.val(inicia62 + 2, unis + 4, rs.getInt("esterciario"), "datos");
+                            } else { //si no hay una respuesta de la consulta
+                                obj.combinarCeldas("NO CONCLUIDO", inicia62, inicia62 + 2, unis + 4, unis + 4, "error");
+                            }
+                        } else {
+                            obj.combinarCeldas("NO CONCLUIDO", inicia62, inicia62 + 2, unis + 4, unis + 4, "error");
+                        }
+                    } else {
+                        obj.combinarCeldas("NO TIENE EL NIVEL", inicia62, inicia62 + 2, unis + 4, unis + 4, "error");
+                    }
+                }
+                inicia62 += 3;
+            }
+                
+            ///LLENA DATOS DEL CUADRO 6.3
+            for (int nivel = 0; nivel < niveles.size(); nivel++) {
+                obj.combinarCeldas("Egresados del nivel " + niveles.getNombre(nivel) + " trabajando a seis meses de su egreso", inicia63, inicia63 +8, 2, 2, "h1");
+                   obj.val(inicia63, 3, "Egresados en electricidad, agua y gas " + (Integer.parseInt(anio) ) + " ", "h2");
+                    obj.val(inicia63 + 1, 3, "Egresados en mineria " + (Integer.parseInt(anio) ), "h2");
+                    obj.val(inicia63 + 2, 3, "Egresados en transportes, correos y almacenamiento" + (Integer.parseInt(anio)) + " ", "h2");
+                    obj.val(inicia63 + 3, 3, "Egresados en construcción" + (Integer.parseInt(anio)) + " ", "h2");
+                    obj.val(inicia63 + 4, 3, "Egresados en servicios financieros y de seguros" + (Integer.parseInt(anio)) + " ", "h2");
+                    obj.val(inicia63 + 5, 3, "Egresados en industrias manufactureras" + (Integer.parseInt(anio)) + " ", "h2");
+                    obj.val(inicia63 + 6, 3, "Egresados en pesca y aculcultura" + (Integer.parseInt(anio)) + " ", "h2");
+                    obj.val(inicia63 + 7, 3, "Egresados en servicios privados no financieros" + (Integer.parseInt(anio)) + " ", "h2");
+                    obj.val(inicia63 + 8, 3, "Egresados en comercios" + (Integer.parseInt(anio)) + " ", "h2");
+               
+                    for (int unis = 0; unis < univs.size(); unis++) {
+                    if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                        consulta = "SELECT sum(egresados) as suma from eficaciain5 "
+                                .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                .concat(" AND id_periodo=").concat(periodo);
+                        if (niveles.getId(nivel) != 3) {
+                            consulta = consulta.concat(" AND anio=1");
+                        } else {
+                            consulta = consulta.concat(" AND anio=2");
+                        }
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {
+                            //obj.val(inicia62 + 1, unis + 4, rs.getInt("suma"), "datos");
+                            consulta = "SELECT  emleag, emlmin, emlatc, emlaco, emlsfs, emlaim, emlapa, emlasp, emlacm FROM eficaciain6 "
+                                    .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                    .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                    .concat(" AND id_periodo=").concat(periodo);
+                            rs = con.Consultar(consulta);
+                            if (rs.next()) { //si hay una respuesta de la consulta
+                                
+                                obj.val(inicia63, unis + 4, rs.getInt("emleag"), "datos");
+                                obj.val(inicia63 + 1, unis + 4, rs.getInt("emlmin"), "datos");
+                                obj.val(inicia63 + 2, unis + 4, rs.getInt("emlatc"), "datos");
+                                obj.val(inicia63 + 3, unis + 4, rs.getInt("emlaco"), "datos");
+                                obj.val(inicia63 + 4, unis + 4, rs.getInt("emlsfs"), "datos");
+                                obj.val(inicia63 + 5, unis + 4, rs.getInt("emlaim"), "datos");
+                                obj.val(inicia63 + 6, unis + 4, rs.getInt("emlapa"), "datos");
+                                obj.val(inicia63 + 7, unis + 4, rs.getInt("emlasp"), "datos");
+                                obj.val(inicia63 + 8, unis + 4, rs.getInt("emlacm"), "datos");
+                            } else { //si no hay una respuesta de la consulta
+                                obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 2, unis + 4, unis + 4, "error");
+                                obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 3, unis + 4, unis + 4, "error");
+                                obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 4, unis + 4, unis + 4, "error");
+                                obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 5, unis + 4, unis + 4, "error");
+                                obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 6, unis + 4, unis + 4, "error");
+                                obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 7, unis + 4, unis + 4, "error");
+                                obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 8, unis + 4, unis + 4, "error");
+                            }
+                        } else {
+                            obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 2, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 3, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 4, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 5, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 6, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 7, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", inicia63, inicia63 + 8, unis + 4, unis + 4, "error");
+                        }
+                    } else {
+                        obj.combinarCeldas("NO TIENE EL NIVEL", inicia63, inicia63 + 8, unis + 4, unis + 4, "error");
+                    }
+                }
+                inicia63 += 9;
+            }
+               
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 6 " + ex.getMessage());
+        }
+    }
+
+    private void indicador7() {
+        int ra, rb, rc, rd, re, rf, rg, numEncuestas = 0;
+        double escala5, escala10, totMult, totSum;
+        c = 2 + 21 * niveles.size();
+        obj.crearHoja("Ind. 07 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(3);
+        contCol = 2;
+        try {
+            //ENCABEZADOS
+            for (int nivel = 0; nivel < niveles.size(); nivel++) {
+                for (int y = 0; y <= 14; y++) {
+                    obj.setAnchoColumna(contCol + y, 1900);
+                }
+                obj.combinarCeldas("7. TASA DE EGRESADOS SATISFECHOS DEL NIVEL " + niveles.getDescripcion(nivel), contCol, contCol + 19, 1, 1, "h1");
+                obj.combinarCeldas("RESPUESTAS", contCol, contCol + 7, 2, 2, "h1");
+                obj.val(contCol, 3, "MS", "h2");
+                obj.val(contCol + 1, 3, "S", "h2");
+                obj.val(contCol + 2, 3, "RS", "h2");
+                obj.val(contCol + 3, 3, "PS", "h2");
+                obj.val(contCol + 4, 3, "NS", "h2");
+                obj.val(contCol + 5, 3, "NA", "h2");
+                obj.val(contCol + 6, 3, "NE", "h2");
+                obj.val(contCol + 7, 3, "TOTAL", "h2");
+                obj.combinarCeldas("GRADO DE APLICACIÓN", contCol + 8, contCol + 14, 2, 2, "h1");
+                obj.val(contCol + 8, 3, "MS * 5", "h2");
+                obj.val(contCol + 9, 3, "S * 4", "h2");
+                obj.val(contCol + 10, 3, "RS * 3", "h2");
+                obj.val(contCol + 11, 3, "PS * 2", "h2");
+                obj.val(contCol + 12, 3, "NS * 1", "h2");
+                obj.val(contCol + 13, 3, "TOTAL", "h2");
+                obj.val(contCol + 14, 3, "MS+S+RS+PS+NS", "h2");
+                obj.combinarCeldas("CALIFICACIÓN ESCALA 5", contCol + 15, contCol + 15, 2, 3, "h1");
+                obj.combinarCeldas("CALIFICACIÓN ESCALA 10", contCol + 16, contCol + 16, 2, 3, "h1");
+                obj.combinarCeldas("TOTAL MS+S", contCol + 17, contCol + 17, 2, 3, "h1");
+                obj.combinarCeldas("MUY SATISFECHOS Y SATISFECHOS", contCol + 18, contCol + 18, 2, 3, "h1");
+                obj.combinarCeldas("TOTAL DE EGRESADOS ENCUESTADOS", contCol + 19, contCol + 19, 2, 3, "h1");
+                for (int unis = 0; unis < univs.size(); unis++) {
+                    if (unis == 0) {
+                        consulta = "SELECT COUNT(id_pregunta) as numEncuestas FROM encuesta_preguntas WHERE id_encuesta=("
+                                .concat(" SELECT id_encuesta FROM encuestas WHERE id_nivel=")
+                                .concat(String.valueOf(niveles.getId(nivel)))
+                                .concat(" AND indicador=7)");
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {
+                            numEncuestas = rs.getInt("numEncuestas");//numEncuestas es la cantidad de preguntas
+                        } else {
+                            numEncuestas = 0;
+                        }
+                    }
+                    if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                        consulta = "SELECT SUM(r_a) as r_a, SUM(r_b) as r_b, SUM(r_c) as r_c,"
+                                .concat(" SUM(r_d) as r_d, SUM(r_e) as r_e, SUM(r_f) as r_f, SUM(r_g) as r_g")
+                                .concat(" FROM eficaciain7_10 WHERE id_pregunta IN(")
+                                .concat(" SELECT id_pregunta FROM encuesta_preguntas WHERE id_encuesta=(")
+                                .concat(" SELECT id_encuesta FROM encuestas WHERE id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                .concat(" AND indicador=7))")
+                                .concat(" AND id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_periodo=").concat(periodo);
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {
+                            ra = rs.getInt("r_a");
+                            rb = rs.getInt("r_b");
+                            rc = rs.getInt("r_c");
+                            rd = rs.getInt("r_d");
+                            re = rs.getInt("r_e");
+                            rf = rs.getInt("r_f");
+                            rg = rs.getInt("r_g");
+                            obj.val(contCol, unis + 4, ra, "datos");
+                            obj.val(contCol + 1, unis + 4, rb, "datos");
+                            obj.val(contCol + 2, unis + 4, rc, "datos");
+                            obj.val(contCol + 3, unis + 4, rd, "datos");
+                            obj.val(contCol + 4, unis + 4, re, "datos");
+                            obj.val(contCol + 5, unis + 4, rf, "datos");
+                            obj.val(contCol + 6, unis + 4, rg, "datos");
+                            obj.val(contCol + 7, unis + 4, ra + rb + rc + rd + re + rf + rg, "datos");
+                            obj.val(contCol + 8, unis + 4, ra * 5, "datos");
+                            obj.val(contCol + 9, unis + 4, rb * 4, "datos");
+                            obj.val(contCol + 10, unis + 4, rc * 3, "datos");
+                            obj.val(contCol + 11, unis + 4, rd * 2, "datos");
+                            obj.val(contCol + 12, unis + 4, re * 1, "datos");
+                            totMult = (ra * 5) + (rb * 4) + (rc * 3) + (rd * 2) + (re * 1);
+                            totSum = ra + rb + rc + rd + re;
+                            if (totSum != 0) {
+                                escala5 = totMult / totSum;
+                            } else {
+                                escala5 = 0;
+                            }
+                            escala10 = escala5 * 2;
+                            obj.val(contCol + 13, unis + 4, totMult, "datos");
+                            obj.val(contCol + 14, unis + 4, totSum, "datos");
+                            obj.val(contCol + 15, unis + 4, escala5, "datos2");
+                            obj.val(contCol + 16, unis + 4, escala10, "datos2");
+                            obj.val(contCol + 17, unis + 4, ra + rb, "datos");
+                            if (numEncuestas != 0) {
+                                obj.val(contCol + 18, unis + 4, (ra + rb) / numEncuestas, "datos");
+                                obj.val(contCol + 19, unis + 4, (ra + rb + rc + rd + re + rf + rg) / numEncuestas, "datos");
+                            } else {
+                                obj.val(contCol + 18, unis + 4, "0", "datos");
+                                obj.val(contCol + 19, unis + 4, "0", "datos");
+                            }
+                        } else {
+                            obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 7, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", contCol + 8, contCol + 14, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", contCol + 15, contCol + 19, unis + 4, unis + 4, "error");
+                        }
+                    } else {
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 7, unis + 4, unis + 4, "error");
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol + 8, contCol + 14, unis + 4, unis + 4, "error");
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol + 15, contCol + 19, unis + 4, unis + 4, "error");
+                    }
+                }
+                contCol += 21;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 7 " + ex.getMessage());
+        }
+    }
+
+    private void indicador7b() {
+        int ra, rb, rc, rd, re, rf, rg, pregsNivel, numEncuestas = 0;
+        double escala5, escala10, totMult, totSum;
+
+        ListaPreguntas preguntas = new ListaPreguntas("7");
+
+        c = 2 + niveles.size() + preguntas.size();
+        obj.crearHoja("Ind. 07 b ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(2);
+        contCol = 2;
+        try {
+            //ENCABEZADOS
+            for (int nivel = 0; nivel < niveles.size(); nivel++) {
+
+                pregsNivel = preguntas.getPreguntasxNivel(String.valueOf(niveles.getId(nivel)));
+                if (pregsNivel != 0) {
+                    obj.combinarCeldas("7 b. TASA DE EGRESADOS SATISFECHOS DEL NIVEL " + niveles.getDescripcion(nivel), contCol,
+                            (contCol + pregsNivel - 1), 1, 1, "h1");
+                    //System.out.println(niveles.getDescripcion(nivel) + " " + contCol + " - " + (contCol + pregsNivel - 1));
+                }
+                for (int p = 0; p < preguntas.size(); p++) {
+                    if (preguntas.getNivelPregunta(p) == niveles.getId(nivel)) {
+                        obj.val(contCol, 2, preguntas.getNombrePregunta(p), "h2");
+                        //System.out.println(preguntas.getNombrePregunta(p) + " --- " + contCol);
+
+                        for (int unis = 0; unis < univs.size(); unis++) {
+                            if (unis == 0) {
+                                consulta = "SELECT COUNT(id_pregunta) as numEncuestas FROM encuesta_preguntas WHERE id_encuesta=("
+                                        .concat(" SELECT id_encuesta FROM encuestas WHERE id_nivel=")
+                                        .concat(String.valueOf(niveles.getId(nivel)))
+                                        .concat(" AND indicador=7)");
+                                rs = con.Consultar(consulta);
+                                if (rs.next()) {
+                                    numEncuestas = rs.getInt("numEncuestas");//numEncuestas es la cantidad de preguntas
+                                } else {
+                                    numEncuestas = 0;
+                                }
+                            }
+                            if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                                consulta = "SELECT SUM(r_a) as r_a, SUM(r_b) as r_b, SUM(r_c) as r_c,"
+                                        .concat(" SUM(r_d) as r_d, SUM(r_e) as r_e, SUM(r_f) as r_f, SUM(r_g) as r_g")
+                                        .concat(" FROM eficaciain7_10 WHERE id_pregunta = ")
+                                        .concat(String.valueOf(preguntas.getId(p)))
+                                        .concat(" AND id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                        .concat(" AND id_periodo=").concat(periodo);
+                                rs = con.Consultar(consulta);
+                                if (rs.next()) {
+                                    ra = rs.getInt("r_a");
+                                    rb = rs.getInt("r_b");
+                                    rc = rs.getInt("r_c");
+                                    rd = rs.getInt("r_d");
+                                    re = rs.getInt("r_e");
+                                    rf = rs.getInt("r_f");
+                                    rg = rs.getInt("r_g");
+                                    totMult = (ra * 5.0) + (rb * 4.0) + (rc * 3.0) + (rd * 2) + (re * 1);
+                                    totSum = ra + rb + rc + rd + re;
+                                    if (totSum != 0) {
+                                        escala5 = totMult / totSum;
+                                    } else {
+                                        escala5 = 0;
+                                    }
+                                    escala10 = escala5 * 2;
+                                    obj.val(contCol, unis + 3, escala10, "datos2");
+                                } else {
+                                    obj.val(contCol, unis + 3, "No Concluido", "datos");
+                                }
+                            } else {
+                               obj.val(contCol, unis + 3, "S/PE", "error");
+                             }
+                        }
+                        contCol++;
+                    }//if
+                }//for preguntas
+                contCol++;
+            }//for niveles
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 7 b " + ex);
+        }
+    }
+
+    private void indicador8() {
+        c = 2 + 4 * niveles.size();
+        obj.crearHoja("Ind. 08 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(2);
+        contCol = 2;
+        try {
+            for (int nivel = 0; nivel < niveles.size(); nivel++) { //MUEVE LOS NIVELES
+                //ENCABEZADOS
+                obj.combinarCeldas("8. EGRESADOS DE ".concat(niveles.getDescripcion(nivel)) + " QUE PRESENTARON EGETSU", contCol, contCol + 3, 1, 1, "h1");
+                if (niveles.getId(nivel) == 3) {//LICENCIATURA, OSEA EGRESADOS EN ABRIL
+                    obj.val(contCol, 2, "Egresados de abril " + (Integer.parseInt(anio) + 1) + " con testimonio de desempeño sobresaliente del EGETSU", "h2");
+                    obj.val(contCol + 1, 2, "Egresados de abril " + (Integer.parseInt(anio) + 1) + " con testimonio de desempeño satisfactorio del EGETSU", "h2");
+                    obj.val(contCol + 2, 2, "Egresados de abril " + (Integer.parseInt(anio) + 1) + " sin testimonio del EGETSU", "h2");
+                    obj.val(contCol + 3, 2, "Egresados en el mes de abril " + (Integer.parseInt(anio) + 1), "h2");
+                } else {
+                    obj.val(contCol, 2, "Egresados de agosto " + anio + " con testimonio de desempeño sobresaliente del EGETSU", "h2");
+                    obj.val(contCol + 1, 2, "Egresados de agosto " + anio + " con testimonio de desempeño satisfactorio del EGETSU", "h2");
+                    obj.val(contCol + 2, 2, "Egresados de agosto " + anio + " sin testimonio del EGETSU", "h2");
+                    obj.val(contCol + 3, 2, "Egresados en el mes de agosto " + anio, "h2");
+                }
+                for (int unis = 0; unis < univs.size(); unis++) {
+                    if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) { //la universidad si tiene el nivel
+                        consulta = "SELECT aplica, sobresaliente, destacado, sin_testimonio FROM eficaciain8"
+                                .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_periodo=").concat(periodo)
+                                .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)));
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) { //si hay una respuesta de la consulta
+                            if (rs.getBoolean("aplica")) {
+                                obj.val(contCol, unis + 3, rs.getInt("sobresaliente"), "datos");
+                                obj.val(contCol + 1, unis + 3, rs.getInt("destacado"), "datos");
+                                obj.val(contCol + 2, unis + 3, rs.getInt("sin_testimonio"), "datos");
+                            } else {
+                                obj.combinarCeldas("NO APLICA", contCol, contCol + 3, unis + 3, unis + 3, "error");
+                            }
+                        } else { //si no hay una respuesta de la consulta
+                            obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 3, unis + 3, unis + 3, "error");
+                        }
+                        consulta = "SELECT sum(egresados) as suma from eficaciain5 "
+                                .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                .concat(" AND id_periodo=").concat(periodo);
+                        if (niveles.getId(nivel) != 3) {
+                            consulta = consulta.concat(" AND anio=1");
+                        } else {
+                            consulta = consulta.concat(" AND anio=2");
+                        }
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {
+                            obj.val(contCol + 3, unis + 3, rs.getInt("suma"), "datos");
+                        } else {
+                            obj.val(contCol + 3, unis + 3, "NO CONCLUIDO", "error");
+                        }
+                    } else {//la universidad no tiene el nivel
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 3, unis + 3, unis + 3, "error");
+                    }
+                }
+                contCol += 4;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general, Eficacia, Indicador 3 " + ex.getMessage());
+        }
+    }
+
+    private void indicador9() {
+        c = 2 + 4 * niveles.size();
+        obj.crearHoja("Ind. 09 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 5000);
+        }
+        columnasPrincipales(3);
+        obj.setAlturaFilas(3, 70);
+        contCol = 2;
+        try {
+            //ENCABEZADOS
+            for (int nivel = 0; nivel < niveles.size(); nivel++) {
+                if (niveles.getId(nivel) == 1) {//TSU
+                    obj.combinarCeldas("9. EGRESADOS EN ESTUDIOS SUPERIORES A SEIS MESES DE SU EGRESO DE " + niveles.getDescripcion(nivel), contCol, contCol + 3, 1, 2, "h1");
+                    obj.val(contCol, 3, "Egresados de agosto " + anio + " que siguen estudios de licencia profesional o licenciatura", "h2");
+                    obj.val(contCol + 1, 3, "Egresados de Agosto " + anio + " que continuan estudios superiores de Licencia Profesional en una UT", "h2");
+                    obj.val(contCol + 2, 3, "Egresados de Agosto " + anio + " que continuan estudios superiores de Licenciatura en una UT", "h2");
+                    obj.val(contCol + 3, 3, "Egresados de Agosto " + anio, "h2");
+                    for (int unis = 0; unis < univs.size(); unis++) {
+                        if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                            consulta = "SELECT egre_continuan, egre_continuan_ut, egre_continuan_ut_con FROM eficaciain9"
+                                    .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                    .concat(" AND id_periodo=").concat(periodo)
+                                    .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)));
+                            rs = con.Consultar(consulta);
+                            if (rs.next()) {
+                                obj.val(contCol, unis + 4, rs.getInt("egre_continuan"), "datos");
+                                obj.val(contCol + 1, unis + 4, rs.getInt("egre_continuan_ut"), "datos");
+                                obj.val(contCol + 2, unis + 4, rs.getInt("egre_continuan_ut_con"), "datos");
+                            } else {
+                                obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 2, unis + 4, unis + 4, "error");
+                            }
+                            consulta = "SELECT sum(egresados) as suma from eficaciain5 "
+                                    .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                    .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                    .concat(" AND id_periodo=").concat(periodo)
+                                    .concat(" AND anio=1");
+                            rs = con.Consultar(consulta);
+                            if (rs.next()) {
+                                obj.val(contCol + 3, unis + 4, rs.getInt("suma"), "datos");
+                            }
+                        } else {
+                            obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 3, unis + 4, unis + 4, "error");
+                        }
+                    }
+                    contCol += 5;
+                } else {
+                    if (niveles.getId(nivel) == 3) {//LICENCIATURA 
+                        obj.combinarCeldas("9. EGRESADOS EN ESTUDIOS SUPERIORES A SEIS MESES DE SU EGRESO DE " + niveles.getDescripcion(nivel), contCol, contCol + 1, 1, 2, "h1");
+                        obj.val(contCol, 3, "Egresados de Abril " + (Integer.parseInt(anio) + 1) + " que continuan estudios superiores", "h2");
+                        obj.val(contCol + 1, 3, "Egresados de Abril " + (Integer.parseInt(anio) + 1), "h2");
+                        for (int unis = 0; unis < univs.size(); unis++) {
+                            if (contieneNivel(String.valueOf(univs.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                                consulta = "SELECT egre_continuan FROM eficaciain9"
+                                        .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                        .concat(" AND id_periodo=").concat(periodo)
+                                        .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)));
+                                rs = con.Consultar(consulta);
+                                if (rs.next()) {
+                                    obj.val(contCol, unis + 4, rs.getInt("egre_continuan"), "datos");
+                                } else {
+                                    obj.val(contCol, unis + 4, "NO CONLCUIDO", "datos");
+                                }
+                                consulta = "SELECT sum(egresados) as suma from eficaciain5 "
+                                        .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                        .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                        .concat(" AND id_periodo=").concat(periodo)
+                                        .concat(" AND anio=2");
+                                rs = con.Consultar(consulta);
+                                if (rs.next()) {
+                                    obj.val(contCol + 1, unis + 4, rs.getInt("suma"), "datos");
+                                }
+                            } else {
+                                obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 1, unis + 4, unis + 4, "error");
+                            }
+                        }
+                        contCol += 3;
+                    } else {//OTROS (LP)
+                        obj.combinarCeldas("9. EGRESADOS EN ESTUDIOS SUPERIORES A SEIS MESES DE SU EGRESO DE " + niveles.getDescripcion(nivel), contCol, contCol + 1, 1, 2, "h1");
+                        obj.val(contCol, 3, "Egresados de Agosto " + anio + " que continuan estudios superiores", "h2");
+                        obj.val(contCol + 1, 3, "Egresados de Agosto " + anio, "h2");
+                        for (int unis = 0; unis < univs.size(); unis++) {
+                            if (contieneNivel(String.valueOf(univs.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                                consulta = "SELECT egre_continuan FROM eficaciain9"
+                                        .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                        .concat(" AND id_periodo=").concat(periodo)
+                                        .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)));
+                                rs = con.Consultar(consulta);
+                                if (rs.next()) {
+                                    obj.val(contCol, unis + 4, rs.getInt("egre_continuan"), "datos");
+                                } else {
+                                    obj.val(contCol, unis + 4, "NO CONLCUIDO", "datos");
+                                }
+                                consulta = "SELECT sum(egresados) as suma from eficaciain5 "
+                                        .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                        .concat(" AND id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                        .concat(" AND id_periodo=").concat(periodo)
+                                        .concat(" AND anio=1");
+                                rs = con.Consultar(consulta);
+                                if (rs.next()) {
+                                    obj.val(contCol + 1, unis + 4, rs.getInt("suma"), "datos");
+                                }
+                            } else {
+                                obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 1, unis + 4, unis + 4, "error");
+                            }
+                        }
+                        contCol += 3;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 9 " + ex.getMessage());
+        }
+    }
+
+    private void indicador10() {
+        int ra, rb, rc, rd, re, rf, rg, numEncuestas = 0;
+        double escala5, escala10, totMult, totSum;
+        c = 2 + 21 * niveles.size();
+        obj.crearHoja("Ind. 10 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(3);
+        contCol = 2;
+        try {
+            //ENCABEZADOS
+            for (int nivel = 0; nivel < niveles.size(); nivel++) {
+                for (int y = 0; y <= 14; y++) {
+                    obj.setAnchoColumna(contCol + y, 1900);
+                }
+                obj.combinarCeldas("10. TASA DE EMPLEADORES SATISFECHOS DEL NIVEL " + niveles.getDescripcion(nivel), contCol, contCol + 19, 1, 1, "h1");
+                obj.combinarCeldas("RESPUESTAS", contCol, contCol + 7, 2, 2, "h1");
+                obj.val(contCol, 3, "MS", "h2");
+                obj.val(contCol + 1, 3, "S", "h2");
+                obj.val(contCol + 2, 3, "RS", "h2");
+                obj.val(contCol + 3, 3, "PS", "h2");
+                obj.val(contCol + 4, 3, "NS", "h2");
+                obj.val(contCol + 5, 3, "NA", "h2");
+                obj.val(contCol + 6, 3, "NE", "h2");
+                obj.val(contCol + 7, 3, "TOTAL", "h2");
+                obj.combinarCeldas("GRADO DE APLICACIÓN", contCol + 8, contCol + 14, 2, 2, "h1");
+                obj.val(contCol + 8, 3, "MS * 5", "h2");
+                obj.val(contCol + 9, 3, "S * 4", "h2");
+                obj.val(contCol + 10, 3, "RS * 3", "h2");
+                obj.val(contCol + 11, 3, "PS * 2", "h2");
+                obj.val(contCol + 12, 3, "NS * 1", "h2");
+                obj.val(contCol + 13, 3, "TOTAL", "h2");
+                obj.val(contCol + 14, 3, "MS+S+RS+PS+NS", "h2");
+                obj.combinarCeldas("CALIFICACIÓN ESCALA 5", contCol + 15, contCol + 15, 2, 3, "h1");
+                obj.combinarCeldas("CALIFICACIÓN ESCALA 10", contCol + 16, contCol + 16, 2, 3, "h1");
+                obj.combinarCeldas("TOTAL MS+S", contCol + 17, contCol + 17, 2, 3, "h1");
+                obj.combinarCeldas("MUY SATISFECHOS Y SATISFECHOS", contCol + 18, contCol + 18, 2, 3, "h1");
+                obj.combinarCeldas("TOTAL DE EMPLEADORES ENCUESTADOS", contCol + 19, contCol + 19, 2, 3, "h1");
+                for (int unis = 0; unis < univs.size(); unis++) {
+                    if (unis == 0) {
+                        consulta = "SELECT COUNT(id_pregunta) as numEncuestas FROM encuesta_preguntas WHERE id_encuesta=("
+                                .concat(" SELECT id_encuesta FROM encuestas WHERE id_nivel=")
+                                .concat(String.valueOf(niveles.getId(nivel)))
+                                .concat(" AND indicador=10)");
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {
+                            numEncuestas = rs.getInt("numEncuestas");
+                        } else {
+                            numEncuestas = 0;
+                        }
+                    }
+                    if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                        consulta = "SELECT SUM(r_a) as r_a, SUM(r_b) as r_b, SUM(r_c) as r_c,"
+                                .concat(" SUM(r_d) as r_d, SUM(r_e) as r_e, SUM(r_f) as r_f, SUM(r_g) as r_g")
+                                .concat(" FROM eficaciain7_10 WHERE id_pregunta IN(")
+                                .concat(" SELECT id_pregunta FROM encuesta_preguntas WHERE id_encuesta=(")
+                                .concat(" SELECT id_encuesta FROM encuestas WHERE id_nivel=").concat(String.valueOf(niveles.getId(nivel)))
+                                .concat(" AND indicador=10))")
+                                .concat(" AND id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND id_periodo=").concat(periodo);
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) {
+                            ra = rs.getInt("r_a");
+                            rb = rs.getInt("r_b");
+                            rc = rs.getInt("r_c");
+                            rd = rs.getInt("r_d");
+                            re = rs.getInt("r_e");
+                            rf = rs.getInt("r_f");
+                            rg = rs.getInt("r_g");
+                            obj.val(contCol, unis + 4, ra, "datos");
+                            obj.val(contCol + 1, unis + 4, rb, "datos");
+                            obj.val(contCol + 2, unis + 4, rc, "datos");
+                            obj.val(contCol + 3, unis + 4, rd, "datos");
+                            obj.val(contCol + 4, unis + 4, re, "datos");
+                            obj.val(contCol + 5, unis + 4, rf, "datos");
+                            obj.val(contCol + 6, unis + 4, rg, "datos");
+                            obj.val(contCol + 7, unis + 4, ra + rb + rc + rd + re + rf + rg, "datos");
+                            obj.val(contCol + 8, unis + 4, ra * 5, "datos");
+                            obj.val(contCol + 9, unis + 4, rb * 4, "datos");
+                            obj.val(contCol + 10, unis + 4, rc * 3, "datos");
+                            obj.val(contCol + 11, unis + 4, rd * 2, "datos");
+                            obj.val(contCol + 12, unis + 4, re * 1, "datos");
+                            totMult = (ra * 5) + (rb * 4) + (rc * 3) + (rd * 2) + (re * 1);
+                            totSum = ra + rb + rc + rd + re;
+                            if (totSum != 0) {
+                                escala5 = totMult / totSum;
+                            } else {
+                                escala5 = 0;
+                            }
+                            escala10 = escala5 * 2;
+                            obj.val(contCol + 13, unis + 4, totMult, "datos");
+                            obj.val(contCol + 14, unis + 4, totSum, "datos");
+                            obj.val(contCol + 15, unis + 4, escala5, "datos2");
+                            obj.val(contCol + 16, unis + 4, escala10, "datos2");
+                            obj.val(contCol + 17, unis + 4, ra + rb, "datos");
+                            if (numEncuestas != 0) {
+                                obj.val(contCol + 18, unis + 4, (ra + rb) / numEncuestas, "datos");
+                                obj.val(contCol + 19, unis + 4, (ra + rb + rc + rd + re + rf + rg) / numEncuestas, "datos");
+                            } else {
+                                obj.val(contCol + 18, unis + 4, "0", "datos");
+                                obj.val(contCol + 19, unis + 4, "0", "datos");
+                            }
+                        } else {
+                            obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 7, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", contCol + 8, contCol + 14, unis + 4, unis + 4, "error");
+                            obj.combinarCeldas("NO CONCLUIDO", contCol + 15, contCol + 19, unis + 4, unis + 4, "error");
+                        }
+                    } else {
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol + 7, unis + 4, unis + 4, "error");
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol + 8, contCol + 14, unis + 4, unis + 4, "error");
+                        obj.combinarCeldas("NO TIENE EL NIVEL", contCol + 15, contCol + 19, unis + 4, unis + 4, "error");
+                    }
+                }
+                contCol += 21;
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 10 " + ex.getMessage());
+        }
+    }
+    
+    private void indicador10b() {
+        int ra, rb, rc, rd, re, rf, rg, pregsNivel, numEncuestas = 0;
+        double escala5, escala10, totMult, totSum;
+
+        ListaPreguntas preguntas = new ListaPreguntas("10");
+
+        c = 2 + niveles.size() + preguntas.size();
+        obj.crearHoja("Ind. 10 b ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(2);
+        contCol = 2;
+        try {
+            //ENCABEZADOS
+            for (int nivel = 0; nivel < niveles.size(); nivel++) {
+
+                pregsNivel = preguntas.getPreguntasxNivel(String.valueOf(niveles.getId(nivel)));
+                if (pregsNivel != 0) {
+                    obj.combinarCeldas("10 b. TASA DE EMPLEADORES SATISFECHOS DEL NIVEL " + niveles.getDescripcion(nivel), contCol,
+                            (contCol + pregsNivel - 1), 1, 1, "h1");
+                    //System.out.println(niveles.getDescripcion(nivel) + " " + contCol + " - " + (contCol + pregsNivel - 1));
+                }
+                for (int p = 0; p < preguntas.size(); p++) {
+                    if (preguntas.getNivelPregunta(p) == niveles.getId(nivel)) {
+                        obj.val(contCol, 2, preguntas.getNombrePregunta(p), "h2");
+                        //System.out.println(preguntas.getNombrePregunta(p) + " --- " + contCol);
+
+                        for (int unis = 0; unis < univs.size(); unis++) {
+                            if (unis == 0) {
+                                consulta = "SELECT COUNT(id_pregunta) as numEncuestas FROM encuesta_preguntas WHERE id_encuesta=("
+                                        .concat(" SELECT id_encuesta FROM encuestas WHERE id_nivel=")
+                                        .concat(String.valueOf(niveles.getId(nivel)))
+                                        .concat(" AND indicador=10)");
+                                rs = con.Consultar(consulta);
+                                if (rs.next()) {
+                                    numEncuestas = rs.getInt("numEncuestas");//numEncuestas es la cantidad de preguntas
+                                } else {
+                                    numEncuestas = 0;
+                                }
+                            }
+                            if (contieneNivel(String.valueOf(niveles.getId(nivel)), String.valueOf(univs.getId(unis)))) {
+                                consulta = "SELECT SUM(r_a) as r_a, SUM(r_b) as r_b, SUM(r_c) as r_c,"
+                                        .concat(" SUM(r_d) as r_d, SUM(r_e) as r_e, SUM(r_f) as r_f, SUM(r_g) as r_g")
+                                        .concat(" FROM eficaciain7_10 WHERE id_pregunta = ")
+                                        .concat(String.valueOf(preguntas.getId(p)))
+                                        .concat(" AND id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                        .concat(" AND id_periodo=").concat(periodo);
+                                rs = con.Consultar(consulta);
+                                if (rs.next()) {
+                                    ra = rs.getInt("r_a");
+                                    rb = rs.getInt("r_b");
+                                    rc = rs.getInt("r_c");
+                                    rd = rs.getInt("r_d");
+                                    re = rs.getInt("r_e");
+                                    rf = rs.getInt("r_f");
+                                    rg = rs.getInt("r_g");
+                                    totMult = (ra * 5.0) + (rb * 4.0) + (rc * 3.0) + (rd * 2) + (re * 1);
+                                    totSum = ra + rb + rc + rd + re;
+                                    if (totSum != 0) {
+                                        escala5 = totMult / totSum;
+                                    } else {
+                                        escala5 = 0;
+                                    }
+                                    escala10 = escala5 * 2;
+                                    obj.val(contCol, unis + 3, escala10, "datos2");
+                                } else {
+                                    obj.val(contCol, unis + 3, "No Concluido", "datos");
+                                }
+                            } else {
+                                //obj.combinarCeldas("NO TIENE EL NIVEL", contCol, contCol, unis + 3, unis + 3, "error");
+                                obj.val(contCol, unis + 3, "S/PE", "error");
+                                //System.out.println(univs.getNombre(unis) + "NO TIENE EL NIVEL " + niveles.getNombre(nivel));
+                            }
+                        }//for unis
+
+
+
+
+                        contCol++;
+                    }//if
+                }//for preguntas
+                contCol++;
+            }//for niveles
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 10 b " + ex);
+        }
+    }
+    
+    
+    
+
+    private void indicador11() {
+        c = 4;
+        obj.crearHoja("Ind. 11 ", f, c);
+        obj.setAnchoColumna(1, 17500);
+        int NoColumnas = c;
+        for (int i = 2; i <= NoColumnas; i++) {
+            obj.setAnchoColumna(i, 4250);
+        }
+        columnasPrincipales(2);
+        contCol = 2;
+        try {
+            //ENCABEZADOS
+            obj.combinarCeldas("11. PRESUPUESTO EJERCIDO", contCol, contCol + 1, 1, 1, "h1");
+            obj.val(contCol, 2, "Presupuesto ejercido", "h2");
+            obj.val(contCol + 1, 2, "Presupuesto total autorizado Federal y Estatal", "h2");
+            for (int unis = 0; unis < univs.size(); unis++) {
+                consulta = "SELECT ejercido, autorizado FROM eficaciain11 "
+                        .concat(" WHERE id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                        .concat(" AND id_periodo=").concat(periodo);
+                rs = con.Consultar(consulta);
+                if (rs.next()) { //si hay una respuesta de la consulta
+                    obj.val(contCol, unis + 3, rs.getDouble("ejercido"), "datos2");
+                    obj.val(contCol + 1, unis + 3, rs.getDouble("autorizado"), "datos2");
+                } else { //si no hay una respuesta de la consulta
+                    obj.combinarCeldas("NO CONCLUIDO", contCol, contCol + 1, unis + 3, unis + 3, "error");
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("ERROR BD: Sabana general Indicador 11 " + ex.getMessage());
+        }
+    }
+}

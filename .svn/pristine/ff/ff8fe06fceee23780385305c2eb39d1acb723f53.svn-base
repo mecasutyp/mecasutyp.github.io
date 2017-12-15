@@ -1,0 +1,81 @@
+<%--
+    Document   : EficienciaIn17
+    Created on : 24/06/2012, 23:43:12 PM
+    Author     : Daniel Ramìrez Torres
+--%>
+<%@page import="javax.servlet.http.HttpSession"%>
+<%@page import="java.sql.*"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+
+<%--Se obtiene la sesion--%>
+<%
+    try {
+        HttpSession sesion = request.getSession(false);
+        String idUniversidad = sesion.getAttribute("idUniversidad").toString();
+        String idPeriodo = sesion.getAttribute("idPeriodo").toString();
+
+        ConexionMySQL con = new ConexionMySQL();
+        String matricula = "0";
+        String profesores = "0";
+        try {
+
+            String consulta = "SELECT matricula_total, prof_tc FROM datos_universidad WHERE id_universidad=".concat(String.valueOf(idUniversidad)).concat(" AND id_periodo=").concat(String.valueOf(idPeriodo));
+            ResultSet datos = con.Consultar(consulta);
+            while (datos.next()) {
+                matricula = datos.getString(1);
+                profesores = datos.getString(2);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Jsp error eficiencia 17: " + ex);
+        } finally {
+            con.Desconectar();
+        }
+
+%>
+
+<html:form action="/EficienciaIn17">
+    <div id="efici17">
+        <h3><a href="#">Cuadro 17.1<br/>Relaci&oacute;n alumno / docente:</a></h3>
+        <div>
+            <table id="rounded-corner" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th scope="col" class="rounded-company">1</th>
+                        <th class="rounded-q1">2</th>
+                        <th class="rounded-q4" width="30%" >3</th>
+                    </tr>            
+                </thead>
+                <tr>
+                    <th  align="center" >Matricula total al inicio del ciclo escolar</th>
+                    <th  align="center" >Profesores de tiempo completo al inicio del ciclo escolar</th>
+                    <th  align="center" >RAD = 1/2</th>
+                </tr>
+                <tr>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='matricula_inicial' value='<%=matricula%>' onblur="EficienciaIn17(this);" ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='profe_tiempo' value="<%=profesores%>" onblur="EficienciaIn17(this);"></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='resultado' value='0' ></td>
+                </tr>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="rounded-foot-left">Notas: Éste cuadro es llenado autom&aacute;ticamente.</td>
+                        <td class="rounded-foot-right"></td>
+                    </tr>
+                </tfoot>
+
+            </table>
+        </div>
+
+    </div>
+    <html:hidden name="EficienciaIn17Form" property="valores" styleId="valores" />
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+<div id="efic17" align="center">
+    La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+</div>
+<%            }
+%>

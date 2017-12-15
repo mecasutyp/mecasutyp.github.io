@@ -1,0 +1,79 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.shared;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ *
+ * @author Joshua
+ */
+public class Universidad {
+
+    public String getNombreUniversidad(String id) throws SQLException {
+        ConexionMySQL conexion = new ConexionMySQL();
+        
+        String consulta = "Select nombre_universidad from universidades where id_universidad = ".concat(String.valueOf(id));
+        ResultSet rs = conexion.Consultar(consulta);
+        if (rs.next()) {
+            return rs.getString("nombre_universidad");
+        } else {
+            System.out.println("LOGINERROR: No existe la universidad: ".concat(id));
+            return "error";
+        }
+    }
+
+    public String getCveCgut(String id) throws SQLException {
+        ConexionMySQL conexion = new ConexionMySQL();
+        
+        String consulta = "Select cve_cgut from universidades where id_universidad = ".concat(String.valueOf(id));
+        ResultSet rs = conexion.Consultar(consulta);
+        if (rs.next()) {
+            if (rs.getString("cve_cgut") == null) {
+                return "No asignado";
+            } else {
+                return rs.getString("cve_cgut");
+            }
+        } else {
+            System.out.println("LOGINERROR: No existe la universidad: ".concat(id));
+            return "error";
+        }
+    }
+
+    public String getFechaAcreditacion(String id) throws SQLException {
+        ConexionMySQL conexion = new ConexionMySQL();
+        
+        String consulta = "Select fecha_acreditacion from universidades where id_universidad = ".concat(String.valueOf(id));
+        ResultSet rs = conexion.Consultar(consulta);
+        if (rs.next()) {
+            if (rs.getString("fecha_acreditacion") == null) {
+                return "No asignado";
+            } else {
+                return rs.getString("fecha_acreditacion");
+            }
+        } else {
+            System.out.println("LOGINERROR: No existe la universidad: ".concat(id));
+            return "error";
+        }
+    }
+        public String getRFC(String id) throws SQLException {
+        ConexionMySQL conexion = new ConexionMySQL();
+        
+        String consulta = "Select rfc from universidades where id_universidad = ".concat(String.valueOf(id));
+        ResultSet rs = conexion.Consultar(consulta);
+        if (rs.next()) {
+            if (rs.getString("rfc") == null) {
+                return "No asignado";
+            } else {
+                return rs.getString("rfc");
+            }
+        } else {
+            System.out.println("LOGINERROR: No existe la universidad: ".concat(id));
+            return "error";
+        }
+    }
+}

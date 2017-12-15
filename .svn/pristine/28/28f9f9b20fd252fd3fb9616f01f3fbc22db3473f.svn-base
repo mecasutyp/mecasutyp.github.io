@@ -1,0 +1,185 @@
+<%--
+    Document   : EficaciaIn3
+    Created on : 10/05/2012, 12:34:12 PM
+    Author     : Daniel Ramírez Torres
+--%>
+<%@page import="javax.servlet.http.HttpSession"%>
+<%@page import="java.sql.*"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%
+    try {
+%>
+<html:form action="/EficaciaIn3">
+    <div id="efi3" align="center">
+        <%
+            HttpSession sesion = request.getSession(false);
+            sesion.getAttribute("idUniversidad").toString();
+            sesion.getAttribute("idPeriodo").toString();
+            String tablas = "";
+            ConexionMySQL con = new ConexionMySQL();
+            int c = 1;
+            try {
+
+                String sql2 = "select distinct(pe.id_nivel), descripcion from programa_educativo pe inner join nivel_pe n on pe.id_nivel = n.id_nivel where pe.id_pe in (select id_pe from pe_universidad where id_universidad =".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo =".concat(sesion.getAttribute("idPeriodo").toString()).concat(") order by pe.id_nivel"));
+                ResultSet rs2 = con.Consultar(sql2);
+                //DECLARACION DE RESULTADO PARA LAS CARRERAS POR nivel
+                while (rs2.next()) {
+                    //Se realiza una consulta para visualizar los datos en caso de existir
+                    String sql1 = "select mat_sep,rep_sep ,mat_ene,rep_ene, mat_may,rep_may from eficaciain3 where id_universidad=".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo=".concat(sesion.getAttribute("idPeriodo").toString()).concat(" and id_nivel='".concat(rs2.getString(1)).concat("'")));
+                    ResultSet rs1 = con.Consultar(sql1);
+
+                    //TITULOS
+                    tablas = tablas.concat("<h2><a href='#'>Cuadro 3.").concat(String.valueOf(c)).concat("<br/>");
+                    tablas = tablas.concat(" Nivel ").concat(rs2.getString("descripcion")).concat(" porcentaje promedio cuatrimestral de reprobaci&oacute;n").concat("</a></h2>");
+
+                    //ENCABEZADOS DE LA TABLA
+                    tablas = tablas.concat("<div><table id='rounded-corner' style='width: 100%'>");
+                    tablas = tablas.concat("<thead>");
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<th scope='col' class='rounded-company'>1</th>");
+                    tablas = tablas.concat("<th class='rounded-q1'>2</th>");
+                    tablas = tablas.concat("<th class='rounded-q1'>3</th>");
+                    tablas = tablas.concat("<th class='rounded-q1'>4</th>");
+                    tablas = tablas.concat("<th class='rounded-q1'>5</th>");
+                    tablas = tablas.concat(" <th class='rounded-q1'>6</th>");
+                    tablas = tablas.concat(" <th class='rounded-q4'>7</th>");
+                    tablas = tablas.concat("</tr>");
+
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<input type='hidden' name='niv," + c + "' value=" + rs2.getString(1) + ">");
+                    tablas = tablas.concat("<th width='15%' class='rounded-q1'>Matr&iacute;cula inicial atendida cuatrimestre Sep-Dic</th>");
+                    tablas = tablas.concat("<th width='15%' class='rounded-q1'>Alumnos reprobados definitivos del cuatrimestre Septiembre-Diciembre</th>");
+                    tablas = tablas.concat("<th width='15%' class='rounded-q1'>Matr&iacute;cula inicial atendida cuatrimestre Enero-Abril</th>");
+                    tablas = tablas.concat("<th width='15%' class='rounded-q1'>Alumnos reprobados definitivos del cuatrimestre enero-abril</th>");
+                    tablas = tablas.concat("<th width='15%' class='rounded-q1'>Matr&iacute;cula inicial atendida cuatrimestre Mayo-Agosto</th>");
+                    tablas = tablas.concat("<th width='15%' class='rounded-q1'>Alumnos reprobados definitivos del cuatrimestre Mayo-Agosto</th>");
+                    tablas = tablas.concat("<th width='10%' class='rounded-q1'>% Promedio de Reprobaci&oacute;n</th>");
+                    tablas = tablas.concat("</tr>");
+                    tablas = tablas.concat("</thead>");
+                    if (rs1.next()) {
+                        tablas = tablas.concat("<tr>");
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='mat_sep," + c + "' value='".concat(rs1.getString(1)).concat("' onblur='indicador3(this);'></td>"));
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='rep_sep," + c + "' value='".concat(rs1.getString(2)).concat("' onblur='indicador3(this);'></td>"));
+
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='mat_ene," + c + "' value='".concat(rs1.getString(3)).concat("' onblur='indicador3(this);'></td>"));
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='rep_ene," + c + "' value='".concat(rs1.getString(4)).concat("' onblur='indicador3(this);'></td>"));
+
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='mat_may," + c + "' value='".concat(rs1.getString(5)).concat("' onblur='indicador3(this);'></td>"));
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='rep_may," + c + "' value='".concat(rs1.getString(6)).concat("' onblur='indicador3(this);'></td>"));
+
+                        tablas = tablas.concat("<td rowspan='3' align='center'>RET</td>");
+                        tablas = tablas.concat("</tr>");
+                    } else {
+                        tablas = tablas.concat("<tr>");
+
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='mat_sep," + c + "' value='0' onblur='indicador3(this);'></td>");
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='rep_sep," + c + "' value='0' onblur='indicador3(this);'></td>");
+
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='mat_ene," + c + "' value='0' onblur='indicador3(this);'></td>");
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='rep_ene," + c + "' value='0' onblur='indicador3(this);'></td>");
+
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='mat_may," + c + "' value='0' onblur='indicador3(this);'></td>");
+                        tablas = tablas.concat("<td align='center'><input style='width:90%' maxlength='6' type='text' name='rep_may," + c + "' value='0' onblur='indicador3(this);'></td>");
+
+
+                        tablas = tablas.concat("<td rowspan='3' align='center'>RET</td>");
+                        tablas = tablas.concat("</tr>");
+                    }
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<td colspan='2' align='center'>RE1</td>");
+                    tablas = tablas.concat("<td colspan='2' align='center'>RE2</td>");
+                    tablas = tablas.concat("<td colspan='2' align='center'>RE3</td>");
+                    tablas = tablas.concat("</tr>");
+
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<td colspan='2' align='center'>2/1</td>");
+                    tablas = tablas.concat("<td colspan='2' align='center'>4/3</td>");
+                    tablas = tablas.concat("<td colspan='2' align='center'>6/5</td>");
+                    tablas = tablas.concat("</tr>");
+
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<td colspan='2' align='center'><input readonly=\"readonly\" id=\"etiqueta\" style='width:90%' type='text' name='tot_1," + c + "' value='0' ></td>");
+                    tablas = tablas.concat("<td colspan='2' align='center'><input readonly=\"readonly\" id=\"etiqueta\" style='width:90%' type='text' name='tot_2," + c + "' value='0' ></td>");
+                    tablas = tablas.concat("<td colspan='2' align='center'><input readonly=\"readonly\" id=\"etiqueta\" style='width:90%' type='text' name='tot_3," + c + "' value='0' ></td>");
+                    tablas = tablas.concat("<td colspan='1' align='center'><input readonly=\"readonly\" id=\"etiqueta\" style='width:90%' type='text' name='tot_4," + c + "' value='0' ></td>");
+                    tablas = tablas.concat("</tr>");
+
+                    //PIE DE LA TABLE
+                    tablas = tablas.concat("<tfoot>");
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<td colspan='6' class='rounded-foot-left'>Notas: No hay notas adicionales.</td>");
+                    tablas = tablas.concat("<td class='rounded-foot-right'></td>");
+                    tablas = tablas.concat("</tr>");
+                    tablas = tablas.concat("</tfoot>");
+                    tablas = tablas.concat("</table></div>");
+                    c++;
+                }
+
+                String sql3 = "select distinct(pe.id_nivel), descripcion from programa_educativo pe inner join nivel_pe n on pe.id_nivel = n.id_nivel where pe.id_pe in (select id_pe from pe_universidad where id_universidad =".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo =".concat(sesion.getAttribute("idPeriodo").toString()).concat(") order by pe.id_nivel"));
+                ResultSet rs3 = con.Consultar(sql3);
+                if (rs3.next()) {
+                    tablas = tablas.concat("<h2><a href='#'> Cuadro 3.").concat(String.valueOf(c)).concat("<br/> Porcentaje Promedio de Reprobación de la UT</br>");
+                    tablas = tablas.concat(" </a></h2>");
+                    tablas = tablas.concat("<div align='center'><table align='center' id='rounded-corner' width='60%'>");
+                    tablas = tablas.concat("<thead>");
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<th scope='col' class='rounded-company'> Nivel</th>");
+                    tablas = tablas.concat("<th class='rounded-q4'> Promedio</th>");
+                    tablas = tablas.concat("</tr>");
+                    tablas = tablas.concat("</thead>");
+                    //cuerpo dinamico de los totales
+                    int cu = 1;
+                    do {
+                        tablas = tablas.concat("<tr>");
+                        tablas = tablas.concat("<td class='rounded-q1' width='30%'align='center'>".concat(rs3.getString(2)).concat("</td>"));
+                        tablas = tablas.concat("<td  class='rounded-q1' width='30%' align='center'><input readonly=\"readonly\" id=\"etiqueta\" style='width:90%' type='text' name='tot_4," + cu + "' value='0'></td>");
+                        tablas = tablas.concat("</tr>");
+                        cu++;
+                    } while (rs3.next());
+                    tablas = tablas.concat("<tfoot>");
+                    tablas = tablas.concat("<tr>");
+                    tablas = tablas.concat("<td class='rounded-foot-left' width='30%' style='font-weight: bold' align='center'>Promedio total de la UT</td>");
+                    tablas = tablas.concat("<td class='rounded-foot-right'><input readonly=\"readonly\" id=\"etiqueta\" style='width:90%' type='text' name='tot_t' value='0'/></td>");
+                    tablas = tablas.concat("</tr>");
+                    tablas = tablas.concat("</tfoot>");
+                    tablas = tablas.concat("</table></div>");
+                }
+
+            } catch (SQLException ex) {
+                System.out.println("JSPERROR-EficaciaIn3:" + ex.getMessage());
+            } finally {
+                con.Desconectar();
+            }
+
+
+
+        %>
+        <%=tablas%>
+        <input type="hidden" name="numC" value="<%=c%>" />
+        <input type="hidden" name="fin" />
+        <html:hidden name="EficaciaIn3Form" property="valores" styleId="valores" />
+    </div>
+    <%
+        String consulta = "select activo from system_mecasut";
+        ResultSet rs = con.Consultar(consulta);
+        rs.next();
+        if (rs.getInt(1) == 1) {
+            if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")) {
+    %>
+    <button type="button" class="btnGuardarIndicador"  onclick="enviarDatosIndicadores(guardarEficaciaIn3(),'EficaciaIn3Datos','EficaciaIn3Form');" >Guardar</button>
+    <%}
+        }
+    } else {%>
+    <button type="button" class="btnGuardarIndicador" disabled="disabled">La evaluación ha sido desactivada.</button>
+    <%        }%>
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+<%            }
+%>

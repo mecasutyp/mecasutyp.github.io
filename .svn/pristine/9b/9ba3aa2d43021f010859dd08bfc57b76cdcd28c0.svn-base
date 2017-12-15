@@ -1,0 +1,89 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.reportes.sabana;
+
+import java.sql.SQLException;
+
+/**
+ *
+ *
+ * @author Cuauhtemoc Medina Muñoz
+ */
+public class ExcelDirectorio extends SabanaCategorias {
+    ListaCausas causas;
+    ListaModalidades modalidades;
+    int contCol = 0;
+    int c = 0;
+    int f = 5;
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        System.err.println("Excel Directorio Eliminada :)");
+    }
+
+    public ExcelDirectorio(String anio, HojaCalculo obj, String periodo, ListaUniversidades univs, ListaNiveles niveles) {
+        super(periodo, obj, univs, niveles, anio);
+        this.obj = obj;
+        this.f += univs.size();
+        this.causas = new ListaCausas();
+        this.modalidades = new ListaModalidades();
+    }
+
+    public HojaCalculo hacerEficacia() {
+        directorio();
+        con.Desconectar();
+        return obj;
+    }
+
+    private void directorio() {
+        for (int zpersona = 0; zpersona < 3; zpersona++) {
+            String cargo="", tipo="";
+            if (zpersona==0) {
+                cargo="Rector";tipo="RU";
+            } if (zpersona==1) {
+                cargo="Responsable";tipo="RC";
+            } if (zpersona==2) {
+                cargo="Capturista";tipo="CU";
+            }
+             c = 7;
+            obj.crearHoja(cargo, f, c);
+            obj.setAnchoColumna(1, 17500);
+            int NoColumnas = c;
+            for (int i = 2; i <= NoColumnas; i++) {
+                obj.setAnchoColumna(i, 10000);
+            }
+            columnasPrincipalessTotal(2);
+            obj.setAlturaFilas(2, 57);
+            contCol = 2;
+            try { 
+                    obj.combinarCeldas("Nombre", contCol, contCol, 1, 2, "h1");
+                    obj.combinarCeldas("Cargo", contCol + 1, contCol + 1, 1, 2, "h1");
+                    obj.combinarCeldas("Teléfono", contCol + 2, contCol + 2, 1, 2, "h1");
+                    obj.combinarCeldas("Correo", contCol + 3, contCol + 3, 1, 2, "h1");
+                      for (int unis = 0; unis < univs.size(); unis++) {
+                        consulta = "SELECT r.nombre, r.apaterno, r.amaterno, r.cargo, r.telefono, r.mail from responsables r inner join responsables_universidad ru on r.id_responsable= ru.id_responsable"
+                                .concat(" WHERE r.id_universidad=").concat(String.valueOf(univs.getId(unis)))
+                                .concat(" AND ru.id_periodo=").concat(periodo).concat(" AND r.tipoResponsable='"+tipo+"'");
+                        rs = con.Consultar(consulta);
+                        if (rs.next()) { //si hay una respuesta de la consulta
+                            obj.val(contCol, unis + 3, rs.getString("r.nombre").concat(" "+rs.getString("r.apaterno")).concat(" "+rs.getString("r.amaterno")));
+                            obj.val(contCol + 1, unis + 3, rs.getString("r.cargo"));
+                            obj.val(contCol + 2, unis + 3, rs.getString("r.telefono"));
+                            obj.val(contCol + 3, unis + 3, rs.getString("r.mail"));
+                        } else {
+                            obj.val(contCol, unis + 3, "SIN DATOS", "error");
+                            obj.val(contCol + 1, unis + 3, "SIN DATOS", "error");
+                            obj.val(contCol + 2, unis + 3, "SIN DATOS", "error");
+                            obj.val(contCol + 3, unis + 3, "SIN DATOS", "error");
+                        }
+                    }
+
+            } catch (Exception x) {
+                System.err.println("ERROR BD: Reporte directorio rectores " + x.getMessage());
+            }
+        }     
+    }
+}

@@ -1,0 +1,54 @@
+function guardar33(){
+    var cadena="-";
+    var bandera=false;
+    var v1 =Number(parseInt($('#i33v1').val()));
+    var v2 =Number(parseInt($('#i33v2').val()));
+    alert(v1+","+v2);
+    var total = $('[name="COB"]').val();
+    if (total!=0){
+        cadena=cadena.concat(v1).concat(",")
+                    .concat(v2).concat("-");
+        bandera=true;
+    }else{
+        bandera=false;
+    }
+    if (bandera==true){
+        $().alerta("verde", "Datos guardados correctamente.");
+    }else{
+        $().alerta("rojo", "Los datos no han sido guardados.");
+    }
+    return cadena;
+}
+
+function indicador33(control){
+    if($(control).val()==""){
+        $(control).val(0);
+    }
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("amarillo", "El valor '".concat(control.value).concat("' no es v&aacute;lido"));
+        $(control).addClass("inputerror").removeClass("inputok");
+        $('[name="COB"]').val(0);
+    }else{
+
+        $(control).addClass("inputok").removeClass("inputerror");
+        control.value=Number(control.value);
+        operacionesIndicador33();
+    }
+    if ($('form[name="EquidadIn33Form"] input').hasClass("inputerror")){
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("update", "<center>Indicador con <br/> errores, favor <br/> de revisar.</center>").globo("show");
+    }else{
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide");
+    }
+}
+function operacionesIndicador33(){
+        var v1 = parseInt($('#i33v1').val());
+        var v2 = parseInt($('#i33v2').val());
+        var total;
+        if (v2!=0 && /^([0-9])*$/.test(v1) && /^([0-9])*$/.test(v2)){
+            total = (v1/v2)*100;
+            total=getDecimal(total);
+            $('[name="COB"]').val(total);
+        }else{
+            $('[name="COB"]').val(0);
+        }
+    }

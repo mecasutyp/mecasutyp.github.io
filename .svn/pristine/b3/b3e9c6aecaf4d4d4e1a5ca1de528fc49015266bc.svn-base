@@ -1,0 +1,124 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.eficacia;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.SQLException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+/**
+ *
+ * @author Joshua
+ */
+public class EficaciaIn5Action extends org.apache.struts.action.Action {
+
+    /* forward name="success" path="" */
+    private static final String SUCCESS = "success";
+
+    /**
+     * This is the action called from the Struts framework.
+     * @param mapping The ActionMapping used to select this instance.
+     * @param form The optional ActionForm bean for this request.
+     * @param request The HTTP Request we are processing.
+     * @param response The HTTP Response we are processing.
+     * @throws java.lang.Exception
+     * @return
+     */
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form,
+            HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        HttpSession sesion = request.getSession(false);
+        String idUniversidad = sesion.getAttribute("idUniversidad").toString();
+        String idPeriodo = sesion.getAttribute("idPeriodo").toString();
+        EficaciaIn5Form frm = (EficaciaIn5Form) form;
+        if (!frm.getValores().equals("-1")) {
+            boolean band = Guardar(frm.getValores(), idUniversidad, idPeriodo);
+            if (band == false) {
+                return mapping.findForward(null);
+            } else {
+                return mapping.findForward(SUCCESS);
+            }
+        } else {
+            return mapping.findForward(null);
+        }
+    }
+
+    private boolean Guardar(String valores, String idUniversidad, String idPeriodo) {
+        String[] values = valores.split("-");//Valores de todo el formulario
+        String[] values1 = valores.split("x");//Valores de todo el formulario
+        String[] datos;//Valores de cada insert
+        ConexionMySQL conexion = new ConexionMySQL();
+        try {
+            for (int i = 1; i < values.length; i++) {
+                datos = values[i].split(",");
+                String sql = "Update eficaciain5 set ingreso = ".concat(datos[4])
+                        .concat(", egresados = ").concat(datos[5])
+                        .concat(", titulados = ").concat(datos[6])
+                        .concat(", cuatri = ").concat(datos[7])
+                        .concat(" where id_universidad = ").concat(idUniversidad)
+                        .concat(" and id_periodo = ").concat(idPeriodo)
+                        .concat(" and id_nivel = ").concat(datos[0])
+                        .concat(" and id_pe = ").concat(datos[1])
+                        .concat(" and id_modelo = ").concat(datos[2])
+                        .concat(" and anio = ").concat(datos[3]);
+                if (conexion.Modificar(sql) == 0) {
+                    sql = "Insert into eficaciain5 values";
+                    for (int j = 1; j < values.length; j++) {
+                        if (j == values.length - 1) {
+                            sql = sql.concat("(").concat(idUniversidad).concat(",") //uni
+                                    .concat(idPeriodo).concat(",") //periodo
+                                    .concat(values[j]) //Valores
+                                    .concat(")");
+                        } else {
+                            sql = sql.concat("(").concat(idUniversidad).concat(",") //uni
+                                    .concat(idPeriodo).concat(",") //periodo
+                                    .concat(values[j]) //Valores
+                                    .concat("),");
+                        }
+                    }
+                    conexion.Insertar(sql);
+                    break;
+                }
+            }
+            for (int i = 1; i < values1.length; i++) {
+                datos = values1[i].split(",");
+                String sql = "Update eficaciain5_1 set titulados_universidad = ".concat(datos[2])
+                        .concat(", titulados_dgp = ").concat(datos[3])
+                        .concat(" where id_universidad = ").concat(idUniversidad)
+                        .concat(" and id_periodo = ").concat(idPeriodo)
+                        .concat(" and id_nivel = ").concat(datos[0])
+                        .concat(" and anio = ").concat(datos[1]);
+                if (conexion.Modificar(sql) == 0) {
+                    sql = "Insert into eficaciain5_1 values";
+                    for (int j = 1; j < values1.length; j++) {
+                        if (j == values1.length - 1) {
+                            sql = sql.concat("(").concat(idUniversidad).concat(",") //uni
+                                    .concat(idPeriodo).concat(",") //periodo
+                                    .concat(values1[j]) //Valores
+                                    .concat(")");
+                        } else {
+                            sql = sql.concat("(").concat(idUniversidad).concat(",") //uni
+                                    .concat(idPeriodo).concat(",") //periodo
+                                    .concat(values1[j]) //Valores
+                                    .concat("),");
+                        }
+                    }
+                    conexion.Insertar(sql);
+                    break;
+                }
+            }
+        } catch (SQLException ex) {
+            System.err.println("Error al guardar en EficaciaIn5Action. Error: " + ex.getMessage());
+            return false;
+        }
+        return true;
+    }
+}

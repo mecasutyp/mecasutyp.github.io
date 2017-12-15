@@ -1,0 +1,799 @@
+//Author: Cuauhtemoc Medina Muñoz, Daniel Ramirez Torres
+var idResponsable="";
+var idMensaje=0;
+var validaEn=0;
+var idEl="";
+var divRespuesta = "";
+var formularioRespuesta = "";
+var tiempoAutoSave = 60;
+var lblTiempoAutoSave = "(1 min.)";
+var timerAutoSave = $.timer(function() {
+    if($(".btnGuardarIndicador").length != 0){
+        $(".btnGuardarIndicador").focus();
+        $(".btnGuardarIndicador").trigger("click");
+    }
+});
+var timerIndicador;
+var timerMensajeriaCuauh = $.timer(mensajeriaCuauh);
+
+function mensajeriaCuauh(){
+    $.ajax({
+        url: "/mensajeriaNueva",
+        type: "POST",
+        data: {
+            "ask" : "comprobarMensajesNuevos"
+        }
+    }).done(function(msg) {
+         console.log("msg " +msg);
+        var buzon = "<a href='global.msut?ask=mensajes'>";
+        if (msg=="Error"){
+            alert("Error");
+        }else if (msg==0){
+            buzon += "<span class='ui-icon ui-icon-mail-open' style='float:right;'></span>";
+        }else{
+            buzon += "<span class='ui-icon ui-icon-mail-closed' style='float:right;'></span>"
+            +"<span style='background: #FF3333; border-color: #cd0a0a; color: #ffffff; height: 16px; float: right;'>"+msg+"</span>";
+        }
+        buzon += "</a>";
+        $("#mensajes").html(buzon);
+    }).fail(function(msg){
+        alert("fail " + msg);
+    });
+}
+
+
+//var timerMensajeria = $.timer(function() {
+//    sendNormalRequest("GET", "Vistas/Admon/Buzon.jsp", "mensajes");
+//});
+
+/*
+*var exp = new Date();
+*var expDays = 1;
+*exp.setTime(exp.getTime() + (expDays*24*60*60*1000));
+*crearCookie('nombreDeLaCookie', 'ValorDeLaCookie' , exp);
+*/
+function GuardarCookie(n, v, d)
+{
+    document.cookie = n + "=" + v + ";expires=" + d;
+}
+
+function CojerValorCookie(indice) {  
+    var galleta = document.cookie;
+    var finDeCadena = galleta.indexOf(";", indice);
+    if (finDeCadena == -1)
+        finDeCadena = galleta.length;
+  
+    return unescape(galleta.substring(indice, finDeCadena));
+}  
+  
+function RecuperarCookie(nombre) {  
+    var galleta = document.cookie;
+    var arg = nombre + "=";
+    var alen = arg.length;
+    var glen = galleta.length;
+    var i = 0;
+    while (i < glen){
+        var j = i + alen;
+        if (galleta.substring(i, j) == arg)
+            return CojerValorCookie(j);
+        i = galleta.indexOf(" ", i) + 1;
+        if (i == 0)
+            break;
+    }  
+    return null;
+}  
+            
+function modal(titulo, mensaje){
+    $("#dialog-modal").attr("title",titulo);
+    $("#dialog-modal").html(mensaje);
+    $("#dialog-modal").dialog({
+        modal: true
+    });
+}
+
+function limpiarDivs(){
+    $("div[id^='indT']").empty();
+}
+            
+function createRequestObject(){
+    var req;
+    if(window.XMLHttpRequest){
+
+        req = new XMLHttpRequest();
+    }
+    else if(window.ActiveXObject){
+        //For IE 5+
+        req = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    else{
+    }
+
+    return req;
+}
+
+//Make the XMLHttpRequest Object
+var http = createRequestObject();
+function sendRequest(method, url, div, form, ind){
+    timerIndicador = $.timer(function() {
+        timerIndicador.stop();
+        timerIndicador = null;
+        sendRequest(method, url, div, form, ind);
+    },3000);
+    timerIndicador.play(true); 
+    if(form!="EficaciaIn5Form"){
+        modal("Espere...","<img alt='MECASUT' src='images/ajax-loader.gif' /><br/> Cargando "+ind);        
+    }
+    divRespuesta = div;
+    formularioRespuesta = form;
+    if(method == 'get' || method == 'GET'){
+        http.open(method,url);
+        http.onreadystatechange = handleResponse;
+        http.send(null);
+    }
+}
+
+function sendNormalRequest(method, url, div){
+    divRespuesta = div;
+    if(method == 'get' || method == 'GET'){
+        http.open(method,url);
+        http.onreadystatechange = handleNormalResponse;
+        http.send(null);
+    }
+}
+///llama pag jsp
+function handleNormalResponse(){
+    if(http.readyState == 4 && http.status == 200){
+        var response = http.responseText;
+        if(response){
+            document.getElementById(divRespuesta).innerHTML = response;
+        }
+    }
+}
+
+function handleResponse(){
+    if(http.readyState == 4 && http.status == 200){
+        var response = http.responseText;
+        if(response){
+            document.getElementById(divRespuesta).innerHTML = response;
+        }else{
+            $("#dialog-modal").dialog("close");
+            modal("Error","Error al cargar el indicador, la conexi&oacute;n est&aacute; tardando demasiado, por favor cierre esta ventana y vuelva a intentarlo.");
+        }
+        timerIndicador.stop();
+        recuperarEstilos(formularioRespuesta);
+        InicializarIndicador(formularioRespuesta);
+        $("#dialog-modal").dialog("close");
+    }else if(http.readyState != 1){
+        timerIndicador.stop();
+    }
+}
+            
+function recuperarEstilos(form){
+    $("form[name='"+form+"'] *:not(input)").globo({
+        showOn: 'none',
+        alignTo: 'target',
+        offsetX: 5,
+        alignX: 'center'
+    });
+    $("form[name='"+form+"'] input ").globo({
+        alignTo: 'target',
+        offsetX: 5,
+        alignX: 'center'
+    }).globo('disable');
+    
+    $("form[name='"+form+"'] .btnGuardarIndicador").button({
+        icons: {
+            primary: "ui-icon-disk"
+        }
+    });
+    if(form!="PertinenciaIn21Form"){
+        $("form[name='"+form+"'] .btnGuardarIndicador").css("position", "fixed");
+        $("form[name='"+form+"'] .btnGuardarIndicador").css("right", "10px");
+        $("form[name='"+form+"'] .btnGuardarIndicador").css("bottom", "10px");
+        $("form[name='"+form+"'] .btnGuardarIndicador").css("z-index", "1000");
+    }else{      
+        //$("form[name='"+form+"'] .btnGuardarIndicador").css("position", "static");
+        $("form[name='"+form+"'] .btnGuardarIndicador").css("align", "right");
+        // $("form[name='"+form+"'] .btnGuardarIndicador").css("right", "10px");
+        $("form[name='"+form+"'] .btnGuardarIndicador").css("bottom", "10px");
+        $("form[name='"+form+"'] .btnGuardarIndicador").css("z-index", "1000");
+    }
+
+    $("div > ul > li > a, div > div > form > div > h3 > a, div > form > div").click(function(){
+        $("input").globo('reset');
+    });
+
+    $("div > form[name='"+form+"'] > div").accordion({
+        icons: {
+            "header": "ui-icon-arrowreturnthick-1-s", 
+            "headerSelected": "ui-icon-arrowreturnthick-1-n"
+        },
+        collapsible: true,
+        autoHeight: false,
+        navigation: true
+    });
+}
+
+function cargando(){
+    $( "#dialog-cargando" ).dialog({
+        height: 150,
+        modal: true,
+        disabled: true,
+        closeText: 'hide',
+        show: "fade",
+        hide: "fade"
+    }).parent('.ui-dialog').find('.ui-dialog-titlebar-close').hide();
+}
+                        
+$(document).ready(function(){
+    
+    $(window).scroll(function(){
+        var scrollTop = $(window).scrollTop();
+        if(scrollTop <= 148){
+            $('#nav').slideUp();
+            $("#opcAutoGuardar").attr("style","z-index: 100; position: absolute; right: 28.5%; top: 85px;");
+            $("#opcGuardarBorrador").attr("style","z-index: 100; position: absolute; right: 19%; top: 85px;");
+        }else{
+            $('#nav').slideDown();
+            $("#opcAutoGuardar").attr("style","z-index: 100; position: fixed; top: 3px; right: 11.5%;");
+            $("#opcGuardarBorrador").attr("style","z-index: 100; position: fixed; top: 4px; right: 2%; ");
+        }
+    });
+    
+    var allFields = $( [] ).add( $( "#name" ) ).add( $( "#password" ) );
+    function checkLength( o, n, min, max ) {
+        if ( o.val().length > max || o.val().length < min ) {
+            o.addClass( "ui-state-error" );
+            updateTips( "El " + n + " es requerido. "+"Minimo: "+min+ " caracteres. Maximo: "+max+" caracteres." );
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    function updateTips( t ) {
+        $( ".validateTips" )
+        .text( t )
+        .addClass( "ui-state-highlight" );
+        setTimeout(function() {
+            $( ".validateTips" ).removeClass( "ui-state-highlight", 1500 );
+        }, 500 );
+    }
+                
+    $("*:not(input)").globo({
+        showOn: 'none',
+        alignTo: 'target',
+        offsetX: 5,
+        alignX: 'center'
+    });
+    $("input ").globo({
+        alignTo: 'target',
+        offsetX: 5,
+        alignX: 'center'
+    }).globo('disable');
+    $( "#dialog-confirm" ).dialog({
+        autoOpen: false,
+        resizable: false,
+        height:300,
+        width: 470,
+        modal: true,
+        buttons: {
+            "Iniciar Ahora": function() {
+                if(validarFormulario(true) == true){
+                    //    retrieveURL('/global.msut?ask=validar');
+                    window.location.href = "global.msut?ask=validar";
+                //window.open('/global.msut?ask=validar');
+                }
+                else
+                    $( this ).dialog( "close" );
+            },
+            Cancelar: function() {
+                $( this ).dialog( "close" );
+            }
+        }
+    });
+    $( "#formEnvio" ).dialog({
+        autoOpen: false,
+        width: 700,
+        height: 460,
+        modal: true,
+        buttons: {
+            Cancelar: function() {
+                $( "#name" ).val("");
+                $( "#password" ).val("");
+                $( "#formularioEnvio, #textoEnvio").fadeIn();
+                $( "#confirmacionEnvio, #submitButton" ).fadeOut();
+                $("#confirmacionEnvio").html("");
+                $( this ).dialog( "close" );
+            }
+        },
+        close: function() {
+            allFields.val( "" ).removeClass( "ui-state-error" );
+        }
+    });
+    $( "#formReportes" ).dialog({
+        autoOpen: false,
+        width: 800,
+        modal: true,
+        buttons: {
+            Cerrar: function() {
+                $( this ).dialog( "close" );
+            },
+            "Exportar Reporte en Excel": function(){
+                if($("select[name='report']").val()=="forllenNuevo"){
+                    window.open('Excel_Reporte_Borrador.msut?ask='+$('#report').val()+'&iun='+$('#univ').val()+'&ipe='+$('#perio').val());
+                }
+                if($("select[name='report']").val()=="forllen"){
+                    window.open('Excel.msut?ask='+$('#report').val()+'&iun='+$('#univ').val()+'&ipe='+$('#perio').val());
+                }
+                if($("select[name='report']").val()=="cat_Eficacia"){
+                    window.open('Excel_Reporte_Eficacia.msut?ask='+$('#report').val()+'&ipe='+$('#perio').val());
+                }
+                if($("select[name='report']").val()=="cat_Eficiencia"){
+                    window.open('Excel_Reporte_Eficiencia.msut?ask='+$('#report').val()+'&ipe='+$('#perio').val());
+                }
+                if($("select[name='report']").val()=="cat_Pertinencia"){
+                    window.open('Excel_Reporte_Pertinencia.msut?ask='+$('#report').val()+'&ipe='+$('#perio').val());
+                }
+                if($("select[name='report']").val()=="sabana"){
+                    window.open('Excel_Reporte_Sabana.msut?ask=sabana&ipe='+$('#perio').val());
+                }
+                 if($("select[name='report']").val()=="directorio"){
+                     window.open('Excel_Reporte_Directorio.msut?ask=directorio&ipe='+$('#perio').val());
+                }
+                if($("select[name='report']").val()=="repprog"){
+                     window.open('Excel_Reporte_Programas.msut?ask=programas&ipe='+$('#perio').val());
+                   // window.open('Excel_Reporte_Directorio.msut?ask=directorio&ipe='+$('#perio').val());
+                }
+            },
+            "Vista Previa": function(){
+                if($("select[name='report']").val()=="cat_Eficiencia"){
+                    window.open('/Vistas/Reportes/Eficiencia_Vista_Reporte.jsp'+'?&periodo='+$('#perio').val());
+                //    window.open('Excel.msut?ask='+$('#report').val()+'&iun='+$('#univ').val()+'&ipe='+$('#perio').val());
+                }
+               
+            }
+        },
+        close: function() {
+            allFields.val( "" );
+        }
+    });
+    
+    $( "#formErrores" ).dialog({
+        autoOpen: false,
+        width: 950,
+        height: 700,
+        modal: true,
+        buttons: {
+            "Enviar": function() {
+                $.ajax({
+                    url: "/mensajeriaNueva",
+                    type: "POST",
+                    data: {
+                        "ask" : "enviarMensaje",
+                        "asunto" : $("#formErrores #asunto").val(),
+                        "mensaje" : $("#formErrores #comentario").val(),
+                        "destinatario" : "0"
+                    }
+                }).done(function(msg) {
+                    if (msg=="Error"){
+                        alert("Error");
+                    }else if (msg!=0){
+                        if($("#formErrores #asunto").val() != "" && $("#formErrores #comentario").val() != "" )
+                        {                            
+                            $().alerta("verde","Mensaje enviado correctamente.");
+                            $("#formErrores").dialog("close");
+                            $("#formErrores #asunto").val("");
+                            $("#formErrores #comentario").val("");
+                        }
+                        else
+                        {
+                            $().alerta("rojo","No puede dejar campos vac\u00EDos");
+                        }
+                    }else{
+                        $().alerta("rojo","El mensaje no se ha enviado correctamente");
+                    } 
+                }).fail(function(msg){
+                    alert("fail " + msg);
+                });
+            },
+            Cancelar: function() {
+                allFields.val( "" ).removeClass( "ui-state-error" );
+                $( this ).dialog( "close" );
+            }
+        },
+        close: function() {
+            allFields.val( "" ).removeClass( "ui-state-error" );
+        }
+    });  
+    
+    $( "#confirm_del_mes" ).dialog({
+        autoOpen: false,        
+        width: 300,
+        height: 200,
+        modal: true,
+        buttons: {
+            "Eliminar": function() {                        
+                retrieveURL("/EnvioErrores.msut?&ask=del_men&id_me="+idEl, 'EnvioErroresForm');        
+                $().alerta("verde","Mensaje Eliminado Correctamente.");
+                location.reload();
+                $( this ).dialog( "close" );
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        }
+    });
+    
+          
+          
+    function ActivarAutoSave(){
+        $("#lblAutoGuardado").html("<span class='ui-button-icon-primary ui-icon ui-icon-clock'></span><span class='ui-button-text'>&nbsp;&nbsp;&nbsp;&nbsp;<span class='ui-icon ui-icon-disk' style='float:right;'></span>".concat(lblTiempoAutoSave, "</span>"));
+        var exp = new Date();
+        exp.setTime(exp.getTime() + (9999*24*60*60*1000));
+        GuardarCookie('ag', '1' , exp);
+        GuardarCookie('tag', tiempoAutoSave, exp);
+        GuardarCookie('lt', lblTiempoAutoSave, exp);
+        timerAutoSave.set({
+            time : tiempoAutoSave * 1000, 
+            autostart : true
+        });
+        timerAutoSave.reset();
+        $().alerta('showToast', {
+            text     : 'Se ha activado la opci&oacute;n de autoguardar para enviar la informaci&oacute;n automaticamente '.concat(lblTiempoAutoSave),
+            sticky   : false,
+            position : 'top-right',
+            type     : 'notice',
+            stayTime    : 3000
+        });
+    }
+    function DesactivarAutoSave(){
+        var exp = new Date();
+        exp.setTime(exp.getTime() + (9999*24*60*60*1000));
+        GuardarCookie('ag', '0' , exp);
+        timerAutoSave.stop();
+        $("#lblAutoGuardado").html("<span class='ui-button-icon-primary ui-icon ui-icon-clock'></span><span class='ui-button-text'>&nbsp;&nbsp;&nbsp;<span class='ui-icon ui-icon-disk' style='float:right;'</span>");
+        $().alerta('showToast', {
+            text     : 'Se ha desactivado la opci&oacute;n de autoguardar',
+            sticky   : false,
+            position : 'top-right',
+            type     : 'notice',
+            stayTime    : 3000
+        });
+    }
+                
+    if(RecuperarCookie("tag") != null){
+        lblTiempoAutoSave = RecuperarCookie("lt");
+        tiempoAutoSave = RecuperarCookie("tag");
+    }
+                
+    $( "#chkAutoGuardado" ).button({
+        icons: {
+            primary: "ui-icon-clock"
+        }
+    }).click(function() {
+        if($("#lblAutoGuardado").hasClass("ui-state-active")){
+            ActivarAutoSave();
+        }else{
+            DesactivarAutoSave();
+        }
+    }).next().button({
+        text: false,
+        icons: {
+            primary: "ui-icon-triangle-1-s"
+        }
+    }).click(function() {
+        var menu = $( this ).parent().next().show().position({
+            my: "left top",
+            at: "left bottom",
+            of: this
+        });
+        $( document ).one( "click", function() {
+            menu.hide();
+        });
+        return false;
+    }).parent().buttonset().next().hide().menu();
+                
+    if(RecuperarCookie("ag") == "1"){
+        $("#lblAutoGuardado").addClass("ui-state-active");
+        $("#chkAutoGuardado").trigger("click");
+    }
+    //    if($("#tU").val() == "AD" || $("#tU").val() == "CG"){
+    //        timerMensajeria.set({
+    //            time : 45000, 
+    //            autostart : true
+    //        });
+    //    }else{
+    //        timerMensajeria.set({
+    //            time : 45000, 
+    //            autostart : true
+    //        });
+    //    }
+    //    sendNormalRequest("GET", "Vistas/Admon/Buzon.jsp", "mensajes");
+    $("#raTipoEnvio").buttonset();
+    $("#botonEnviarFinal").button();
+    $("#btnBorrador").button().css({
+        width: 'auto', 
+        height: '15px', 
+        'padding-bottom': '13px'
+    });
+    $("#univ").combobox();
+    $("#btnSolicReporte").button()
+    $( "#dialog-cargando" ).dialog("close");
+    
+    mensajeriaCuauh();//lo dispara por primera vez
+    //SET TIMER MENSAJERIA
+    timerMensajeriaCuauh.set({
+        time : 240000, 
+        autostart : true
+    });
+    
+});
+
+function selectmensaje(id){
+    $("#area_text").val($("#area"+id).val());    
+    idResponsable=id;
+}
+function eliminarMensaje(id){
+    idEl=id;
+}      
+
+function validar(){ 
+
+    if($("select[name='report']").val()=="forllenNuevo"){
+        $('#inunic').removeAttr("disabled");
+        $('#lista').removeAttr("disabled");
+//       alert("deberia desbloquear");
+            
+
+    }else{
+        $('#inunic').attr("disabled","disabled");
+        $('#lista').attr("disabled","disabled");
+   
+//        alert("deberia bloquear");
+    }
+      
+}     
+
+//function leerMensajes(x,s,mss,tipo,as){
+//    idMensaje=x;
+//    var accion="";
+//    if(validaEn==0){
+//        accion="leer";
+//    }else{
+//        accion="leido";
+//    }
+//    var datos = {
+//        "id_mensaje" : x,
+//        "ac":accion,
+//        "mss":mss,
+//        "tipo":tipo,
+//        "asunto":as
+//        
+//    }
+//    $.ajax({
+//        data: datos,
+//        url: "/LeerMensajes",
+//        type: "post",
+//        beforeSend: function(xhr){
+//            $( "#dialog-procesando" ).dialog({
+//                height: 180,
+//                modal: true,
+//                show: "fade",
+//                hide: "fade"
+//            }).parent('.ui-dialog').find('.ui-dialog-titlebar-close').hide();
+//        },
+//        success: function(resultado, status, xhr){
+//            $( "#dialog-procesando" ).dialog("close");
+//            $("#mensajeCompleto").val(resultado);
+//            if(tipo=="CGUTyP"){
+//                $("#deUttec").html($("#nombreUttec"+x).html()+" ("+ $("#nombre"+x).val()+ ")");
+//            }else{
+//                $("#deUttec").html("Coordinaci&oacute;n General de Universidades Tecnol&oacute;gicas y Polit&eacute;cnicas (CGUTyP)");
+//            }
+//            $('#asuntoM').val($('#asunto'+x).val());
+//            
+//            
+//            $('#leermensaje').dialog( 'open' );
+//            validaEn++;
+//        //            if(validaEn==1){
+//        //                leerMensajes(x);
+//        //            }
+//        },
+//        failiure: function(response){
+//            validaEn=0;  
+//            $().alerta('rojo','Error al Consultar el Mensaje Seleccionado');
+//        }
+//    });
+//   
+//    
+//}
+
+//function mensajeria(x,accion,mss,tipo,as){
+//    var datos = {
+//        "id_mensaje" : x,
+//        "ac":accion,
+//        "mss":mss,
+//        "tipo":tipo,
+//        "asunto":as
+//    }
+//    $.ajax({
+//        data: datos,
+//        url: "/LeerMensajes",
+//        type: "post",
+//        beforeSend: function(xhr){
+//            $( "#dialog-procesando" ).dialog({
+//                height: 180,
+//                modal: true,
+//                show: "fade",
+//                hide: "fade"
+//            }).parent('.ui-dialog').find('.ui-dialog-titlebar-close').hide();
+//        },
+//        success: function(resultado, status, xhr){
+//            $( "#dialog-procesando" ).dialog("close");
+//            if(accion=="leer"){
+//                $("#mensajeCompleto").val(resultado);
+//                if(tipo=="CGUTyP"){
+//                
+//                    $("#deUttec").html($("#nombreUttec"+x).html()+" ("+ $("#nombre"+x).val()+ ")");
+//                }else{
+//                    $("#deUttec").html("Coordinaci&oacute;n General de Universidades Tecnol&oacute;gicas y Polit&eacute;cnicas (CGUTyP)");
+//                }
+//            
+//                $('#leermensaje').dialog( 'open' );
+//            }
+//            if(accion=="responder"){
+//                $().alerta('verde','Los datos se han guardado correctamente.');
+//                $("#mensajeCompletoR").val("");
+//            }
+//        },
+//        failiure: function(response){
+//            if(accion=="leer"){
+//                $().alerta('rojo','Error al Consultar el Mensaje Seleccionado');
+//            }
+//            if(accion=="responder"){
+//                $().alerta('rojo','Error al Enviar Mensaje'+response);
+//            }
+//        }
+//    });
+//}
+function enviarDatosIndicadores(inf,dest,form){
+    //    if ($("form[name='"+form+"'] input").hasClass("inputerror")){
+    //        $().alerta('rojo', 'Error al guardar. Por favor verifique los datos.');
+    //        return;     
+    //    }
+    //alert(inf);
+    if(inf=="Error"){
+        $().alerta("amarillo","Datos no guardados. Verifique que la informaci&oacute;n capturada no contenga errores.");
+        return;
+    }
+    var datos = {
+        "inf" : inf        
+    }
+    $.ajax({
+        data: datos,
+        url: "/"+dest,
+        type: "post",
+        beforeSend: function(xhr){
+            $( "#dialog-procesando" ).dialog({
+                height: 180,
+                modal: true,
+                show: "fade",
+                hide: "fade"
+            }).parent('.ui-dialog').find('.ui-dialog-titlebar-close').hide();
+        },
+        success: function(response){
+            $( "#dialog-procesando" ).dialog("close");
+           if(response==1){
+                $().alerta('verde', 'Datos guardados correctamente.');
+            }else if(response==0){
+                $().alerta('rojo','Error al Guardar los Datos aqui es el error');               
+            }  
+        },
+        failiure: function(response){
+            $().alerta('rojo','Error al Procesar la Solicitud. :(');
+        }
+    });
+}
+function base64(file, callback){///METODO QUE CODIFICA UN ARCHIVO A BASE 64 PARA ENVIAR
+    var coolFile = {};
+    function readerOnload(e){
+      var base64 = btoa(e.target.result);
+      coolFile.base64 = base64;
+      callback(coolFile)
+    };
+    var reader = new FileReader();
+    reader.onload = readerOnload;
+    var file = file.files[0];//.files[0];
+    coolFile.filetype = file.type;
+    coolFile.size = file.size;
+    coolFile.filename = file.name;
+    reader.readAsBinaryString(file);
+    
+}
+function enviarcorreo(archivo, universidad, indicador,extension){
+        
+          $.ajax({ //Comunicación jQuery hacia JSP
+            type: "POST",
+            url: "Vistas/Admon/enviarcor.jsp",
+            data: "archivo="+encodeURIComponent(archivo)+"&extension="+extension+"&universidad="+universidad+"&indicador="+indicador,
+                
+            success: function(msg){
+                $().alerta('verde', 'El archivo fue enviado.');
+            },
+            error: function(xml,msg){
+               $().alerta('rojo','Error en el envio del correo, intentalo nuevamente.'); 
+           }
+        });         
+}
+function verificararchivo(nombreform){
+    var filexext=$("form[name='"+nombreform+"'] input[name='archivo']")[0].value;
+    if(filexext!=""){
+            var extensiones_permitidas = new Array(".pdf");
+            var archivo = $("form[name='"+nombreform+"'] input[name='archivo']")[0].value;
+       //recupero la extensión de este nombre de archivo 
+            var extension = (archivo.substring(archivo.lastIndexOf("."))).toLowerCase(); 
+       //compruebo si la extensión está entre las permitidas 
+             var extensioncorrecta = false; 
+             for (var i = 0; i < extensiones_permitidas.length; i++) { 
+                if (extensiones_permitidas[i] == extension) { 
+                extensioncorrecta = true; 
+                break; 
+                } 
+             }             
+             if(!extensioncorrecta ){
+                  $("form[name='"+nombreform+"'] input[name='archivo']").removeClass("inputok").addClass("inputerror");
+             }else{
+                  $("form[name='"+nombreform+"'] input[name='archivo']").removeClass("inputerror").addClass("inputok");
+             }   
+        return true;
+    }else{
+        return false;
+    }    
+}
+
+function replaceAll( text, busca, reemplaza ){
+    while (text.toString().indexOf(busca) != -1)
+        text = text.toString().replace(busca,reemplaza);
+    return text;
+}
+
+function progresoUniversidad(idUniversidad){
+    $.ajax({
+        data: {
+            "idUniversidad" : idUniversidad,
+            "ask" : "consultarProgreso"
+        },
+        url: "/progresoUniversidad",
+        type: "post",
+        beforeSend: function(xhr){
+            $( "#dialog-procesando" ).dialog({
+                height: 180,
+                modal: true,
+                show: "fade",
+                hide: "fade"
+            }).parent('.ui-dialog').find('.ui-dialog-titlebar-close').hide();
+        },
+        success: function(response){
+            $( "#dialog-procesando" ).dialog("close");
+            if (response.toString()==="completos"){
+                $("#progresoUniversidad").hide();
+                $("#indFaltantes").hide();
+                $("form[name='EnvioDatosForm']").show();
+                $("#botonEnviarFinal").button();
+            }else{
+                var faltantes = response.toString().split(",");
+                $("#progresoUniversidad").show();
+                $("#indFaltantes").show();
+                $("#indFaltantes").html("");
+                for (var f in faltantes){
+                    $("#indFaltantes").append("<li style='width:33%; float: left;'>"+faltantes[f]+"</li>")
+                }
+                $("form[name='EnvioDatosForm']").hide();
+            }
+        },
+        failiure: function(response){
+            $().alerta('rojo','Error al Procesar la Solicitud. :(');
+        }
+    });
+}

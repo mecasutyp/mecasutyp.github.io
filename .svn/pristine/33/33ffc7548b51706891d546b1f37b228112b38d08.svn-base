@@ -1,0 +1,133 @@
+<%-- 
+    Document   : PertinenciaIn25
+    Created on : 10-ago-2012, 0:00:31
+    Author     : Danny
+--%>
+<%@page import="javax.servlet.http.HttpSession"%>
+<%@page import="java.sql.*"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+
+<%--Se obtiene la sesion--%>
+<%
+    try {
+        HttpSession sesion = request.getSession(false);
+        sesion.getAttribute("idUniversidad").toString();
+        sesion.getAttribute("idPeriodo").toString();
+        ConexionMySQL con = new ConexionMySQL();
+        String[] Datos = new String[8];
+        int prof_tc = 0, prof_asig = 0;
+        boolean vacio = false;
+        try {
+
+            String consulta = "SELECT * FROM  pertinenciain25 where id_universidad=".concat(String.valueOf(sesion.getAttribute("idUniversidad").toString())).concat(" and id_periodo=").concat(String.valueOf(sesion.getAttribute("idPeriodo").toString()));
+            ResultSet datos = con.Consultar(consulta);
+            while (datos.next()) {
+                vacio = true;
+                Datos[0] = datos.getString(3);
+                Datos[1] = datos.getString(4);
+                Datos[2] = datos.getString(5);
+                Datos[3] = datos.getString(6);
+                Datos[4] = datos.getString(7);
+                Datos[5] = datos.getString(8);
+                Datos[6] = datos.getString(9);
+                Datos[7] = datos.getString(10);
+            }
+            if (vacio == false) {
+                for (int i = 0; i < 8; i++) {
+                    Datos[i] = "0";
+                }
+            }
+            String consulta1 = "SELECT prof_tc,prof_asig FROM datos_universidad WHERE id_universidad=".concat(String.valueOf(sesion.getAttribute("idUniversidad").toString())).concat(" and id_periodo=").concat(String.valueOf(sesion.getAttribute("idPeriodo").toString()));
+            datos = con.Consultar(consulta1);
+            while (datos.next()) {
+                prof_tc = datos.getInt(1);
+                prof_asig = datos.getInt(2);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Jsp error pertinencia 25: " + ex);
+        } finally {
+            con.Desconectar();
+        }
+%>
+
+<html:form action="/PertinenciaIn25">
+    <div id="pert25" align="center">
+        <h3><a href="#">Cuadro 25.1<br/>Capacitaci&oacute;n del Personal</a></h3>
+        <div>
+            <table id="rounded-corner" style="width: 70%">
+                <thead>
+                    <tr>
+                        <th scope="col" class="rounded-company" >Total</th>
+                        <th class="rounded-q1" >Mandos medios y superiores</th>
+                        <th class="rounded-q1">Personal administrativo y secretarial</th>
+                        <th class="rounded-q1">Profesores de tiempo completo</th>
+                        <th class="rounded-q4" width="30%" >Profesores de asignatura</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total_per' value='0' ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valores1' value='<%=Datos[0]%>' onblur="PertinenciaIn25(this);" ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valores2' value='<%=Datos[1]%>' onblur="PertinenciaIn25(this);" ></td>
+                    <td  align="center" ><input readonly=\"readonly\" id="etiqueta" type='text' maxlength="6" name='valores3' value='<%=prof_tc%>' onblur="PertinenciaIn25(this);" ></td>
+                    <td  align="center" ><input readonly=\"readonly\" id="etiqueta" type='text' maxlength="6" name='valores4' value='<%=prof_asig%>' onblur="PertinenciaIn25(this);" ></td>
+                </tr>
+                <tr>
+                    <th class="rounded-q4" colspan="5">Con capacitaci&oacute;n</th>
+                </tr>
+                <tr>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total_per_con' value='0'></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valores5' value='<%=Datos[4]%>' onblur="PertinenciaIn25(this);" ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valores6' value='<%=Datos[5]%>' onblur="PertinenciaIn25(this);" ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valores7' value='<%=Datos[6]%>' onblur="PertinenciaIn25(this);" ></td>
+                    <td  align="center" ><input type='text' maxlength="6" name='valores8' value='<%=Datos[7]%>' onblur="PertinenciaIn25(this);" ></td>
+                </tr>
+                <tr>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text'></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' value='CP1=' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' value='CP2=' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' value='CP3=' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' value='CP4=' ></td>
+                </tr>
+                <tr>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' value='%' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total1' value='0' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total2' value='0' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total3' value='0' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total4' value='0' ></td>
+                </tr>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="rounded-foot-left">Notas: No hay notas adicionales.</td>
+                        <td class="rounded-foot-right"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <html:hidden name="PertinenciaIn25Form" property="valores" styleId="valores" />
+    <%
+        String consulta = "select activo from system_mecasut";
+        ResultSet rs = con.Consultar(consulta);
+        rs.next();
+        if (rs.getInt(1) == 1) {
+            if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")) {
+%>
+    <button type="button" class="btnGuardarIndicador" onclick="enviarDatosIndicadores(guardarPertinenciaIn25(),'PertinenciaIn25Datos','PertinenciaIn25Form');" >Guardar</button>
+    <%}
+        }
+    } else {%>
+    <button type="button" class="btnGuardarIndicador" disabled="disabled">La evaluación ha sido desactivada.</button>
+    <%        }%>
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+<div id="pert25" align="center">
+    La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+</div>
+<%            }
+%>

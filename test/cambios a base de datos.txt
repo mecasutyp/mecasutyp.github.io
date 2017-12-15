@@ -1,0 +1,38 @@
+
+
+ALTER TABLE pe_universidad ADD (nuevo_ingreso int(6) NOT NULL, matricula_total int (6) NOT NULL, clasificacion enum('TB', 'TN') );
+
+update pe_universidad set nuevo_ingreso=0, matricula_total=0, clasificacion='TB';
+
+
+alter table vinculacionin29 drop total_egresados;
+alter table vinculacionin29 drop acumulados;
+
+
+
+alter table eficaciain1 add (comentario varchar (500));
+update eficaciain1 set comentario="Sin comentarios";
+
+
+alter table eficaciain11 add(original_f_e double, original_f double, original_e double, autorizado_f double, ampliaciones_f double, reducciones_f double, ejercido_f double, autorizado_e double, ampliaciones_e double, reducciones_e double, ejercido_e double,t_autorizado_f_e double, t_ampliaciones_f_e double, t_reducciones_f_e double, t_ejercido_f_e double);
+
+update eficaciain11 set original_f_e=0, original_f=0, original_e=0, autorizado_f=0, ampliaciones_f=0, reducciones_f=0, ejercido_f=0, autorizado_e=0, ampliaciones_e=0, reducciones_e=0, ejercido_e=0,t_autorizado_f_e=0, t_ampliaciones_f_e=0, t_reducciones_f_e=0, t_ejercido_f_e=0;
+
+
+alter table eficaciain5 add(cuatri int(4));
+update eficaciain5 set cuatri =3; ///CUATRIMESTRE MAS USADO
+
+
+insert into apoyos_estudiante values (13,25, 'Becas de manutención', 1),(14,25, 'De practicas', 1),(15,25, 'Servicio Social', 1),(16,25, 'Excelencia', 1),(17,25, 'Capacitación', 1),(18,25, 'Continuación de estudios', 1),(19,25, 'Movilidad Nacional', 1),(20,25, 'Movilidad Internacional', 1),(21,25, 'Becas Salario', 1)
+
+
+
+
+/*SE COMENTA EN SP_REINICIARDATOS uNIVERSIDAD*/
+
+delete from datos_universidad where datos_universidad.id_universidad=id_universidad  and datos_universidad.id_periodo= id_periodo;
+
+/*------------------*/
+
+
+update usuarios us set us.password=sha1(CONCAT(us.user, '-2016')) WHERE id_univ > 0

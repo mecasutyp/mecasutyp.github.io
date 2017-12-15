@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.3//EN"
+          "http://jakarta.apache.org/struts/dtds/struts-config_1_3.dtd">
+
+<struts-config>
+    <form-beans>
+        <form-bean name="CgutMantenimientoUniversidadForm" type="com.mecasut.cgut.CgutMantenimientoUniversidadForm"/>
+        
+        <form-bean name="CgutMantenimientoMecasutForm" type="com.mecasut.cgut.CgutMantenimientoMecasutForm"/>
+        <form-bean name="CgutEncuestasForm" type="com.mecasut.cgut.CgutEncuestasForm"/>
+        <form-bean name="CgutPreguntasForm" type="com.mecasut.cgut.CgutPreguntasForm"/>
+        <form-bean name="CgutServiciosForm" type="com.mecasut.cgut.CgutServiciosForm"/>
+        <form-bean name="CgutUsuariosForm" type="com.mecasut.cgut.CgutUsuariosForm"/>
+        <form-bean name="CgutEdificiosForm" type="com.mecasut.cgut.CgutEdificiosForm"/>
+        <form-bean name="CgutProgramasForm" type="com.mecasut.cgut.CgutProgramasForm"/>
+        <form-bean name="CgutFamiliasForm" type="com.mecasut.cgut.CgutFamiliasForm"/>
+        <form-bean name="CgutAreasForm" type="com.mecasut.cgut.CgutAreasForm"/>
+        <form-bean name="CgutMatriculaTotalForm" type="com.mecasut.cgut.CgutMatriculaTotalForm"/>
+        <form-bean name="CgutNuevoIngresoForm" type="com.mecasut.cgut.CgutNuevoIngresoForm"/>
+        <form-bean name="CgutEgresadosForm" type="com.mecasut.cgut.CgutEgresadosForm"/>
+        <form-bean name="CgutResponsablesForm" type="com.mecasut.cgut.CgutResponsablesForm"/>
+        <form-bean name="CgutCertificacionesForm" type="com.mecasut.cgut.CgutCertificacionesForm"/>
+        <form-bean name="CgutNivelesForm" type="com.mecasut.cgut.CgutNivelesForm"/>
+        <form-bean name="CgutModelosForm" type="com.mecasut.cgut.CgutModelosForm"/>
+        <form-bean name="CgutCausasForm" type="com.mecasut.cgut.CgutCausasForm"/>
+        <form-bean name="CgutUniversidadForm" type="com.mecasut.cgut.CgutUniversidadForm"/>
+        <form-bean name="CgutOrganismosForm" type="com.mecasut.cgut.CgutOrganismosForm"/>
+        <form-bean name="PerfilForm" type="com.mecasut.admon.PerfilForm"/>
+        <form-bean name="EnvioErroresForm" type="com.mecasut.admon.EnvioErroresForm"/>
+        <form-bean name="OrganismoExtranjeroForm" type="com.mecasut.admon.UnivForms.OrganismoExtranjeroForm"/>
+        <form-bean name="PertinenciaIn18Form" type="com.mecasut.pertinencia.PertinenciaIn18Form"/>
+        <form-bean name="EnvioDatosForm" type="com.mecasut.admon.EnvioDatosForm"/>
+        <form-bean name="CertificacionesForm" type="com.mecasut.admon.CgutForms.CertificacionesForm"/>
+        <form-bean name="PertinenciaIn20Form" type="com.mecasut.pertinencia.PertinenciaIn20Form"/>
+        <form-bean name="PertinenciaIn19Form" type="com.mecasut.pertinencia.PertinenciaIn19Form"/>
+        <form-bean name="EquidadIn36Form" type="com.mecasut.equidad.EquidadIn36Form"/>
+        <form-bean name="EquidadIn35Form" type="com.mecasut.equidad.EquidadIn35Form"/>
+        <form-bean name="EquidadIn34Form" type="com.mecasut.equidad.EquidadIn34Form"/>
+        <form-bean name="EquidadIn33Form" type="com.mecasut.equidad.EquidadIn33Form"/>
+        <form-bean name="VinculacionIn32Form" type="com.mecasut.vinculacion.VinculacionIn32Form"/>
+        <form-bean name="VinculacionIn31Form" type="com.mecasut.vinculacion.VinculacionIn31Form"/>
+        <form-bean name="VinculacionIn30Form" type="com.mecasut.vinculacion.VinculacionIn30Form"/>
+        <form-bean name="VinculacionIn29Form" type="com.mecasut.vinculacion.VinculacionIn29Form"/>
+        <form-bean name="VinculacionIn28Form" type="com.mecasut.vinculacion.VinculacionIn28Form"/>
+        <form-bean name="VinculacionIn27Form" type="com.mecasut.vinculacion.VinculacionIn27Form"/>
+        <form-bean name="VinculacionIn26Form" type="com.mecasut.vinculacion.VinculacionIn26Form"/>
+        <form-bean name="PertinenciaIn25Form" type="com.mecasut.pertinencia.PertinenciaIn25Form"/>
+        <form-bean name="PertinenciaIn24Form" type="com.mecasut.pertinencia.PertinenciaIn24Form"/>
+        <form-bean name="PertinenciaIn23Form" type="com.mecasut.pertinencia.PertinenciaIn23Form"/>
+        <form-bean name="PertinenciaIn22Form" type="com.mecasut.pertinencia.PertinenciaIn22Form"/>
+        <form-bean name="PertinenciaIn21Form" type="com.mecasut.pertinencia.PertinenciaIn21Form"/>
+        <form-bean name="EficienciaIn17Form" type="com.mecasut.eficiencia.EficienciaIn17Form"/>
+        <form-bean name="EficienciaIn16Form" type="com.mecasut.eficiencia.EficienciaIn16Form"/>
+        <form-bean name="EficienciaIn15Form" type="com.mecasut.eficiencia.EficienciaIn15Form"/>
+        <form-bean name="EficienciaIn14Form" type="com.mecasut.eficiencia.EficienciaIn14Form"/>
+        <form-bean name="EficienciaIn13Form" type="com.mecasut.eficiencia.EficienciaIn13Form"/>
+        <form-bean name="EficienciaIn12Form" type="com.mecasut.eficiencia.EficienciaIn12Form"/>
+        <form-bean name="EficaciaIn11Form" type="com.mecasut.eficacia.EficaciaIn11Form"/>
+        <form-bean name="EficaciaIn10Form" type="com.mecasut.eficacia.EficaciaIn10Form"/>
+        <form-bean name="EficaciaIn9Form" type="com.mecasut.eficacia.EficaciaIn9Form"/>
+        <form-bean name="EficaciaIn8Form" type="com.mecasut.eficacia.EficaciaIn8Form"/>
+        <form-bean name="EficaciaIn7Form" type="com.mecasut.eficacia.EficaciaIn7Form"/>
+        <form-bean name="EficaciaIn6Form" type="com.mecasut.eficacia.EficaciaIn6Form"/>
+        <form-bean name="EficaciaIn5Form" type="com.mecasut.eficacia.EficaciaIn5Form"/>
+        <form-bean name="EficaciaIn4Form" type="com.mecasut.eficacia.EficaciaIn4Form"/>
+        <form-bean name="EficaciaIn3Form" type="com.mecasut.eficacia.EficaciaIn3Form"/>
+        <form-bean name="EficaciaIn2Form" type="com.mecasut.eficacia.EficaciaIn2Form"/>
+        <form-bean name="EficaciaIn1Form" type="com.mecasut.eficacia.EficaciaIn1Form"/>
+        <form-bean name="CgutInterfaceForm" type="com.mecasut.admon.CgutInterfaceForm"/>
+        <form-bean name="registroUniversidadForm" type="com.mecasut.admon.registroUniversidadForm"/>
+        <form-bean name="LoginForm" type="com.mecasut.admon.LoginForm"/>
+    </form-beans>
+
+    <global-exceptions>
+
+    </global-exceptions>
+
+    <global-forwards>
+        <forward name="iniciar" path="/WEB-INF/Vistas/iniciarEvaluacion.jsp"/>
+        <forward name="errorbd" path="/WEB-INF/Vistas/ErrorConexionBD.jsp"/>
+        <forward name="logout" path="/Vistas/Admon/login.jsp"/>
+        <forward name="eficacia" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        <forward name="eficiencia" path="/Vistas/Eficiencia/Eficiencia.jsp"/>
+        <forward name="pertinencia" path="/Vistas/Pertinencia/Pertinencia.jsp"/>
+        <forward name="vinculacion" path="/Vistas/Vinculacion/Vinculacion.jsp"/>
+        <forward name="equidad" path="/Vistas/Equidad/Equidad.jsp"/>
+        <forward name="universidad" path="/Vistas/Admon/registroUniversidad.jsp"/>
+        <forward name="perfil" path="/WEB-INF/Vistas/Perfil.jsp"/>
+        <forward name="mensajes" path="/WEB-INF/Vistas/Mensajes.jsp"/>
+        <forward name="admin" path="/Vistas/Admon/cgutInterface.jsp"/>
+        <forward name="Eficiencia_Vista_Reporte" path="/Vistas/Reportes/Eficiencia_Vista_Reporte.jsp"/>
+    </global-forwards>
+
+    <action-mappings>
+        <action path="/global" scope="request" type="com.mecasut.admon.GlobalAction" validate="false"/>
+        <action path="/global" type="org.apache.struts.actions.ForwardAction" validate="false" />
+        <action name="LoginForm" path="/login" scope="session" type="com.mecasut.admon.LoginAction" validate="false">
+            <!--forward para los usuarios de captura-->
+            <forward name="success" path="/Vistas/Admon/registroUniversidad.jsp"/>
+            <forward name="failure" path="/Vistas/Admon/login.jsp"/>
+            <!--forward para los usuarios que son administradores-->
+            <forward name="admin" path="/Vistas/Admon/cgutInterface.jsp"/>
+        </action>
+        <action name="registroUniversidadForm" path="/registroUniversidad" scope="request" type="com.mecasut.admon.registroUniversidadAction" validate="false">
+            <forward name="success" path="/Vistas/Admon/registroUniversidad.jsp"/>
+        </action>
+        <action name="CgutInterfaceForm" path="/CgutInterfaceAction" scope="request" type="com.mecasut.admon.CgutInterfaceAction" validate="false">
+            <forward name="success" path="/Vistas/Admon/cgutInterface.jsp"/>
+        </action>
+<!--Eficacia-->
+        <action name="EficaciaIn1Form" path="/EficaciaIn1" scope="request" type="com.mecasut.eficacia.EficaciaIn1Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+            <forward name="universidad"  path="/Vistas/Admon/registroUniversidad.jsp"/>
+        </action>
+        <action name="EficaciaIn2Form" path="/EficaciaIn2" scope="request" type="com.mecasut.eficacia.EficaciaIn2Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+        <action name="EficaciaIn3Form" path="/EficaciaIn3" scope="request" type="com.mecasut.eficacia.EficaciaIn3Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+        <action name="EficaciaIn4Form" path="/EficaciaIn4" scope="request" type="com.mecasut.eficacia.EficaciaIn4Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+        <action name="EficaciaIn5Form" path="/EficaciaIn5" scope="request" type="com.mecasut.eficacia.EficaciaIn5Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/EficaciaIn5.jsp"/>
+        </action>
+        <action name="EficaciaIn6Form" path="/EficaciaIn6" scope="request" type="com.mecasut.eficacia.EficaciaIn6Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+        <action name="EficaciaIn7Form" path="/EficaciaIn7" scope="request" type="com.mecasut.eficacia.EficaciaIn7Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+        <action name="EficaciaIn8Form" path="/EficaciaIn8" scope="request" type="com.mecasut.eficacia.EficaciaIn8Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+        <action name="EficaciaIn9Form" path="/EficaciaIn9" scope="request" type="com.mecasut.eficacia.EficaciaIn9Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+        <action name="EficaciaIn10Form" path="/EficaciaIn10" scope="request" type="com.mecasut.eficacia.EficaciaIn10Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+        <action name="EficaciaIn11Form" path="/EficaciaIn11" scope="request" type="com.mecasut.eficacia.EficaciaIn11Action" validate="false">
+            <forward name="success" path="/Vistas/Eficacia/Eficacia.jsp"/>
+        </action>
+<!--Eficiencia-->
+        <action name="EficienciaIn12Form" path="/EficienciaIn12" scope="request" type="com.mecasut.eficiencia.EficienciaIn12Action" validate="false">
+            <forward name="success" path="/Vistas/Eficiencia/Eficiencia.jsp"/>
+        </action>
+        <action name="EficienciaIn13Form" path="/EficienciaIn13" scope="request" type="com.mecasut.eficiencia.EficienciaIn13Action" validate="false">
+            <forward name="success" path="/Vistas/Eficiencia/Eficiencia.jsp"/>
+        </action>
+        <action name="EficienciaIn14Form" path="/EficienciaIn14" scope="request" type="com.mecasut.eficiencia.EficienciaIn14Action" validate="false">
+            <forward name="success" path="/Vistas/Eficiencia/Eficiencia.jsp"/>
+        </action>
+        <action name="EficienciaIn15Form" path="/EficienciaIn15" scope="request" type="com.mecasut.eficiencia.EficienciaIn15Action" validate="false">
+            <forward name="success" path="/Vistas/Eficiencia/Eficiencia.jsp"/>
+        </action>
+        <action name="EficienciaIn16Form" path="/EficienciaIn16" scope="request" type="com.mecasut.eficiencia.EficienciaIn16Action" validate="false">
+            <forward name="success" path="/Vistas/Eficiencia/Eficiencia.jsp"/>
+        </action>
+        <action name="EficienciaIn17Form" path="/EficienciaIn17" scope="request" type="com.mecasut.eficiencia.EficienciaIn17Action" validate="false">
+            <forward name="success" path="/Vistas/Eficiencia/Eficiencia.jsp"/>
+        </action>
+<!--Pertinencia-->
+        <action name="PertinenciaIn21Form" path="/PertinenciaIn21" scope="request" type="com.mecasut.pertinencia.PertinenciaIn21Action" validate="false">
+            <forward name="success" path="/Vistas/Pertinencia/Pertinencia.jsp"/>
+        </action>
+        <action name="PertinenciaIn22Form" path="/PertinenciaIn22" scope="request" type="com.mecasut.pertinencia.PertinenciaIn22Action" validate="false">
+            <forward name="success" path="/Vistas/Pertinencia/Pertinencia.jsp"/>
+        </action>
+        <action name="PertinenciaIn23Form" path="/PertinenciaIn23" scope="request" type="com.mecasut.pertinencia.PertinenciaIn23Action" validate="false">
+            <forward name="success" path="/Vistas/Pertinencia/Pertinencia.jsp"/>
+        </action>
+        <action name="PertinenciaIn24Form" path="/PertinenciaIn24" scope="request" type="com.mecasut.pertinencia.PertinenciaIn24Action" validate="false">
+            <forward name="success" path="/Vistas/Pertinencia/Pertinencia.jsp"/>
+        </action>
+        <action name="PertinenciaIn25Form" path="/PertinenciaIn25" scope="request" type="com.mecasut.pertinencia.PertinenciaIn25Action" validate="false">
+            <forward name="success" path="/Vistas/Pertinencia/Pertinencia.jsp"/>
+        </action>
+<!--Vinculacion-->
+        <action name="VinculacionIn26Form" path="/VinculacionIn26" scope="request" type="com.mecasut.vinculacion.VinculacionIn26Action" validate="false">
+            <forward name="success" path="/Vistas/Vinculacion/Vinculacion.jsp"/>
+        </action>
+        <action name="VinculacionIn27Form" path="/VinculacionIn27" scope="request" type="com.mecasut.vinculacion.VinculacionIn27Action" validate="false">
+            <forward name="success" path="/Vistas/Vinculacion/Vinculacion.jsp"/>
+        </action>
+        <action name="VinculacionIn28Form" path="/VinculacionIn28" scope="request" type="com.mecasut.vinculacion.VinculacionIn28Action" validate="false">
+            <forward name="success" path="/Vistas/Vinculacion/Vinculacion.jsp"/>
+        </action>
+        <action name="VinculacionIn29Form" path="/VinculacionIn29" scope="request" type="com.mecasut.vinculacion.VinculacionIn29Action">
+            <forward name="success" path="/Vistas/Vinculacion/Vinculacion.jsp"/>
+        </action>
+        <action name="VinculacionIn30Form" path="/VinculacionIn30" scope="request" type="com.mecasut.vinculacion.VinculacionIn30Action" validate="false">
+            <forward name="success" path="/Vistas/Vinculacion/Vinculacion.jsp"/>
+        </action>
+        <action name="VinculacionIn31Form" path="/VinculacionIn31" scope="request" type="com.mecasut.vinculacion.VinculacionIn31Action" validate="false">
+            <forward name="success" path="/Vistas/Vinculacion/Vinculacion.jsp"/>
+        </action>
+        <action name="VinculacionIn32Form" path="/VinculacionIn32" scope="request" type="com.mecasut.vinculacion.VinculacionIn32Action" validate="false">
+            <forward name="success" path="/Vistas/Vinculacion/Vinculacion.jsp"/>
+        </action>
+<!--Equidad-->
+        <action name="EquidadIn33Form" path="/EquidadIn33" scope="request" type="com.mecasut.equidad.EquidadIn33Action" validate="false">
+            <forward name="success" path="/Vistas/Equidad/Equidad.jsp"/>
+            <forward name="universidad"  path="/Vistas/Admon/registroUniversidad.jsp"/>
+        </action>
+        <action name="EquidadIn34Form" path="/EquidadIn34" scope="request" type="com.mecasut.equidad.EquidadIn34Action" validate="false">
+            <forward name="success" path="/Vistas/Equidad/Equidad.jsp"/>
+        </action>
+        <action name="EquidadIn35Form" path="/EquidadIn35" scope="request" type="com.mecasut.equidad.EquidadIn35Action" validate="false">
+            <forward name="success" path="/Vistas/Equidad/Equidad.jsp"/>
+        </action>
+        <action name="EquidadIn36Form" path="/EquidadIn36" scope="request" type="com.mecasut.equidad.EquidadIn36Action" validate="false">
+            <forward name="success" path="/Vistas/Equidad/Equidad.jsp"/>
+        </action>
+        <action name="CertificacionesForm" path="/Certificaciones" scope="request" type="com.mecasut.admon.CgutForms.CertificacionesAction" validate="false"/>
+        <action name="PertinenciaIn20Form" path="/PertinenciaIn20" scope="request" type="com.mecasut.pertinencia.PertinenciaIn20Action" validate="false">
+            <forward name="success" path="/Vistas/Pertinencia/Pertinencia.jsp"/>
+        </action>
+        <action name="EnvioDatosForm" path="/EnvioDatos" scope="request" type="com.mecasut.admon.EnvioDatosAction" validate="false">
+            <forward name="failure" path="/WEB-INF/Vistas/ErrorEnvio.jsp"/>
+            <forward name="success" path="/WEB-INF/Vistas/success.jsp"/>
+        </action>
+        <action name="PertinenciaIn19Form" path="/PertinenciaIn19" scope="request" type="com.mecasut.pertinencia.PertinenciaIn19Action" validate="false">
+            <forward name="success" path="/Vistas/Pertinencia/Pertinencia.jsp"/>
+        </action>
+        <action name="PerfilForm" path="/Perfil" scope="request" type="com.mecasut.admon.PerfilAction" validate="false">
+            <forward name="success" path="/WEB-INF/Vistas/Perfil.jsp"/>
+        </action>
+        <action input="/" name="CgutOrganismosForm" path="/CgutOrganismos" scope="request" type="com.mecasut.cgut.CgutOrganismosAction">
+            <forward name="success" path="/Vistas/Cgut/CgutOrganismos.jsp"/>
+        </action>
+        <action input="/" name="CgutUniversidadForm" path="/CgutUniversidad" scope="request" type="com.mecasut.cgut.CgutUniversidadAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutUniversidad.jsp"/>
+        </action>
+        <action input="/" name="CgutCausasForm" path="/CgutCausas" scope="request" type="com.mecasut.cgut.CgutCausasAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutCausas.jsp"/>
+        </action>
+        <action path="/Excel_Reporte_Borrador" type="com.mecasut.reportes.Excel_Reporte_Borrador"/>
+        <action input="/" name="CgutModelosForm" path="/CgutModelos" scope="request" type="com.mecasut.cgut.CgutModelosAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutModelos.jsp"/>
+        </action>
+        <action input="/" name="CgutNivelesForm" path="/CgutNiveles" scope="request" type="com.mecasut.cgut.CgutNivelesAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutNiveles.jsp"/>
+        </action>
+        <action input="/" name="CgutEdificiosForm" path="/CgutEdificios" scope="request" type="com.mecasut.cgut.CgutEdificiosAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutEdificios.jsp"/>
+        </action>
+        <action input="/" name="CgutUsuariosForm" path="/CgutUsuarios" scope="request" type="com.mecasut.cgut.CgutUsuariosAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutUsuarios.jsp"/>
+        </action>
+        <action path="/Excel_Reporte_Pertinencia" type="com.mecasut.reportes.Excel_Reporte_Pertinencia" validate="false"/>
+        <action path="/Excel_Reporte_Categorias" type="com.mecasut.reportes.Excel_Reporte_Categorias" validate="false"/>
+        
+        <action input="/" name="CgutCertificacionesForm" path="/CgutCertificacionesAction" scope="request" type="com.mecasut.cgut.CgutCertificacionesAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutCertificaciones.jsp"/>
+        </action>
+         <action input="/" name="CgutAreasForm" path="/CgutAreasAction" scope="request" type="com.mecasut.cgut.CgutAreasAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutAreas.jsp"/>
+        </action>
+         <action input="/" name="CgutFamiliasForm" path="/CgutFamiliasAction" scope="request" type="com.mecasut.cgut.CgutFamiliasAction" validate="false">
+        <forward name="success" path="/Vistas/Cgut/CgutFamilias.jsp"/>
+         </action>
+        <action input="/" name="CgutResponsablesForm" path="/CgutResponsablesAction" scope="request" type="com.mecasut.cgut.CgutResponsablesAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutResponsables.jsp"/>
+        </action>
+        <action input="/" name="CgutProgramasForm" path="/CgutProgramasAction" scope="request" type="com.mecasut.cgut.CgutProgramasAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutProgramas.jsp"/>
+        </action>
+
+        <action input="/" name="CgutMantenimientoMecasutForm" path="/CgutMantenimientoMecasutAction" scope="request" type="com.mecasut.cgut.CgutMantenimientoMecasutAction" validate="false">
+             <forward name="success" path="/Vistas/Cgut/CgutMantenimientoMecasut.jsp"/>
+        </action>
+        <action input="/" name="CgutMantenimientoUniversidadForm" path="/CgutMantenimientoUniversidadAction" scope="request" type="com.mecasut.cgut.CgutMantenimientoUniversidadAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutMantenimientoUniversidad.jsp"/>
+        </action>
+        <action input="/" name="CgutCategoriasForm" path="/CgutCategoriasAction" scope="request" type="com.mecasut.cgut.CgutCategoriasAction" validate="false"/>
+
+        <action input="/" name="CgutEncuestasForm" path="/CgutEncuestas" scope="request" type="com.mecasut.cgut.CgutEncuestasAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutEncuestas.jsp"/>
+        </action>
+
+        <action input="/" name="CgutServiciosForm" path="/CgutServicios" scope="request" type="com.mecasut.cgut.CgutServiciosAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutServicios.jsp"/>
+        </action>
+
+        <action input="/" name="CgutPreguntasForm" path="/CgutPreguntas" scope="request" type="com.mecasut.cgut.CgutPreguntasAction" validate="false">
+            <forward name="success" path="/Vistas/Cgut/CgutPreguntas.jsp"/>
+        </action>
+           
+        <action input="/" name="EnvioErroresForm" path="/EnvioErrores" scope="request" type="com.mecasut.admon.EnvioErroresAction" validate="false">
+         <forward name="success" path="/WEB-INF/Vistas/Mensajes.jsp"/>
+        </action>
+        <action path="/AcusePDF" type="com.mecasut.admon.AcusePDF"/>
+        
+        <action path="/LogErrores" type="utilerias.LogErrores"/>
+        <action path="/Excel_Reporte_Principal" type="com.mecasut.reportes.Excel_Reporte_Principal"/>
+
+        <action input="/" name="CgutMatriculaTotalForm" path="/CgutMatriculaTotalAction" scope="request" type="com.mecasut.cgut.CgutMatriculaTotalAction" validate="false"/>
+        <action input="/" name="CgutNuevoIngresoForm" path="/CgutNuevoIngresoAction" scope="request" type="com.mecasut.cgut.CgutNuevoIngresoAction" validate="false"/>
+        <action input="/" name="CgutEgresadosForm" path="/CgutEgresadosAction" scope="request" type="com.mecasut.cgut.CgutEgresadosAction" validate="false"/>
+        <action path="/Excel_Reporte_Eficiencia" type="com.mecasut.reportes.Excel_Reporte_Eficiencia" validate="false"/>    
+        <action path="/Excel_Reporte_Eficacia" type="com.mecasut.reportes.Excel_Reporte_Eficacia" validate="false"/>
+        <action path="/Excel_Reporte_Sabana" type="com.mecasut.reportes.sabana.Excel_Reporte_Sabana"/>
+        <action path="/Excel_Reporte_Directorio" type="com.mecasut.reportes.sabana.Excel_Reporte_Directorio"/>
+        <action path="/Excel_Reporte_Programas" type="com.mecasut.reportes.sabana.Excel_Reporte_Programas"/>
+        <action name="PerfilForm" path="/Excel" scope="request" type="com.mecasut.admon.ExcelAction" validate="false"/>
+     
+        
+        
+        <action name="OrganismoExtranjeroForm" path="/OrganismoExtranjero" scope="request" type="com.mecasut.admon.UnivForms.OrganismoExtranjeroAction" validate="false"/>
+        <action path="/PDF" scope="request" type="com.mecasut.admon.PDFAction" validate="false"/>
+        <action name="PertinenciaIn18Form" path="/PertinenciaIn18" scope="request" type="com.mecasut.pertinencia.PertinenciaIn18Action" validate="false"/>
+        <action path="/global" scope="request" type="com.mecasut.admon.GlobalAction" validate="false"/>
+    </action-mappings>
+
+    <controller processorClass="org.apache.struts.tiles.TilesRequestProcessor"/>
+
+    <message-resources parameter="com/mecasut/login/ApplicationResource"/>
+
+    <!-- ========================= Tiles plugin ===============================-->
+    <!--
+    This plugin initialize Tiles definition factory. This later can takes some
+    parameters explained here after. The plugin first read parameters from
+    web.xml, thenoverload them with parameters defined here. All parameters
+    are optional.
+    The plugin should be declared in each struts-config file.
+    - definitions-config: (optional)
+    Specify configuration file names. There can be several comma
+    separated file names (default: ?? )
+    - moduleAware: (optional - struts1.1)
+    Specify if the Tiles definition factory is module aware. If true
+    (default), there will be one factory for each Struts module.
+    If false, there will be one common factory for all module. In this
+    later case, it is still needed to declare one plugin per module.
+    The factory will be initialized with parameters found in the first
+    initialized plugin (generally the one associated with the default
+    module).
+    true : One factory per module. (default)
+    false : one single shared factory for all modules
+    - definitions-parser-validate: (optional)
+    Specify if xml parser should validate the Tiles configuration file.
+    true : validate. DTD should be specified in file header (default)
+    false : no validation
+
+    Paths found in Tiles definitions are relative to the main context.
+    -->
+    <plug-in className="org.apache.struts.tiles.TilesPlugin" >
+        <set-property property="definitions-config" value="/WEB-INF/tiles-defs.xml" />
+        <set-property property="moduleAware" value="true" />
+    </plug-in>
+
+    <!-- ========================= Validator plugin ================================= -->
+    <plug-in className="org.apache.struts.validator.ValidatorPlugIn">
+        <set-property
+            property="pathnames"
+            value="/WEB-INF/validator-rules.xml,/WEB-INF/validation.xml"/>
+    </plug-in>
+
+</struts-config>

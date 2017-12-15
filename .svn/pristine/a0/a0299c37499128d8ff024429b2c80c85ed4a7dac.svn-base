@@ -1,0 +1,177 @@
+package com.mecasut.conexion;
+
+import java.sql.*;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
+public class ConexionMySQL {
+
+    String url = "jdbc:mysql://localhost:3306/";
+    String baseDeDatos = "mecasut";
+    String drName = "com.mysql.jdbc.Driver";
+    String usuarioMySQL = "root";
+    String contrasena = "";
+    public static Connection con = null;
+    static DataSource ds = null;
+    Statement stmt = null;
+
+    class cerrarConexion {
+
+        Timer timer = new Timer(); // El timer que se encarga de administrar los tiempo de repeticion
+        public int segundos; // manejar el valor del contador
+        public boolean frozen; // manejar el estado del contador TIMER AUTOMATICO -- True Detenido | False Corriendo
+
+        class MiTarea extends TimerTask {
+
+            public void run() {
+                segundos++;
+                System.out.println(segundos);
+                Desconectar();
+            }// end run()
+        }// end SincronizacionAutomatica
+
+        public void Start(int pSeg) throws Exception {
+            frozen = false;
+            // le asignamos una tarea al timer
+            timer.schedule(new MiTarea(), 0, pSeg * 1000 * 60);
+        }// end Start
+
+        public void Stop() {
+            System.out.println("Stop");
+            frozen = true;
+        }// end Stop
+
+        public void Reset() {
+            System.out.println("Reset");
+            frozen = true;
+            segundos = 0;
+        }// end Reset
+    }
+
+    public ConexionMySQL() {
+    }
+
+    public ConexionMySQL(String url, String baseDeDatos, String usuarioMySQL, String contrasena) {
+        this.url = url;
+        this.baseDeDatos = baseDeDatos;
+        this.usuarioMySQL = usuarioMySQL;
+        this.contrasena = contrasena;
+        con = null;
+        this.stmt = null;
+    }
+
+    public boolean Desconectar() {
+        try {
+            if (con != null && !con.isClosed()) {
+                con.close();
+                con = null;
+            }
+            if (this.stmt != null && !stmt.isClosed()) {
+                this.stmt.close();
+                this.stmt = null;
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println(" DBCONECTION:No se ha podido cerrar la conexion");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean Conectar() {
+        try {
+            if (ds == null) {
+                ds = getPruebasource();
+                con = ds.getConnection();
+                System.out.println(" DBCONECTION:Se ha iniciado una nueva conexión al pool");
+                System.out.println(" DBCONECTION:Conexión satisfactoria a la base de datos");
+            } else if (con != null) {
+                if (con.isClosed()) {
+                    con = ds.getConnection();
+                } else {
+                    //System.out.println(" DBCONECTION: La conexión ya se encontraba establecida");
+                }
+            } else if (con == null) {
+                con = ds.getConnection();
+            }
+            if (stmt == null) {
+                stmt = con.createStatement();
+            }
+            return true;
+            //Class.forName(drName).newInstance();
+            //con = DriverManager.getConnection(url + baseDeDatos, usuarioMySQL,
+            //        contrasena);
+        } catch (Exception e) {
+            System.err.println(" DBCONECTION:Conexión rechazada");
+            System.out.println(e.getMessage());
+            Desconectar();
+            return false;
+        }
+    }
+
+    
+    public int Insertar(String sqlQuery) throws SQLException {
+        if (con == null) {
+            Conectar();
+        } else if (con.isClosed()) {
+            Conectar();
+        }
+        stmt = con.createStatement();
+        int val = stmt.executeUpdate(sqlQuery);
+        return val;
+    }
+
+    public int Eliminar(String sqlQuery) throws SQLException {
+        if (con == null) {
+            Conectar();
+        } else if (con.isClosed()) {
+            Conectar();
+        }
+        stmt = con.createStatement();
+        int val = stmt.executeUpdate(sqlQuery);
+        return val;
+    }
+
+    public int Modificar(String sqlQuery) throws SQLException {
+        if (con == null) {
+            Conectar();
+        } else if (con.isClosed()) {
+            Conectar();
+        }
+        stmt = con.createStatement();
+        int val = stmt.executeUpdate(sqlQuery);
+        return val;
+    }
+
+    public ResultSet Consultar(String sqlQuery) throws SQLException {
+        if (con == null) {
+            Conectar();
+        } else if (con.isClosed()) {
+            Conectar();
+        }
+        stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery(sqlQuery);
+        return rs;
+    }
+
+    public CallableStatement PrepararSP(String sqlQuery) throws SQLException {
+        if (con == null) {
+            Conectar();
+        } else if (con.isClosed()) {
+            Conectar();
+        }
+        CallableStatement cstmt = con.prepareCall("{CALL ".concat(sqlQuery).concat("}"));
+        return cstmt;
+    }
+
+    private DataSource getPruebasource() throws NamingException {
+        Context c = new InitialContext();
+        return (DataSource) c.lookup("java:comp/env/pruebasource");
+    }
+}

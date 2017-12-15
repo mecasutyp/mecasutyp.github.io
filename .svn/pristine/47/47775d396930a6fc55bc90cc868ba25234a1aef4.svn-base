@@ -1,0 +1,67 @@
+package com.mecasut.pertinencia;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.SQLException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+/**
+  Author     : Daniel Ramìrez Torres
+ */
+public class PertinenciaIn25Action extends org.apache.struts.action.Action {
+    /* forward name="success" path="" */
+    private static final String SUCCESS = "success";
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form,
+            HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        HttpSession sesion = request.getSession(false);
+        String idUniversidad = sesion.getAttribute("idUniversidad").toString();
+        String Id_Periodo = sesion.getAttribute("idPeriodo").toString();
+        PertinenciaIn25Form frm = (PertinenciaIn25Form) form;
+        Guardar(frm.getValores(), idUniversidad, Id_Periodo);
+        return mapping.findForward(SUCCESS);
+    }
+
+    private boolean Guardar(String valores, String Id_Universidad, String Id_Periodo) {
+        if (valores.equals("Error")) {
+            return false;
+        } else {
+            String[] values;//Valores de todo el formulario
+            String[] datos;//Valores de cada insert
+            values = valores.split("-");
+            ConexionMySQL conexion = new ConexionMySQL();
+            
+            try {
+                for (int i = 1; i < values.length; i++) {
+                    datos = values[i].split(",");
+                    String sql = "Update pertinenciain25 set superiores = ".concat(datos[0])
+                            .concat(", administrativo = ").concat(datos[1])
+                            .concat(", profesores_tc = ").concat(datos[2])
+                            .concat(", profesores_asignatura = ").concat(datos[3])
+                            .concat(", superiores_con = ").concat(datos[4])
+                            .concat(", administrativo_con = ").concat(datos[5])
+                            .concat(", profesores_tc_con = ").concat(datos[6])
+                            .concat(", profesores_asignatura_con = ").concat(datos[7])
+                            .concat(" where id_universidad = ").concat(Id_Universidad).concat(" and id_periodo = ").concat(Id_Periodo);
+                    conexion.Modificar(sql);
+                    if (conexion.Modificar(sql) == 0) {
+                        String sql2 = "Insert into pertinenciain25 values";
+                        for (int j = 1; j < values.length; j++) {
+                            datos = values[j].split(",");
+                            sql2 = sql2.concat("(").concat(Id_Universidad).concat(",".concat(Id_Periodo).concat(",").concat(datos[0]).concat(",").concat(datos[1]).concat(",").concat(datos[2]).concat(",").concat(datos[3]).concat(",").concat(datos[4]).concat(",").concat(datos[5]).concat(",").concat(datos[6]).concat(",").concat(datos[7]).concat(")"));
+                        }
+                        conexion.Insertar(sql2);
+                    }
+                }
+            } catch (SQLException ex) {
+                System.err.println("Error de guardado pertinencia 25: "+ex);
+                return false;
+            }
+            return true;
+        }
+    }
+}

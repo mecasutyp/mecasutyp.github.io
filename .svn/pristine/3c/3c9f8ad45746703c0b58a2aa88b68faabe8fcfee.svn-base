@@ -1,0 +1,168 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.cgut;
+
+import com.mecasut.admon.CgutInterfaceAction;
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+/**
+ *
+ * @author DELL
+ */
+public class CgutUniversidadAction extends org.apache.struts.action.Action {
+
+    /* forward name="success" path="" */
+    private static final String SUCCESS = "success";
+    ConexionMySQL conexion = new ConexionMySQL();
+
+    /**
+     * This is the action called from the Struts framework.
+     *
+     * @param mapping The ActionMapping used to select this instance.
+     * @param form The optional ActionForm bean for this request.
+     * @param request The HTTP Request we are processing.
+     * @param response The HTTP Response we are processing.
+     * @throws java.lang.Exception
+     * @return
+     */
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form,
+            HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        HttpSession sesion = request.getSession(false);
+        CgutUniversidadForm frm = (CgutUniversidadForm) form;
+
+        if (frm.getAsk().equals("buscaUni")) {
+            if (frm.getUniversidad() > 0) {
+                ResultSet rs = conexion.Consultar("select * from universidades where id_universidad="
+                        .concat(String.valueOf(frm.getUniversidad())));
+                if (rs.next()) {
+                    frm.setCvecgut(rs.getString("cve_cgut"));
+                    frm.setNombreUni(rs.getString("nombre_universidad"));
+                    frm.setAbreviatura(rs.getString("abreviatura"));
+                    frm.setRfc(rs.getString("rfc"));
+                    frm.setFechaAcred(rs.getString("fecha_acreditacion"));
+                    if (rs.getBoolean("activo")) {
+                        frm.setUniActivo("Desactivar Universidad");
+                    } else {
+                        frm.setUniActivo("Activar Universidad");
+                    }
+                }
+                return mapping.findForward(SUCCESS);
+            } else {
+                nuevaUni(frm);
+                return mapping.findForward(SUCCESS);
+            }
+        }
+
+        if (frm.getAsk().equals("nuevaUni")) {
+            nuevaUni(frm);
+            return mapping.findForward(SUCCESS);
+        }
+
+        if (frm.getAsk().equals("bajaUni")) {
+            if (frm.getUniversidad() > 0) {
+                String consulta = "select activo from universidades where id_universidad=".concat(String.valueOf(frm.getUniversidad())).concat(" order by nombre_universidad");
+                String update1 = "update universidades set activo=";
+                String update2 = " where id_universidad=";
+                if (bajaDatos(consulta, update1, update2, frm.getUniversidad()) == 1) {
+                    frm.setUniActivo("Activar Universidad");
+                } else {
+                    frm.setUniActivo("Desactivar Universidad");
+                }
+            }
+            return mapping.findForward(SUCCESS);
+        }
+
+        if (frm.getAsk().equals("guardarUni")) {
+            System.out.println("CLAVE:" + frm.getCvecgut());
+            System.out.println("fecha" + frm.getFechaAcred());
+            System.out.println("activo" + frm.getUniActivo());
+            System.out.println("universidades" + frm.getUniversidades());
+            String update = "update universidades set cve_cgut='".concat(frm.getCvecgut())
+                    .concat("', nombre_universidad='").concat(frm.getNombreUni()).concat("', abreviatura='")
+                    .concat(frm.getAbreviatura()).concat("', rfc='").concat(frm.getRfc())
+                    .concat("', fecha_acreditacion='").concat(frm.getFechaAcred())
+                    .concat("' where id_universidad=").concat(String.valueOf(frm.getUniversidad()));
+            System.out.println(update);
+            String insert = "insert into universidades (cve_cgut,nombre_universidad,abreviatura,rfc,fecha_acreditacion) values ('"
+                    .concat(frm.getCvecgut()).concat("','").concat(frm.getNombreUni()).concat("','").concat(frm.getAbreviatura())
+                    .concat("','").concat(frm.getRfc()).concat("','").concat(frm.getFechaAcred()).concat("')");
+            System.out.println(insert);
+            if (frm.getUniversidad() == -1) {
+                update = "update universidades set cve_cgut='".concat(frm.getCvecgut()).concat("', nombre_universidad='")
+                        .concat(frm.getNombreUni()).concat("', abreviatura='").concat(frm.getAbreviatura())
+                        .concat("', rfc='").concat(frm.getRfc())
+                        .concat("', fecha_acreditacion='").concat(frm.getFechaAcred()).concat("' where id_universidad=-2");
+                insert = "insert into universidades (cve_cgut,nombre_universidad,abreviatura,rfc,fecha_acreditacion) values ('"
+                        .concat(frm.getCvecgut()).concat("','").concat(frm.getNombreUni()).concat("','").concat(frm.getAbreviatura())
+                        .concat("','").concat(frm.getRfc())
+                        .concat("','").concat(frm.getFechaAcred()).concat("')");
+            }
+            guardarDatos(update, insert);
+            frm.setUniversidades();
+            nuevaUni(frm);
+            return mapping.findForward(SUCCESS);
+        }
+        return mapping.findForward(SUCCESS);
+    }
+
+    private void nuevaUni(CgutUniversidadForm frm) {
+        frm.setUniversidad(-1);
+        frm.setCvecgut("");
+        frm.setNombreUni("");
+        frm.setAbreviatura("");
+        frm.setUniActivo("");
+        frm.setFechaAcred("");
+        frm.setRfc("");
+    }
+
+    private void guardarDatos(String update, String insert) {
+        try {
+            if (conexion.Modificar(update) == 0) {
+                System.out.println("insertar nuevo");
+                try {
+                    conexion.Insertar(insert);
+                } catch (SQLException ex1) {
+                    Logger.getLogger(CgutUniversidadAction.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CgutUniversidadAction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private int bajaDatos(String consulta, String update1, String update2, int id) {
+        int activo = 0;
+        try {
+            String update = update1;
+            ResultSet rs = conexion.Consultar(consulta);
+            if (rs.next()) {
+                activo = rs.getInt(1);
+            }
+            if (activo == 1) {
+                update = update.concat("0").concat(update2).concat(String.valueOf(id));
+                conexion.Modificar(update);
+            } else {
+                update = update.concat("1").concat(update2).concat(String.valueOf(id));
+                conexion.Modificar(update);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CgutUniversidadAction.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return activo;
+    }
+}

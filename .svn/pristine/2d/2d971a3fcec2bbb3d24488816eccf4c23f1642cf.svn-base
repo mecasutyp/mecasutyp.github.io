@@ -1,0 +1,13 @@
+
+
+ALTER TABLE pe_universidad ADD (nuevo_ingreso int(6) NOT NULL, matricula_total int (6) NOT NULL, clasificacion enum('TB', 'TN') )
+
+update pe_universidad set nuevo_ingreso=0, matricula_total=0;
+
+
+
+/*SE COMENTA EN SP_REINICIARDATOS uNIVERSIDAD*/
+
+delete from datos_universidad where datos_universidad.id_universidad=id_universidad  and datos_universidad.id_periodo= id_periodo;
+
+/*------------------*/

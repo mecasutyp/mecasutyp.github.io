@@ -1,0 +1,132 @@
+var validar=false;
+function indicador4(control,cu,save,des){
+    var controles = new Array();
+    var j = 0;
+    while(document.forms["EficaciaIn4Form"][j].name != "fin"){
+        controles.push(document.forms["EficaciaIn4Form"][j].name);
+        j++;
+    }    
+    if (control.value == "")
+        control.value = 0;
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("rojo","El valor '" + control.value + "' no es v&aacute;lido, debe ser un n&uacute;mero entero.");
+        $(control).addClass("inputerror").removeClass("inputok");
+        return;
+    }else{
+        $(control).val(Number(control.value));
+        $(control).addClass("inputok").removeClass("inputerror");
+        /*Modificar a partir de acá*/
+        operacionesEficacia4(cu,save,des);
+    }
+}
+
+function operacionesEficacia4(c,save,des){
+    var cadena = "-",prom=0, cu=$("form[name='EficaciaIn4Form'] input[name=no_niv]").val(),cadena2="x";
+    var num_fil=$("form[name='EficaciaIn4Form'] input[name=no_fil_niv]").val();       
+    if(save==0){
+        var ssep_d=0,tv_1=0,tv_2=0,tv_3=0,cont=0;
+        for(var i=1;i<num_fil;i++){            
+            ssep_d=parseInt($("form[name='EficaciaIn4Form'] input[id=sep_dic_"+c+"_"+i+"]").val())+parseInt($("form[name='EficaciaIn4Form'] input[id=ene_abr_"+c+"_"+i+"]").val())
+            +parseInt($("form[name='EficaciaIn4Form'] input[id=may_ago_"+c+"_"+i+"]").val());           
+            $("form[name='EficaciaIn4Form'] input[name=th"+c+"_"+i+"]").val(ssep_d);        
+            tv_1+=parseInt($("form[name='EficaciaIn4Form'] input[id=sep_dic_"+c+"_"+i+"]").val());        
+            tv_2+=parseInt($("form[name='EficaciaIn4Form'] input[id=ene_abr_"+c+"_"+i+"]").val());        
+            tv_3+=parseInt($("form[name='EficaciaIn4Form'] input[id=may_ago_"+c+"_"+i+"]").val());         
+            $("form[name='EficaciaIn4Form'] input[name=ttv"+c+"]").val(tv_1+tv_2+tv_3);
+        }
+        $("form[name='EficaciaIn4Form'] input[name=tv"+c+"_1]").val(tv_1);    
+        $("form[name='EficaciaIn4Form'] input[name=tv"+c+"_2]").val(tv_2);
+        $("form[name='EficaciaIn4Form'] input[name=tv"+c+"_3]").val(tv_3);
+        ssep_d=0,tv_1=0,tv_2=0,tv_3=0;       
+    }
+    if(save==0 && des==1){        
+        if(parseInt($("form[name='EficaciaIn4Form'] input[name=matSep"+c+"]").val())==parseInt(0)){
+            $("form[name='EficaciaIn4Form'] input[name=Div"+c+"_1]").val(0 + " %");
+        }else{
+            $("form[name='EficaciaIn4Form'] input[name=Div"+c+"_1]").val(getDecimal(((parseInt($("form[name='EficaciaIn4Form'] input[name=tot_deser"+c+"_1]").val())/
+                parseInt($("form[name='EficaciaIn4Form'] input[name=matSep"+c+"]").val()))*100)) + " %");          
+        }
+        if(parseInt($("form[name='EficaciaIn4Form'] input[name=matEne"+c+"]").val())==parseInt(0)){
+            $("form[name='EficaciaIn4Form'] input[name=Div"+c+"_2]").val(0 + " %");
+        }else{
+            $("form[name='EficaciaIn4Form'] input[name=Div"+c+"_2]").val(getDecimal(((parseInt($("form[name='EficaciaIn4Form'] input[name=tot_deser"+c+"_2]").val())/
+                parseInt($("form[name='EficaciaIn4Form'] input[name=matEne"+c+"]").val()))*100)) + " %");
+        }
+        if(parseInt($("form[name='EficaciaIn4Form'] input[name=matMay"+c+"]").val())==parseInt(0)){
+            $("form[name='EficaciaIn4Form'] input[name=Div"+c+"_3]").val(0 + " %");
+        }else{           
+            $("form[name='EficaciaIn4Form'] input[name=Div"+c+"_3]").val(getDecimal(((parseInt($("form[name='EficaciaIn4Form'] input[name=tot_deser"+c+"_3]").val())/
+                parseInt($("form[name='EficaciaIn4Form'] input[name=matMay"+c+"]").val()))*100)) + " %");        
+        }               
+        //validar
+        $("form[name='EficaciaIn4Form'] input[name=promD"+c+"]").val(getDecimal(((parseFloat($("form[name='EficaciaIn4Form'] input[name=Div"+c+"_1]").val())+
+            parseFloat($("form[name='EficaciaIn4Form'] input[name=Div"+c+"_2]").val())+parseFloat($("form[name='EficaciaIn4Form'] input[name=Div"+c+"_3]").val()))/3)));
+        for(var m=1;m<cu;m++){            
+            if(parseFloat($("form[name='EficaciaIn4Form'] input[name=promD"+m+"]").val())>0){
+             cont++;   
+                
+            }
+            prom+=parseFloat($("form[name='EficaciaIn4Form'] input[name=promD"+m+"]").val());
+        }
+        //here
+        $("form[name='EficaciaIn4Form'] input[name=prom]").val(getDecimal(prom/cont));
+    }     
+    if(save==1 && c==0){         
+        if ($("form[name='EficaciaIn4Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+           $().alerta("rojo","Error al guardar. Por favor verifique los datos");                 
+        }else{
+            for(var k=1;k<cu;k++){         
+                for(var l=1;l<num_fil;l++){ 
+                    cadena=cadena.concat($("form[name='EficaciaIn4Form'] input[name=id_nivel"+k+"]").val());          
+                    cadena=cadena.concat(",",$("form[name='EficaciaIn4Form'] input[name=id_causa"+k+"_"+l+"]").val(),","); 
+                    cadena=cadena.concat($("form[name='EficaciaIn4Form'] input[id=sep_dic_"+k+"_"+l+"]").val(),",");
+                    cadena=cadena.concat($("form[name='EficaciaIn4Form'] input[id=ene_abr_"+k+"_"+l+"]").val(),",");
+                    cadena=cadena.concat($("form[name='EficaciaIn4Form'] input[id=may_ago_"+k+"_"+l+"]").val(),"-");           
+                }     
+                cadena2=cadena2.concat($("form[name='EficaciaIn4Form'] input[name=id_nivel"+k+"]").val(),",");  
+                cadena2=cadena2.concat($("form[name='EficaciaIn4Form'] input[name=tot_deser"+k+"_1]").val(),",");
+                cadena2=cadena2.concat($("form[name='EficaciaIn4Form'] input[name=tot_deser"+k+"_2]").val(),",");
+                cadena2=cadena2.concat($("form[name='EficaciaIn4Form'] input[name=tot_deser"+k+"_3]").val(),"x");
+                var niv=$("form[name='EficaciaIn4Form'] input[name=niv_"+k+"]").val();
+                if(parseInt($("form[name='EficaciaIn4Form'] input[name=tot_deser"+k+"_1]").val())!= parseInt($("form[name='EficaciaIn4Form'] input[name=tv"+k+"_1]").val()) ){                    
+                    
+                    $().alerta("rojo","Error al guardar. El Total de Alumnos desertores definitivos del cuatrimestre Septiembre-Diciembre del cuadro 4.1."+niv+" no coincide con el total de desertores Cuatrimestre Septiembre - Diciembre del cuadro  4.2."+niv+"");                     
+                    validar=false;
+                    return;
+                }else{
+                    validar=true;
+                }
+                if(parseInt($("form[name='EficaciaIn4Form'] input[name=tot_deser"+k+"_2]").val())!= parseInt($("form[name='EficaciaIn4Form'] input[name=tv"+k+"_2]").val()) ){                    
+                    $().alerta("rojo","Error al guardar. El Total de Alumnos desertores definitivos del cuatrimestre Enero-Abril del cuadro 4.1."+niv+" no coincide con el total de desertores Cuatrimestre Enero - Abril del cuadro  4.2."+niv+"");                     
+                    validar=false;
+                    return;
+                }else{
+                    validar=true;
+                }
+                if(parseInt($("form[name='EficaciaIn4Form'] input[name=tot_deser"+k+"_3]").val())!= parseInt($("form[name='EficaciaIn4Form'] input[name=tv"+k+"_3]").val()) ){                    
+                    $().alerta("rojo","Error al guardar. El Total de Alumnos desertores definitivos del cuatrimestre Mayo-Agosto del cuadro 4.1."+niv+" no coincide con el total de desertores Cuatrimestre Mayo - Agosto del cuadro  4.2."+niv+"");                     
+                    validar=false;
+                    return;
+                }else{
+                    validar=true;
+                }                   
+            } 
+            if(validar==true){
+                
+                enviarDatosIndicadores(cadena+cadena2,'EficaciaIn4Datos','EficaciaIn4Form');
+                //$().alerta("verde","Datos Guardados Correctamente.");            
+            }else{
+                enviarDatosIndicadores("Error",'EficaciaIn4Datos','EficaciaIn4Form');
+            }
+        }       
+    }
+}
+
+function blurVal4(){
+    $('form[name="EficaciaIn4Form"] input[name^="promD"]').each(function(index, domEle) {
+        $(domEle).blur();       
+    });
+    $('form[name="EficaciaIn4Form"] input[name^="ttv"]').each(function(index, domEle) {
+        $(domEle).blur();       
+    });    
+}

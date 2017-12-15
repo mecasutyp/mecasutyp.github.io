@@ -1,0 +1,44 @@
+function guardar32(){
+    var cadena="";
+    if ($("form[name='VinculacionIn32Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+        cadena="Error";
+    }else{
+        cadena= operaciones_32();        
+    //retrieveURL('/VinculacionIn32.msut?valores='+cadena, 'VinculacionIn32Form');
+    }
+    enviarDatosIndicadores(cadena,'VinculacionIn32Datos','VinculacionIn32Form');
+}
+
+function indicador32(control){
+    if (control.value == "")
+        control.value = 0;
+
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("rojo","El valor '" + control.value + "' no es v&aacute;lido, debe ser un n&uacute;mero entero.");
+        $(control).addClass("inputerror").removeClass("inputok");
+        return;
+    }else{
+        $(control).val(Number(control.value));
+        $(control).addClass("inputok").removeClass("inputerror");
+        operaciones_32();
+    }
+}
+function operaciones_32(){
+    var c=$("form[name='VinculacionIn32Form'] input[name='No_niv']").val();
+    var cadena="";
+    for(var i=1;i<c;i++){
+        $("form[name='VinculacionIn32Form'] input[name='Id_nivel"+i+"']").val();
+        cadena=cadena.concat($("form[name='VinculacionIn32Form'] input[name='Id_nivel"+i+"']").val(),",");
+        $("form[name='VinculacionIn32Form'] input[name='valEgresados_"+i+"']").val();
+        cadena=cadena.concat($("form[name='VinculacionIn32Form'] input[name='valEgresados_"+i+"']").val(),",");
+        $("form[name='VinculacionIn32Form'] input[name='valPlazas_"+i+"']").val();
+        cadena=cadena.concat($("form[name='VinculacionIn32Form'] input[name='valPlazas_"+i+"']").val());
+        cadena=cadena.concat("-");
+        if(parseInt($("form[name='VinculacionIn32Form'] input[name='valEgresados_"+i+"']").val())>0 && parseInt($("form[name='VinculacionIn32Form'] input[name='valPlazas_"+i+"']").val())>0 ){        
+            $("form[name='VinculacionIn32Form'] input[name='BT"+i+"']").val(getDecimal((parseFloat($("form[name='VinculacionIn32Form'] input[name='valEgresados_"+i+"']").val())/parseFloat($("form[name='VinculacionIn32Form'] input[name='valPlazas_"+i+"']").val()))*100) + " %");
+        } else{
+            $("form[name='VinculacionIn32Form'] input[name='BT"+i+"']").val(0 + " %");
+        }         
+    }
+    return cadena;
+}

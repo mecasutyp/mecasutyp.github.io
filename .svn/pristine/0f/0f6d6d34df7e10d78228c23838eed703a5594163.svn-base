@@ -1,0 +1,197 @@
+function getScreenWidth(){
+    return "width:"+screen.width;
+}
+
+function guardar1(){
+    var cadena="";
+    if (!$("form[name='EficaciaIn1Form'] input").hasClass("inputerror")){
+        var valor=checkEficaciaIn1();
+        var v1=$("form[name='EficaciaIn1Form'] input[name='i1v1']").val();
+        var v2=$("form[name='EficaciaIn1Form'] input[name='i1v2']").val();
+        var v3=$("form[name='EficaciaIn1Form'] input[name='i1v3']").val();
+        var v4=$("form[name='EficaciaIn1Form'] input[name='i1v4']").val();
+        var v5=$("form[name='EficaciaIn1Form'] input[name='i1v5']").val();
+         cadena="-".concat(v1, ",", v2, ",", v3, ",", v4, ",", v5,",",valor,"-");
+    //$().alerta("verde","Datos Guardados Correctamente.");         
+    //   return cadena;
+    }else{
+        //$().alerta("amarillo","La informaci&oacute;n capturada contiene errores.");
+        cadena="Error";
+        //return;
+    }   
+    return cadena;
+}
+
+function indicador1(control){
+    if (!/^([0-9])*$/.test(control.value)){ //SI EL VALOR NO ES VÁLIDO
+        $().alerta("rojo","El valor '"+ control.value + "' no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");
+        if ($('form[name="EficaciaIn1Form"] input').hasClass("inputerror")){
+            $('li[class*="ui-tabs-selected ui-state-active"]').globo("update", "<center>Indicador con <br/> errores, favor <br/> de revisar.</center>").globo("show");
+        }else{
+            $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide");
+        }
+        ceros();
+        $("form[name='EficaciaIn1Form'] input[name='i1v1']").globo("disable");
+        $("form[name='EficaciaIn1Form'] input[name='i1v2']").globo("disable");
+        return;
+    }else{
+        control.value=Number(control.value);
+        $(control).removeClass("inputerror").addClass("inputok");
+        var errores=false;
+        if ($('form[name="EficaciaIn1Form"] input').hasClass("inputerror")){
+            $('li[class*="ui-tabs-selected ui-state-active"]').globo("update", "<center>Indicador con <br/> errores, favor <br/> de revisar.</center>").globo("show");
+        }else{
+            $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide");
+        }
+        //SUMA
+        if (!$("form[name='EficaciaIn1Form'] input[name='i1v3']").hasClass("inputerror")
+            && !$("form[name='EficaciaIn1Form'] input[name='i1v4']").hasClass("inputerror")
+            && !$("form[name='EficaciaIn1Form'] input[name='i1v5']").hasClass("inputerror")){
+            $("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val(
+                parseInt($("form[name='EficaciaIn1Form'] input[name='i1v3']").val())+
+                parseInt($("form[name='EficaciaIn1Form'] input[name='i1v4']").val())+
+                parseInt($("form[name='EficaciaIn1Form'] input[name='i1v5']").val()));
+        }else{
+            ceros();
+        }
+        //RESTA
+        if (parseInt($("form[name='EficaciaIn1Form'] input[name='i1v2']").val()) - parseInt($("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val()) > 0){
+            $("form[name='EficaciaIn1Form'] input[name='alumnosNoExaniNI']").val(
+                parseInt($("form[name='EficaciaIn1Form'] input[name='i1v2']").val())-
+                parseInt($("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val())
+                );
+        }else{
+            $("form[name='EficaciaIn1Form'] input[name='alumnosNoExaniNI']").val(0);
+        }
+
+        //GLOBOS
+        if ($("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val()!=0){
+            //MENSAJES 1 MAS GRANDE
+            if (/^([0-9])*$/.test($("form[name='EficaciaIn1Form'] input[name='i1v1']").val())){//I1V1 TIENE ERRORES
+                if(parseInt($("form[name='EficaciaIn1Form'] input[name='i1v1']").val())<
+                    parseInt($("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val())){
+                    $("form[name='EficaciaIn1Form'] input[name='i1v1']").removeClass("inputok").addClass("inputerror").globo("enable").globo("update", "<center>No puede ser menor<br/>que los alumnos de <br/>nuevo ingreso inscritos <br/>a la UT<br/></center>");
+                    $("form[name='EficaciaIn1Form'] input[name='i1v1']").globo("show");
+                    errores=true;
+                }else{
+                    $("form[name='EficaciaIn1Form'] input[name='i1v1']").removeClass("inputerror").addClass("inputok").globo("disable");
+                    errores=false;
+                }
+            }
+            //MENSAJES 2 MAS GRANDE
+            if (/^([0-9])*$/.test($("form[name='EficaciaIn1Form'] input[name='i1v2']").val())){//I1V1 TIENE ERRORES
+                if(parseInt($("form[name='EficaciaIn1Form'] input[name='i1v2']").val())<
+                    parseInt($("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val())){
+                    $("form[name='EficaciaIn1Form'] input[name='i1v2']").removeClass("inputok").addClass("inputerror").globo("enable").globo("update", "<center>No puede ser menor<br/>que los alumnos de <br/>nuevo ingreso inscritos <br/>a la UT<br/></center>");
+                    $("form[name='EficaciaIn1Form'] input[name='i1v2']").globo("show");
+                    errores=true;
+                }else{
+                    $("form[name='EficaciaIn1Form'] input[name='i1v2']").removeClass("inputerror").addClass("inputok").globo("disable");
+                    errores=false;
+                }
+            }
+        }else{
+            // ceros();
+            $("form[name='EficaciaIn1Form'] input[name='i1v1']").globo("disable");
+            $("form[name='EficaciaIn1Form'] input[name='i1v2']").globo("disable");
+        }
+        if (errores==false){
+            operacionesInd1();
+        }
+    }
+    if ($('form[name="EficaciaIn1Form"] input').hasClass("inputerror")){
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("update", "<center>Indicador con <br/> errores, favor <br/> de revisar.</center>").globo("show");
+    }else{
+        $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide");
+    }
+}
+
+function ceros(){
+    $("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val(0);
+    $("form[name='EficaciaIn1Form'] input[name='i1ani1']").val(0);
+    $("form[name='EficaciaIn1Form'] input[name='i1ani2']").val(0);
+    $("form[name='EficaciaIn1Form'] input[name='i1ani3']").val(0);
+    $("form[name='EficaciaIn1Form'] input[name='i1ani4']").val(0);
+    $("form[name='EficaciaIn1Form'] input[name='i1ani5']").val(0);
+}
+
+function operacionesInd1(){
+    if (!$("form[name='EficaciaIn1Form'] input").hasClass("inputerror")){
+        //OPERACIONES
+        var v1 =parseInt($('#i1v1').val());
+        var v2 =parseInt($('#i1v2').val());
+        var v3 =parseInt($('#i1v3').val());
+        var v4 =parseInt($('#i1v4').val());
+        var v5 =parseInt($('#i1v5').val());
+        //SUMA
+        $('[name="alumnosExaniNI"]').val(v3+v4+v5);
+        var total = $('[name="alumnosExaniNI"]').val();
+        if (parseInt($("form[name='EficaciaIn1Form'] input[name='i1v2']").val()) - parseInt($("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val()) > 0){
+            $("form[name='EficaciaIn1Form'] input[name='alumnosNoExaniNI']").val(
+                parseInt($("form[name='EficaciaIn1Form'] input[name='i1v2']").val())-
+                parseInt($("form[name='EficaciaIn1Form'] input[name='alumnosExaniNI']").val())
+                );
+        }else{
+            $("form[name='EficaciaIn1Form'] input[name='alumnosNoExaniNI']").val(0);
+        }
+        //DIVISIONES
+        if (v1!=0){
+            $('[name="i1ani1"]').val(Math.round((total/v1*100)*100)/100);
+        }else{
+            $('[name="i1ani1"]').val(0);
+        }
+        if (v2!=0){
+            $('[name="i1ani2"]').val(Math.round((total/v2*100)*100)/100);
+        }else{
+            $('[name="i1ani2"]').val(0);
+        }
+        if (v3!=0){
+            $('[name="i1ani3"]').val(Math.round((v3/total*100)*100)/100);
+        }else{
+            $('[name="i1ani3"]').val(0);
+        }
+        if (v4!=0){
+            $('[name="i1ani4"]').val(Math.round((v4/total*100)*100)/100);
+        }else{
+            $('[name="i1ani4"]').val(0);
+        }
+        if (v5!=0){
+            $('[name="i1ani5"]').val(Math.round((v5/total*100)*100)/100);
+        }else{
+            $('[name="i1ani5"]').val(0);
+        }
+    }
+}
+
+function checkEficaciaIn1(){
+    var valor="";
+    for (var i=0;i<$("form[name='EficaciaIn1Form'] input[name='radio']").length;i++){
+        if ($("form[name='EficaciaIn1Form'] input[name='radio']")[i].checked){
+            valor=valor.concat($("form[name='EficaciaIn1Form'] input[name='radio']")[i].value);
+            if($("form[name='EficaciaIn1Form'] input[name='radio']")[i].value==1){
+                $("#efi1").slideDown();
+                for(var j=1;j<6;j++){
+                    $("form[name='EficaciaIn1Form'] input[name='i1v"+j+"']").removeAttr("disabled");
+                }
+            }
+            else{
+                $("#efi1").slideUp();
+                for(var k=1;k<6;k++){
+                    $("form[name='EficaciaIn1Form'] input[name='i1v"+k+"']").attr("disabled","disabled");                    
+                    if(k!=2){
+                        $("form[name='EficaciaIn1Form'] input[name='i1v"+k+"']").val(0);
+                    }
+                    $("form[name='EficaciaIn1Form'] input[name='i1v1']").removeClass("inputerror");
+                    $("form[name='EficaciaIn1Form'] input[name='i1v2']").removeClass("inputerror");
+                    $("form[name='EficaciaIn1Form'] input[name='i1v3']").removeClass("inputerror");
+                    $("form[name='EficaciaIn1Form'] input[name='i1v4']").removeClass("inputerror");
+                    $("form[name='EficaciaIn1Form'] input[name='i1v5']").removeClass("inputerror");
+                    $('li[class*="ui-tabs-selected ui-state-active"]').globo("hide");
+                }
+                operacionesInd1();
+            }
+        }
+    }
+    return valor;
+}

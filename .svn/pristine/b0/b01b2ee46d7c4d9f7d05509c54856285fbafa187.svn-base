@@ -1,0 +1,125 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.cgut;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.ResultSet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+/**
+ *
+ * @author DELL
+ */
+public class CgutCausasAction extends org.apache.struts.action.Action {
+
+
+    /* forward name="success" path="" */
+    private static final String SUCCESS = "success";
+    ConexionMySQL conexion = new ConexionMySQL();
+
+    /**
+     * This is the action called from the Struts framework.
+     *
+     * @param mapping The ActionMapping used to select this instance.
+     * @param form The optional ActionForm bean for this request.
+     * @param request The HTTP Request we are processing.
+     * @param response The HTTP Response we are processing.
+     * @throws java.lang.Exception
+     * @return
+     */
+    @Override
+    public ActionForward execute(ActionMapping mapping, ActionForm form,
+            HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+
+        HttpSession sesion = request.getSession(false);
+        CgutCausasForm frm = (CgutCausasForm) form;
+        
+
+        if (frm.getAsk().equals("buscaCausas")) {
+            if (frm.getCboCausas() > 0) {
+                String sql = "select * from causas_desercion where id_causa =".concat(String.valueOf(frm.getCboCausas()));
+                ResultSet rs = conexion.Consultar(sql);
+                if (rs.next()) {
+                    frm.setNombreCausas(rs.getString(3));
+                    if (rs.getBoolean(4)) {
+                        frm.setActivo("Desactivar Causa");
+                    } else {
+                        frm.setActivo("Activar Causa");
+                    }
+                }
+                conexion.Desconectar();
+                return mapping.findForward(SUCCESS);
+            } else {
+                nuevaCausa(frm);
+                conexion.Desconectar();
+                return mapping.findForward(SUCCESS);
+            }
+        }
+
+        if (frm.getAsk().equals("guardarCausa")) {
+            if (frm.getCboCausas() > 0) {
+                String sql = "update causas_desercion set descripcion = '".concat(frm.getNombreCausas()).concat("',").concat(" id_periodo='").concat(sesion.getAttribute("idPeriodo").toString()).concat("' ").concat("where id_causa = '").concat(String.valueOf(frm.getCboCausas())).concat("'");
+                conexion.Modificar(sql);
+                conexion.Desconectar();
+                nuevaCausa(frm);
+                frm.setCausas();
+                return mapping.findForward(SUCCESS);
+            } else {
+                String sql2 = "insert into causas_desercion values(null,'".concat(sesion.getAttribute("idPeriodo").toString()).concat("','").concat(frm.getNombreCausas()).concat("',1)");
+                conexion.Insertar(sql2);
+                conexion.Desconectar();
+                nuevaCausa(frm);
+                frm.setCausas();
+                return mapping.findForward(SUCCESS);
+            }
+        }
+
+        if (frm.getAsk().equals("bajarCausa")) {
+            String query="";
+            if (frm.getActivo().equals("Activar Causa")) {
+                System.out.println("entra en desactivar");
+                query = "UPDATE causas_desercion SET activo=1 WHERE id_causa=".concat(String.valueOf(frm.getCboCausas()));
+                frm.setActivo("Desactivar Causa");
+                try {
+                    conexion.Modificar(query);
+                } catch (Exception e) {
+                    System.out.println("ERROR BD: Desactivando la Causa de Deserción");
+                } finally {
+                    return mapping.findForward(SUCCESS);
+                }
+            } else {
+                System.out.println("entra en else");
+                query = "UPDATE causas_desercion SET activo=0 WHERE id_causa=".concat(String.valueOf(frm.getCboCausas()));
+                frm.setActivo("Activar Causa");
+                try {
+                    conexion.Modificar(query);
+                } catch (Exception e) {
+                    System.out.println("ERROR BD: Desactivando la Causa de Deserción "+e.getMessage());
+                } finally {
+                    return mapping.findForward(SUCCESS);
+                }
+            }
+        }
+
+        if (frm.getAsk().equals("nuevaCausa")) {
+            nuevaCausa(frm);
+            return mapping.findForward(SUCCESS);
+        }
+
+        return mapping.findForward(SUCCESS);
+    }
+
+    private void nuevaCausa(CgutCausasForm frm) {
+        frm.setCboCausas(-1);
+        frm.setNombreCausas("");
+        frm.setActivo("");
+    }
+}

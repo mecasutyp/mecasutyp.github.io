@@ -1,0 +1,117 @@
+<%-- 
+    Document   : CgutMatriculaTotal
+    Created on : 10-jul-2013, 11:39:17
+      Author     : Daniel Ramírez Torres & Cuauhtemoc Medina Muñoz
+--%>
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%  HttpSession sesion = request.getSession();
+    String id_periodo = "", id_user = "";
+    if (sesion.getAttribute("usuario") == null) {
+%>
+<jsp:forward page="/login.msut">
+    <jsp:param name="error" value="true"></jsp:param>
+    <jsp:param name="ask" value="false"></jsp:param>
+    <jsp:param name="errorMessage" value="Sesi&oacute;n caducada o inv&aacute;lida<br/>El recurso al que deseas acceder est&aacute; restringido, debes iniciar sesi&oacute;n para utilizarlo."></jsp:param>
+</jsp:forward>
+<%  } else {
+        id_periodo = sesion.getAttribute("idPeriodo").toString();
+        id_user = sesion.getAttribute("idUsuario").toString();
+    }
+%>
+
+<html:form action="/CgutMatriculaTotalAction" onsubmit="return false">    
+    <input type="hidden" name="inicioMatTotal" id="inicioMatTotal"/>
+    <h2 align="center">Matricula total por nivel de cada Universidad</h2>
+    <%
+
+        ConexionMySQL con = new ConexionMySQL();
+        ResultSet rs = null;
+        ResultSet rs2 = null;
+        int cantniveles = 0, cont = 1, no_niv = 1, a = 0, valor;
+        
+        String sqln = "select * from nivel_pe where id_nivel > 0 and activo = 1";
+        ResultSet rsn = con.Consultar(sqln);
+        String tabla_total = "<table id='hor-minimalist-a' border='0px' align='center' cellpadding='10px' cellspacing='0px'>";
+
+        try {
+            String sql = "select id_universidad, nombre_universidad,fecha_acreditacion from universidades where id_universidad < 63 and id_universidad >0 union"
+ + " select id_universidad, nombre_universidad,fecha_acreditacion from universidades where id_universidad = 67 union "
+ + "select id_universidad, nombre_universidad,fecha_acreditacion from universidades where id_universidad = 63 or id_universidad = 64 union "
+ + "select id_universidad, nombre_universidad,fecha_acreditacion from universidades where id_universidad = 68 union "
+ + "select id_universidad, nombre_universidad,fecha_acreditacion from universidades where id_universidad = 65 or id_universidad = 66 union "
+ + "select id_universidad, nombre_universidad,fecha_acreditacion from universidades where id_universidad > 66";
+            //String sql = "select id_universidad, nombre_universidad,fecha_acreditacion from universidades where id_universidad > 0 order by fecha_acreditacion asc";
+            rs = con.Consultar(sql);
+            while (rs.next()) {
+                if (a % 15 == 0) { // pinta los subencabezados
+                    tabla_total += "<tr>"
+                            + "<th>#</th>"
+                            + "<th align='center'>Universidad</th>";
+                    rsn.beforeFirst();
+                    cantniveles = 0;
+                    while (rsn.next()) { //pinta los encabezados con los niveles
+                        tabla_total = tabla_total.concat("<th>Nivel ").concat(rsn.getString("abreviatura")).concat("</th>");
+                        cantniveles++;
+                    }
+                    tabla_total = tabla_total.concat("<th>Matr&iacute;culaTotal</th>");
+                    tabla_total = tabla_total.concat("</tr>");
+                }
+                tabla_total += "<tr>";
+                tabla_total += "<td align='center'>" + cont + "</td>";
+                //aki es lo nuevo para rehacel el script
+                tabla_total += "<input name='id_u" + cont + "' type='hidden' value='" + rs.getString(1) + "'/>";
+
+                tabla_total += "<td align='right'>" + rs.getString(2) + "</td>";
+                rsn.beforeFirst();
+                while (rsn.next()) {
+                    String sql2 = "select matricula from mat_total_universidad where id_universidad = ".concat(rs.getString(1)).concat(" and id_periodo = ").concat(id_periodo).concat(" and id_nivel = ").concat(rsn.getString("id_nivel"));
+                    rs2 = con.Consultar(sql2);
+                    if (rs2.next()) {
+                        valor = rs2.getInt(1);
+                    } else {
+                        valor = 0;
+                    }
+                    tabla_total += "<td><input type='text' onblur='solo_numeros(this," + rs.getString(1) + ",1,"+no_niv+");' maxlength='6' style='width: 70px' name='niv_" + cont + "," + no_niv + "' id='niv_" + rs.getString(1) + "," + no_niv + "' value='" + valor + "'/></td>";
+                    no_niv++;
+                }
+                tabla_total += "<input name='t_n" + cont + "' type='hidden' value='" + (no_niv - 1) + "'/>";
+                tabla_total += "<input name='tot_n' type='hidden' value='" + cantniveles + "'/>";
+
+                tabla_total += "<td><input type='text' disabled onblur='solo_numeros(this);' maxlength='6' style='width: 70px' name='tot_" + cont + "' id='tot_" + rs.getString(1) + "'  value=''/></td>";
+                tabla_total += "<td><input value='" + rs.getString(1) + "' type='hidden' name='MatTotal" + rs.getString(1) + "' id='MatTotal" + rs.getString(1) + "'/></td>";
+                tabla_total += "</tr>";
+                a++;
+                cont++;
+                no_niv = 1;
+            }
+
+
+            tabla_total += "<tr>";
+            tabla_total += "<th align='center' colspan='2'>Totales</th>";
+            for (int i = 1; i <= cantniveles; i++) {
+                tabla_total += "<th><input disabled  maxlength='6' style='width: 70px' name='totalNiv" + i + "' id='totalNiv" + i + "' />   </th>";
+            }
+            tabla_total += "<th><input disabled  maxlength='6' style='width: 70px' name='totalMatTotal'  /> </th>";
+            tabla_total += "</tr>";
+            tabla_total += "<tr>"
+                    + "<td colspan='8' align='right'>"
+                    + "<a class='green' onclick='mat_Total(1,null,0,0);'>Guardar cambios</a>"
+                    + "</td>"
+                    + "</tr>"
+                    + "</table>";
+        } catch (SQLException ex) {
+            System.out.println("Error CgutMatriculaTotal" + ex.getMessage());
+        } finally {
+            con.Desconectar();
+        }
+    %>
+    <%=tabla_total%>
+    <input type="hidden" name="finMatTotal" id="finMatTotal" value="<%=cont%>"/>
+
+</html:form>
+

@@ -1,0 +1,91 @@
+//* @author Daniel Ramírez Torres
+//PORCENTAJE PROMEDIO CUATRIMESTRAL DE REPROBACIÓN
+
+function indicador3(control){
+    if (control.value == "")
+        control.value = 0;
+    if (!/^([0-9])*$/.test(control.value)){
+        $().alerta("amarillo", "El valor '"+ control.value +"' no es v&aacute;lido");
+        $(control).removeClass("inputok").addClass("inputerror");
+        return;
+    } else{
+        $(control).removeClass("inputerror").addClass("inputok");
+        control.value=Number(control.value);
+        obtenervalores3();
+    }
+}
+function guardarEficaciaIn3(){
+    var x="";
+    if ($("form[name='EficaciaIn3Form'] input").hasClass("inputerror")){ //SI TIENE ERRORES
+       // $().alerta('rojo', 'Error al guardar. Por favor verifique los datos.');
+        //validarLetras();
+        x="Error";
+    }else{
+        x = obtenervalores3();
+        //$().alerta('verde', 'Datos guardados correctamente.');
+    }
+    return x;
+}
+
+function obtenervalores3(){
+    var numC=parseInt($("form[name='EficaciaIn3Form'] input[name='numC']").val());
+    var cadena="-",total_t=0,num=0;
+    for(var i=1;i<=(numC-1);i++){
+        var total=0;
+        cadena+=$("form[name='EficaciaIn3Form'] input[name='niv,"+i+"']").val()+","+$("form[name='EficaciaIn3Form'] input[name='rep_sep,"+i+"']").val()+","
+        +$("form[name='EficaciaIn3Form'] input[name='mat_sep,"+i+"']").val()+","+$("form[name='EficaciaIn3Form'] input[name='rep_ene,"+i+"']").val()
+        +","+$("form[name='EficaciaIn3Form'] input[name='mat_ene,"+i+"']").val()+","+$("form[name='EficaciaIn3Form'] input[name='rep_may,"+i+"']").val()
+        +","+$("form[name='EficaciaIn3Form'] input[name='mat_may,"+i+"']").val()+"-";
+       
+        if(parseInt($("form[name='EficaciaIn3Form'] input[name='rep_sep,"+i+"']").val())> parseInt($("form[name='EficaciaIn3Form'] input[name='mat_sep,"+i+"']").val())){
+            $("form[name='EficaciaIn3Form'] input[name='rep_sep,"+i+"']").globo("enable").globo("update",  "<center>No puede ser mayor el <br/>n&uacute;mero de Alumnos Reprobados, al de la<br/>Matric&uacute;la inicial atendida<br/>cuatrimestre Septiembre-Diciembre</center>").removeClass("inputok").addClass("inputerror");
+        }else{
+            $("form[name='EficaciaIn3Form'] input[name='rep_sep,"+i+"']").globo("disable").removeClass("inputerror").addClass("inputok")   
+        }
+        if(parseInt($("form[name='EficaciaIn3Form'] input[name='rep_ene,"+i+"']").val())> parseInt($("form[name='EficaciaIn3Form'] input[name='mat_ene,"+i+"']").val())){
+            $("form[name='EficaciaIn3Form'] input[name='rep_ene,"+i+"']").globo("enable").globo("update",  "<center>No puede ser mayor el <br/>n&uacute;mero de Alumnos Reprobados, al de la<br/>Matric&uacute;la inicial atendida<br/>cuatrimestre Enero-Abril</center>").removeClass("inputok").addClass("inputerror");
+        }else{
+            $("form[name='EficaciaIn3Form'] input[name='rep_ene,"+i+"']").globo("disable").removeClass("inputerror").addClass("inputok")   
+        }
+        if(parseInt($("form[name='EficaciaIn3Form'] input[name='rep_may,"+i+"']").val())> parseInt($("form[name='EficaciaIn3Form'] input[name='mat_may,"+i+"']").val())){
+            $("form[name='EficaciaIn3Form'] input[name='rep_may,"+i+"']").globo("enable").globo("update",  "<center>No puede ser mayor el <br/>n&uacute;mero de Alumnos Reprobados, al de la<br/>Matric&uacute;la inicial atendida<br/>cuatrimestre Mayo-Agosto</center>").removeClass("inputok").addClass("inputerror");
+        }else{
+            $("form[name='EficaciaIn3Form'] input[name='rep_may,"+i+"']").globo("disable").removeClass("inputerror").addClass("inputok")   
+        }
+        if(!$("form[name='EficaciaIn3Form'] input").hasClass("inputerror")){        
+            if(parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_sep,"+i+"']").val())!=0){
+                $("form[name='EficaciaIn3Form'] input[name='tot_1,"+i+"']").val( getDecimal((parseFloat($("form[name='EficaciaIn3Form'] input[name='rep_sep,"+i+"']").val())/parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_sep,"+i+"']").val())*100)) + " %");
+                total+=getDecimal((parseFloat($("form[name='EficaciaIn3Form'] input[name='rep_sep,"+i+"']").val())/parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_sep,"+i+"']").val())*100));
+            }else{
+                $("form[name='EficaciaIn3Form'] input[name='tot_1,"+i+"']").val(0 + " %");
+            }
+            if(parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_ene,"+i+"']").val())!=0){
+                $("form[name='EficaciaIn3Form'] input[name='tot_2,"+i+"']").val(
+                    getDecimal((parseFloat($("form[name='EficaciaIn3Form'] input[name='rep_ene,"+i+"']").val())/parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_ene,"+i+"']").val())*100)) + " %");
+                total+=getDecimal((parseFloat($("form[name='EficaciaIn3Form'] input[name='rep_ene,"+i+"']").val())/parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_ene,"+i+"']").val())*100));
+            }else{
+                $("form[name='EficaciaIn3Form'] input[name='tot_2,"+i+"']").val(0 + " %");
+            }    
+            if(parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_may,"+i+"']").val())!=0){
+                $("form[name='EficaciaIn3Form'] input[name='tot_3,"+i+"']").val(
+                    getDecimal((parseFloat($("form[name='EficaciaIn3Form'] input[name='rep_may,"+i+"']").val())/parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_may,"+i+"']").val())*100)) + " %");
+                total+=getDecimal((parseFloat($("form[name='EficaciaIn3Form'] input[name='rep_may,"+i+"']").val())/parseFloat($("form[name='EficaciaIn3Form'] input[name='mat_may,"+i+"']").val())*100));
+            }else{
+                $("form[name='EficaciaIn3Form'] input[name='tot_3,"+i+"']").val(0 + " %");
+            }
+            $("form[name='EficaciaIn3Form'] input[name='tot_4,"+i+"']").val(getDecimal((total/3)));
+            if(parseFloat($("form[name='EficaciaIn3Form'] input[name='tot_4,"+i+"']").val())>0){
+                num++;
+                total_t+=parseFloat($("form[name='EficaciaIn3Form'] input[name='tot_4,"+i+"']").val());
+            }
+        }
+    }
+    if(!$("form[name='EficaciaIn3Form'] input").hasClass("inputerror")){
+        if(num>0){
+            $("form[name='EficaciaIn3Form'] input[name='tot_t']").val(getDecimal((total_t/num)));
+        }else{
+            $("form[name='EficaciaIn3Form'] input[name='tot_t']").val(0);
+        }
+    }
+    return cadena;
+}

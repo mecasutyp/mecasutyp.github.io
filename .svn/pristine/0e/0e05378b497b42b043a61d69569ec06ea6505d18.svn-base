@@ -1,0 +1,155 @@
+<%-- 
+    Document   : Mensajes
+    Created on : 15/02/2014, 08:40:56 AM
+    Author     : Danny
+--%>
+<%@page import="javax.net.ssl.SSLEngineResult.Status"%>
+<%
+    HttpSession sesion = request.getSession();
+    if (sesion.getAttribute("usuario") == null) {
+%>
+<jsp:forward page="/login.msut">
+    <jsp:param name="error" value="true"></jsp:param>
+    <jsp:param name="ask" value="false"></jsp:param>
+    <jsp:param name="errorMessage" value="Sesi&oacute;n caducada o inv&aacute;lida<br/>El recurso al que deseas acceder est&aacute; restringido, debes iniciar sesi&oacute;n para utilizarlo."></jsp:param>
+</jsp:forward>
+<%            }
+%>
+
+<%@page import="java.sql.ResultSet, com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+
+<tiles:insert template="/Vistas/Master.jsp">
+    <%
+        ConexionMySQL conexion = new ConexionMySQL();
+    %>
+    <tiles:put name="title" type="string">
+        MECASUT - Mensajes
+    </tiles:put>
+    <tiles:put name="scripts" type="string">
+        <script language="javascript" type="text/javascript" src="js/mensajes.js"></script>
+    </tiles:put>
+    <tiles:put name="body" type="string">
+        <br/><br/><br/>
+        <div>
+            <%
+                String id_mensaje = "";
+                String nombre_Univer = "";
+                String asunto = "";
+                String id_remitente = "";
+                String fecha = "";
+                String nombre = "";
+                String status = "";
+                String utt = "";
+                String consulta = "Select nombre, apaterno, amaterno, cargo, telefono, mail from responsables where id_responsable = ".concat(sesion.getAttribute("idResponsable").toString());
+//                System.out.println("consylta " + consulta);
+
+                ResultSet rs = conexion.Consultar(consulta);
+                if (rs.next()) {
+//                    System.out.println(sesion.getAttribute("tipoUsuario").toString());
+            %>
+            <div align="center">
+                <h2>Mensajes</h2>
+                <div  name="tabPerfil">
+                    <table id="rounded-corner" style="width: 100%" align="center">
+                        <tr>
+                            <th width="15%" class="rounded-company" >Remitente</th>
+                            <th width="25%" class="rounded-q1">Asunto</th>
+                            <th width="20%" class="rounded-q1">Estatus</th>
+                            <th width="20%" class="rounded-q4">Fecha/Hora</th>
+                        </tr>
+                        <%
+                            if (sesion.getAttribute("tipoUsuario").toString().equals("CG")) {
+                                conexion.Conectar();
+                                //                           conexion.Modificar("Update reporte_errores set leido = 1 where tipo = 2 ");
+                                //String sql = " Select id_mensaje, fecha, u.nombre_universidad, CONCAT(r.nombre, ' ', r.apaterno, ' ', r.amaterno), asunto,tipo,re.id_remitente from mensajeria re inner join responsables r on re.id_remitente = r.id_responsable inner join universidades u on r.id_universidad = u.id_universidad where tipo = 1";
+                                String sql = " Select *from mensajeria  where id_destinatario = " + session.getAttribute("idUniversidad").toString();
+                                //String sql = " Select id_mensaje, fecha, u.nombre_universidad, CONCAT(r.nombre, ' ', r.apaterno, ' ', r.amaterno), asunto,tipo,re.id_remitente from mensajeria re inner join responsables r on re.id_remitente = r.id_responsable inner join universidades u on r.id_universidad = u.id_universidad where tipo = 1";
+                                //      String sql = "Select id_reporte, fecha_redactado, u.nombre_universidad, CONCAT(r.nombre, ' ', r.apaterno, ' ', r.amaterno), comentario,re.id_responsable from reporte_errores re inner join responsables r on re.id_responsable = r.id_responsable inner join universidades u on r.id_universidad = u.id_universidad where tipo = 2 and id_destinatario = ".concat(sesion.getAttribute("idResponsable").toString());
+                                // Select id_mensaje, fecha, u.nombre_universidad, asunto,re.id_remitente from mensajeria re inner join responsables r on re.id_remitente = r.id_responsable inner join universidades u on r.id_universidad = u.id_universidad where tipo = 1
+                                ResultSet res = conexion.Consultar(sql);
+                                while (res.next()) {
+                                    sql = "select nombre_universidad from universidades where id_universidad=" + res.getString("id_remitente");
+                                    ResultSet rs1 = conexion.Consultar(sql);
+                                    if (rs1.next()) {
+                                        nombre_Univer = rs1.getString("nombre_universidad");
+
+                                    }
+                                    id_mensaje = res.getString("id_mensaje");
+                                    asunto = res.getString("asunto");
+                                    id_remitente = res.getString("id_remitente");
+                                    fecha = res.getString("fecha");
+                                    status = res.getString("estatus");
+                                    nombre = res.getString(4);
+                        %>                        
+                        <tr>
+                            <td id="nombreUttec<%=id_mensaje%>"><%=nombre_Univer%></td>
+                            <td><a href="#" onclick="leerMensajes(<%=id_mensaje%>,null,null,'CGUTyP',null);"><%=asunto%></a></td>
+                        <input id="asunto<%=id_mensaje%>" type="hidden" value="<%=asunto%>" />
+                        <td><%=status%></td>
+                        <td><%=fecha%></td>
+                        <input id="nombre<%=id_mensaje%>" type="hidden" value="<%=nombre%>" />
+                        <input id="tipo" type="hidden" value="CGUTyP" />
+                        </tr>
+                        <%
+                            }
+                            }
+                            if (sesion.getAttribute("tipoUsuario").toString().equals("UT")) {
+                                conexion.Conectar();
+                                //                           conexion.Modificar("Update reporte_errores set leido = 1 where tipo = 2 ");
+                                String sql = " Select *from mensajeria  where id_destinatario = " + session.getAttribute("idUniversidad").toString();
+                                //      String sql = "Select id_reporte, fecha_redactado, u.nombre_universidad, CONCAT(r.nombre, ' ', r.apaterno, ' ', r.amaterno), comentario,re.id_responsable from reporte_errores re inner join responsables r on re.id_responsable = r.id_responsable inner join universidades u on r.id_universidad = u.id_universidad where tipo = 2 and id_destinatario = ".concat(sesion.getAttribute("idResponsable").toString());
+                                // Select id_mensaje, fecha, u.nombre_universidad, asunto,re.id_remitente from mensajeria re inner join responsables r on re.id_remitente = r.id_responsable inner join universidades u on r.id_universidad = u.id_universidad where tipo = 1
+//                                System.out.println("select lo del SS " + sql);
+                                ResultSet res = conexion.Consultar(sql);
+                                while (res.next()) {
+                                    id_mensaje = res.getString("id_mensaje");
+                                    //nombre_Univer = res.getString("u.nombre_universidad");
+                                    asunto = res.getString("asunto");
+                                    status = res.getString("estatus");
+                                    // id_remitente = res.getString("id_remitente");
+                                    fecha = res.getString("fecha");
+                                    nombre = res.getString(4);
+                        %>                        
+                        <tr>
+                            <td id="nombreC">CGUTyP</td>
+                            <td ><a href="#" onclick="leerMensajes(<%=id_mensaje%>,null,null,'UT',null);"><%=asunto%></a></td>
+                        <input id="asunto<%=id_mensaje%>" type="hidden" value="<%=asunto%>" />
+                        <td><%=status%></td>
+                        <td><%=fecha%></td>
+                        <input id="nombre<%=id_mensaje%>" type="hidden" value="<%=nombre%>" />
+                        <input id="tipo" type="hidden" value="UT" />
+                        </tr>
+                        <%
+                            }
+                            }
+                        %>     
+                        <tr>
+                            <th class="rounded-q1" colspan="5"></th>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <%
+                }%>
+        </div>
+        <div id="leermensaje" title="Mensaje completo" style="display: block;"  >
+            <strong class="titul2">Mensaje de:</strong> <strong id="deUttec"> </strong>
+            <br/>
+            <strong id="asunto" class="titul2">Asunto</strong> 
+            <textarea id="asuntoM" style="width:100%" value="" styleClass="text ui-widget-content ui-corner-all" 
+                      style="width: 90%" rows="1" maxlength="100" ></textarea>
+            <textarea id="mensajeCompleto" style="width:100%" value="" styleClass="text ui-widget-content ui-corner-all" 
+                      disabled="disabled" style="width: 100%" rows="10" ></textarea>
+            <br/>
+            <br/>
+            <strong class="titul2">Respuesta:</strong>
+            <textarea id="mensajeCompletoR" style="width:100%" value="" styleClass="text ui-widget-content ui-corner-all" 
+                      style="width: 100%" rows="10" ></textarea>
+            <p class="validateTips"></p>
+        </div>
+    </tiles:put>
+</tiles:insert>

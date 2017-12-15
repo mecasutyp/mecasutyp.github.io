@@ -1,0 +1,177 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.mecasut.reportes.sabana;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ *
+ * @author Cuauhtemoc Medina Muñoz
+ */
+public class SabanaCategorias {
+    
+    String consulta="";
+    ResultSet rs;
+    ConexionMySQL con;
+    String periodo;
+    HojaCalculo obj;
+    ListaUniversidades univs;
+    ListaNiveles niveles;
+    String anio="";
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        System.err.println("Sabana Categorias Eliminada del Heap");
+    }
+
+    public String getConsulta() {
+        return consulta;
+    }
+
+    public void setConsulta(String consulta) {
+        this.consulta = consulta;
+    }
+
+    public ResultSet getRs() {
+        return rs;
+    }
+
+    public void setRs(ResultSet rs) {
+        this.rs = rs;
+    }
+
+    public ConexionMySQL getCon() {
+        return con;
+    }
+
+    public void setCon(ConexionMySQL con) {
+        this.con = con;
+    }
+
+    public String getPeriodo() {
+        return periodo;
+    }
+
+    public void setPeriodo(String periodo) {
+        this.periodo = periodo;
+    }
+
+    public HojaCalculo getObj() {
+        return obj;
+    }
+
+    public void setObj(HojaCalculo obj) {
+        this.obj = obj;
+    }
+
+    public ListaUniversidades getUnivs() {
+        return univs;
+    }
+
+    public void setUnivs(ListaUniversidades univs) {
+        this.univs = univs;
+    }
+
+    public ListaNiveles getNiveles() {
+        return niveles;
+    }
+
+    public void setNiveles(ListaNiveles niveles) {
+        this.niveles = niveles;
+    }
+
+    public String getAnio() {
+        return anio;
+    }
+
+    public void setAnio(String anio) {
+        this.anio = anio;
+    }
+    
+    public SabanaCategorias(){
+        
+    }
+    
+    public SabanaCategorias (String periodo, HojaCalculo obj, ListaUniversidades univs, ListaNiveles niveles, String anio){
+        this.periodo=periodo;
+        this.obj = obj;
+        this.univs = univs;
+        this.niveles = niveles;
+        this.anio = anio;
+        con = new ConexionMySQL();
+        con.Conectar();
+    }
+   
+    
+    public boolean contieneNivel(String nivel, String idUniversidad) {
+        boolean bandera = false;
+        try {
+            consulta = "SELECT ".concat(nivel).concat(" IN (SELECT id_nivel FROM programa_educativo ")
+                    .concat(" WHERE id_pe IN ( SELECT DISTINCT id_pe FROM pe_universidad WHERE ")
+                    .concat(" id_universidad=").concat(idUniversidad)
+                    .concat(" AND id_periodo=").concat(periodo).concat(" AND activo=1)) AS TieneNivel");
+            rs = con.Consultar(consulta);
+            if (rs.next()) {
+                bandera = rs.getBoolean("TieneNivel");
+            }
+        } catch (SQLException ex) {
+            System.err.println("\n\n\nError: método contiene nivel: " + ex.getMessage());
+            return false;
+        }
+        return bandera;
+    }
+    
+    public boolean contieneModalidad(String modalidad, String idUniversidad, String nivel) {
+        boolean bandera = false;
+        try {
+            consulta = "SELECT ".concat(modalidad).concat(" IN (SELECT id_modelo FROM modelos_universidad ")
+                    .concat(" WHERE id_nivel=").concat(nivel)
+                    .concat(" AND id_universidad=").concat(idUniversidad)
+                    .concat(" AND id_periodo=").concat(periodo).concat(") AS TieneModalidad");
+            rs = con.Consultar(consulta);
+            if (rs.next()) {
+                bandera = rs.getBoolean("TieneModalidad");
+            }
+        } catch (SQLException ex) {
+            System.err.println("\n\n\nError: método contiene modalidad: " + ex.getMessage());
+            return false;
+        }
+        return bandera;
+    }
+    
+    public boolean contieneServicio(String servicio, String idUniversidad) {
+        boolean bandera = false;
+        try {
+            consulta = "SELECT ".concat(servicio).concat(" IN (SELECT id_servicio FROM servicios_universidad ")
+                    .concat(" WHERE id_universidad=").concat(idUniversidad)
+                    .concat(" AND id_periodo=").concat(periodo).concat(") AS TieneServicio");
+            rs = con.Consultar(consulta);
+            if (rs.next()) {
+                bandera = rs.getBoolean("TieneServicio");
+            }
+        } catch (SQLException ex) {
+            System.err.println("\n\n\nError: método contiene servicio: " + ex.getMessage());
+            return false;
+        }
+        return bandera;
+    }
+
+    public void columnasPrincipales(int numero) {
+        obj.setAlturaFilas(1, 30);
+        obj.setAlturaFilas(2, 40);
+        obj.setAnchoColumna(1, 17500);
+        obj.combinarCeldas("NO", 0, 0, 1, numero, "h1");
+        obj.combinarCeldas("UNIVERSIDAD", 1, 1, 1, numero, "h1");
+        for (int i = 0; i <= univs.size() - 1; i++) {
+            obj.val(0, i + numero + 1, String.valueOf((i + 1)), "resultado");//CONSECUTIVO
+            obj.val(1, i + numero + 1, univs.getNombre(i), "resultado");//NOMBRE DE LA UNIVERSIDAD
+        }
+    }
+    
+}

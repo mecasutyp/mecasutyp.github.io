@@ -1,0 +1,112 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.reportes.sabana;
+
+import com.mecasut.conexion.ConexionMySQL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author Cuauh
+ */
+public class ListaUniversidades {
+
+    String consulta;
+    ArrayList<Universidades> universidades;
+    ConexionMySQL con;
+    ResultSet rs;
+    String periodo;
+
+    public ListaUniversidades(String periodo) {
+        this.periodo = periodo;
+        universidades = new ArrayList<Universidades>();
+        try {
+            con = new ConexionMySQL();
+            con.Conectar();
+            
+            //POR ORDEN DE CREACION
+            String sql = "SELECT u.id_universidad as 'id', u.nombre_universidad as 'nombre', nuevo_ingreso, matricula_total, prof_tc, "
+                    .concat(" prof_asig FROM datos_universidad d INNER JOIN universidades u ")
+                    .concat(" ON d.id_universidad=u.id_universidad WHERE u.id_universidad>0 AND d.id_periodo=").concat(periodo).concat(" ORDER BY u.nombre_universidad ");
+            System.out.println(sql);
+            //ORDEN POR ESTADO
+            /*String sql = "SELECT u.id_universidad AS 'id', CONCAT(u.nombre_universidad, ' : ' , e.nombre )AS 'nombre', nuevo_ingreso, matricula_total, prof_tc, prof_asig"
+                    .concat(" FROM datos_universidad d")
+                    .concat(" INNER JOIN universidades u ON d.id_universidad=u.id_universidad")
+                    .concat(" INNER JOIN domicilios_universidad dom ON dom.id_universidad = u.id_universidad")
+                    .concat(" INNER JOIN estados e ON dom.id_estado=e.id_estado")
+                    .concat(" WHERE u.id_universidad>0")
+                    .concat(" ORDER BY dom.id_estado");
+            * */
+            rs = con.Consultar(sql);
+            while (rs.next()) {
+                universidades.add(
+                        new Universidades(rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getInt("nuevo_ingreso"),
+                        rs.getInt("matricula_total"),
+                        rs.getInt("prof_tc"),
+                        rs.getInt("prof_asig")));
+            }
+        } catch (SQLException ex) {
+            System.err.println("ERRORBD: Consultando Universidades en ListaUniversidades.java " + ex.getMessage());
+            con.Desconectar();
+        } finally {
+            con.Desconectar();
+        }
+    }
+
+    public String getNombre(int index) {
+        return universidades.get(index).getNombre();
+    }
+
+    public int getId(int index) {
+        return universidades.get(index).getId();
+    }
+
+    public int size() {
+        return universidades.size();
+    }
+    
+    public int getMatriculaTotal(int index){
+        return universidades.get(index).getMatriculaTotal();
+    }
+    
+    public int getPtc(int index){
+        return universidades.get(index).getProfTiCom();
+    }
+    
+    public int getPasignatura(int index){
+        return universidades.get(index).getProfAsig();
+    }
+    
+    public int getNuevoIngreso(int index){
+        return universidades.get(index).getNuevoIngreso();
+    }
+    
+    
+//    public boolean contieneNivel(String nivel, String idUniversidad) {
+//        boolean bandera = false;
+//        try {
+//            consulta = "SELECT ".concat(nivel).concat(" IN (SELECT id_nivel FROM programa_educativo ")
+//                    .concat(" WHERE id_pe IN ( SELECT DISTINCT id_pe FROM pe_universidad WHERE ")
+//                    .concat(" id_universidad=").concat(idUniversidad)
+//                    .concat(" AND id_periodo=").concat(periodo).concat(" AND activo=1)) AS TieneNivel");
+//            rs = con.Consultar(consulta);
+//            if (rs.next()) {
+//                bandera = rs.getBoolean("TieneNivel");
+//            }
+//        } catch (SQLException ex) {
+//            System.err.println("\n\n\nError: método contiene nivel: " + ex.getMessage());
+//            return false;
+//        }
+//        return bandera;
+//    }
+    
+    
+    
+}

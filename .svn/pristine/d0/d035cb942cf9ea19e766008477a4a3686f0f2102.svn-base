@@ -1,0 +1,392 @@
+<%-- 
+    Document   : PertinenciaIn19
+    Created on : 26/09/2012, 07:53:10 AM
+    Author     : Daniel Ramírez Torres
+--%>
+
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+
+<!--OBTENER LA SESION-->
+<%
+    try {
+        HttpSession sesion = request.getSession(false);
+        int idUniversidad = Integer.parseInt(sesion.getAttribute("idUniversidad").toString());
+        int idPeriodo = Integer.parseInt(sesion.getAttribute("idPeriodo").toString());
+%>
+<!--TERMINA OBTENER LA SESION-->
+
+<html:form action="/PertinenciaIn19">
+    <div id="pert19">
+        <%
+            ConexionMySQL con = new ConexionMySQL();
+            int noProg = 1;
+            int noProgb = 1;
+            int cuadro = 1;
+            int cuadrob = 1;
+            int contador=0;
+            int contador2=0;
+            String Matricula = "0";
+            try {
+
+                String niveles = "Select distinct(pe.id_nivel),descripcion from programa_educativo pe inner join nivel_pe n on pe.id_nivel = n.id_nivel where pe.id_pe in (select id_pe from pe_universidad where id_universidad =".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo =".concat(sesion.getAttribute("idPeriodo").toString()).concat(") order by pe.id_nivel"));
+                ResultSet niv = con.Consultar(niveles);
+                String cons_org = "select id_organismo,nombre from organismos_acreditacion where activo=1 and extranjero='0' order by id_organismo";
+                ResultSet organismos = con.Consultar(cons_org);
+                String paises_org = "select id_organismo, pais from organismos_acreditacion where activo=1 and extranjero='1' order by id_organismo";
+                ResultSet paises = con.Consultar(paises_org);
+                String cons_orge = "select id_organismo,nombre,sigla from organismos_acreditacion where activo=1 and extranjero='1' order by id_organismo";
+                ResultSet organismose = con.Consultar(cons_orge);
+                String conmatricula = "select MATRICULA_TOTAL from datos_universidad where id_universidad =".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo =".concat(sesion.getAttribute("idPeriodo").toString()));
+                ResultSet matricula = con.Consultar(conmatricula);
+                if (matricula.next()) {
+                    Matricula = matricula.getString(1);
+                }
+                String programas = "";
+                ResultSet prog;
+                String nombre_org = "";
+                ResultSet name_org;
+                String nombre_orge = "";
+                ResultSet name_orge;
+                while (niv.next()) {//CANTIDAD DE NIVELES QUE TIENE LA UNIVERSIDAD EN EL PERIODO ACTUAL
+                    contador++;
+        %>
+        <h2 onclick="operacionesPertinencia19(<%=cuadro%>);">Cuadro 19.<%=cuadro%><br/>Relaci&oacute;n de programas Educativos de <%=niv.getString("descripcion")%> acreditados</h2>
+        <div>
+            <table id="rounded-corner" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th class="rounded-company">No.</th>
+                        <th class="rounded-q1">Nombre del programa educativo</th>
+                        <th class="rounded-q1">Matr&iacute;cula </br>inicial </br>atendida</th>
+                        <th class="rounded-q1">Matr&iacute;cula acreditada</th>
+                        <th class="rounded-q1">Acreditado</th>
+                        <th size="11" class="rounded-q1">Nombre del organismo acreditador</th>
+<!--                        <th class="rounded-q1">Pais</th>-->
+                        <th class="rounded-q1">Vigencia de la acreditaci&oacute;n</th>
+                        <th class="rounded-q4">Fecha de inicio de la acreditaci&oacute;n</th>
+                    </tr>
+                </thead>
+
+                <%
+                    String matricula_t = "select matricula from mat_total_universidad where id_universidad=".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo =".concat(sesion.getAttribute("idPeriodo").toString()).concat(" and id_nivel=").concat(niv.getString(1)));
+                    ResultSet resmat = con.Consultar(matricula_t);
+                    while (resmat.next()) {
+                %>
+                <input  type = "hidden" name ='mat<%=cuadro%>' value='<%=resmat.getString(1)%>' />
+
+                <%
+                    }
+                    programas = "SELECT id_pe,nombre_programa,version FROM programa_educativo WHERE id_nivel=".concat(String.valueOf(niv.getString(1))).concat(" AND id_pe IN (SELECT id_pe FROM pe_universidad where id_universidad =".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo =".concat(sesion.getAttribute("idPeriodo").toString()).concat(")")));
+                    prog = con.Consultar(programas);
+                    while (prog.next()) { 
+                       //Aquin no carga nada OLAFF
+                        String datos = "Select matricula_inicial_aten,matricula_acreditada,acreditados,id_organismo,fecha_acreditacion,vigencia_acreditacion from pertinenciain19 where id_universidad =".concat(String.valueOf(idUniversidad)).concat(" and id_periodo =").concat(String.valueOf(idPeriodo)).concat(" and id_pe=").concat(String.valueOf(prog.getString(1))).concat(" order by id_pe");
+                        ResultSet valores = con.Consultar(datos);
+                        if (valores.next()) 
+                        {
+                        // nombre_org = "SELECT nombre FROM organismos_acreditacion WHERE id_organismo=(SELECT id_organismo FROM pertinenciain19 WHERE pertinenciain19.id_organismo = organismos_acreditacion.id_organismo AND id_pe =".concat(prog.getString("id_pe")).concat(" and extranjero='0')");
+                        //name_org = con.Consultar(nombre_org);
+%>
+                <tr>
+                    <td><%=noProg%></td>
+                    <td><input type="hidden" name='id<%=cuadro%><%=noProg%>' value='<%=prog.getString("id_pe")%>' /><%=prog.getString("nombre_programa")%> (<%=prog.getString(3)%>)</td>
+                    <td><input size="9" maxlength="6" type="text" name="matricula<%=cuadro%><%=noProg%>"  value="<%=valores.getString(1)%>" onblur="indicador19(this,<%=cuadro%>);"/></td>
+                    <td><input size="9" maxlength="6" type="text" name="matricula_acre<%=cuadro%><%=noProg%>"  value="<%=valores.getString(2)%>" onblur="indicador19(this,<%=cuadro%>);"/></td>
+                    <td>
+                        <div id="radio1<%=cuadro%><%=noProg%>">
+                            <input type="radio" id="option<%=cuadro%><%=noProg%><%=1%>" name="option<%=cuadro%><%=noProg%>" value="1" <%=valores.getString(3).equals("1") ? "checked='checked'" : ""%> onclick="operacionesPertinencia19(<%=cuadro%>);"/><label for="option<%=cuadro%><%=noProg%>1" >Si</label>
+                            <input type="radio" id="option<%=cuadro%><%=noProg%><%=2%>" name="option<%=cuadro%><%=noProg%>" value="0" <%=valores.getString(3).equals("0") ? "checked='checked'" : ""%>onclick="operacionesPertinencia19(<%=cuadro%>);" /><label for="option<%=cuadro%><%=noProg%>2" >No</label>
+                        </div>
+                    </td>
+                    <td><input type="hidden" name='id_organismo<%=cuadro%><%=noProg%>' value='<%=valores.getString(4)%>' />
+                        <select name="organismo<%=cuadro%><%=noProg%>" width='10%' onblur="select19();" onchange="cambiaorganismo()">
+                            <%while (organismos.next()) {%>
+                            <option value="<%=organismos.getString(1)%>"><%=organismos.getString(2)%></option>
+                            <%}%>
+                        </select>
+                        
+                    </td>
+                     
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="vigencia_acreditacion<%=cuadro%><%=noProg%>"  maxlength="10" name="vigencia_acreditacion<%=cuadro%><%=noProg%>" value="<%=valores.getString(6)%>" onchange="validarfecha19(<%=cuadro%>,<%=noProg%>,this);"/>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="fecha_acreditacion<%=cuadro%><%=noProg%>" maxlength="10" value="<%=valores.getString(5)%>" name="fecha_acreditacion<%=cuadro%><%=noProg%>" onchange="validarfecha19(<%=cuadro%>,<%=noProg%>,this);"/>
+                    </td>
+                </tr>
+                <% organismos.beforeFirst();
+                
+                } else 
+                {
+            %>
+                <tr>
+                    <td><%=noProg%></td>
+                    <td><input type="hidden" name='id<%=cuadro%><%=noProg%>' value='<%=prog.getString("id_pe")%>' /><%=prog.getString("nombre_programa")%> (<%=prog.getString(3)%>)</td>
+                    <td><input size="9" maxlength="6" type="text" name="matricula<%=cuadro%><%=noProg%>"  value="0" onblur="indicador19(this,<%=cuadro%>);"/></td>
+                    <td><input size="9" maxlength="6" type="text" name="matricula_acre<%=cuadro%><%=noProg%>"  value="0" onblur="indicador19(this,<%=cuadro%>);"/></td>
+                     <td>
+                        <div id="radio1<%=cuadro%><%=noProg%>">
+                            <input type="radio" id="option<%=cuadro%><%=noProg%><%=1%>" name="option<%=cuadro%><%=noProg%>" value="1" onclick="operacionesPertinencia19(<%=cuadro%>);"/><label for="option<%=cuadro%><%=noProg%>1" >Si</label>
+                            <input checked="checked" type="radio" id="option<%=cuadro%><%=noProg%><%=2%>" name="option<%=cuadro%><%=noProg%>" value="0" onclick="operacionesPertinencia19(<%=cuadro%>);" /><label for="option<%=cuadro%><%=noProg%>2" >No</label>
+                        </div>
+                    </td>                   
+                    <td>
+                        <select name="organismo<%=cuadro%><%=noProg%>">
+                            <%while (organismos.next()) {%>
+                            <option value="<%=organismos.getString(1)%>"><%=organismos.getString(2)%></option>
+                            <%}%>
+                        </select>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="vigencia_acreditacion<%=cuadro%><%=noProg%>"  name="vigencia_acreditacion<%=cuadro%><%=noProg%>" value="0000-00-00" onchange="validarfecha19(<%=cuadro%>,<%=noProg%>,this);"/>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="fecha_acreditacion<%=cuadro%><%=noProg%>"  name="fecha_acreditacion<%=cuadro%><%=noProg%>" value="0000-00-00" onchange="validarfecha19(<%=cuadro%>,<%=noProg%>,this);"/>
+                    </td>
+                </tr>
+                <%}
+                        noProg++;
+                        organismos.beforeFirst();
+                    }
+                %>
+                <input type="hidden" name="noProg<%=cuadro%>" value="<%=noProg - 1%>" />
+                <tr>
+                    <td align="center" colspan="2">TOTAL</td>
+                    <td align="center" ><input readonly=\"readonly\" class="inputok" style='width:90%' type='text' name='total1<%=cuadro%>' value='0' onblur="operacionesPertinencia19(<%=cuadro%>);"></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total3<%=cuadro%>' value='0' onblur="operacionesPertinencia19(<%=cuadro%>);"></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total2<%=cuadro%>' value='0' onblur="operacionesPertinencia19(<%=cuadro%>);"></td>
+                    <td align="center" colspan="3"></td>
+                </tr>
+                <tfoot>
+                    <tr>
+                        <td  colspan='2'>DISTRIBUCIÒN PORCENTUAL<input type="hidden" id="totalPEE<%=cuadro%>" value="<%=contador%>" /></td>
+                        <td>&nbsp;</td>
+                        <td>PEA2</td>
+                         <td>PEA1</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td  colspan='2'></td>
+                        <td>&nbsp;</td>
+                        <td><span style="font-weight: bold"  id="porcentajeSINPEE<%=cuadro%>"></span></td>
+                        <td><span style="font-weight: bold"  id="porcentajeCONPEE<%=cuadro%>"></span></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan='7' class='rounded-foot-left'>&nbsp;</td><td class="rounded-foot-right" ></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <%
+                noProg = 1;
+                cuadro++;
+                prog.beforeFirst();
+
+            }
+            niv.beforeFirst();
+            while (niv.next()) {//CANTIDAD DE NIVELES QUE TIENE LA UNIVERSIDAD EN EL PERIODO ACTUAL
+
+        %>
+        <h2 onclick="operacionesPertinencia19b();">Cuadro 19.<%=cuadro%><br/>Relaci&oacute;n de programas educativos de <%=niv.getString("descripcion")%> acreditados internacionalmente</h2>
+        <div>
+            <table id="rounded-corner" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th class="rounded-company">No.</th>
+                        <th class="rounded-q1">Nombre del programa educativo que ofrece la universidad tecnol&oacute;gica</th>
+                        <th class="rounded-q1">Matr&iacute;cula</br> inicial </br>atendida</th>
+                        <th class="rounded-q1">Matr&iacute;cula acreditada</th>
+                        <th class="rounded-q1">Acreditado</th>
+                        <th class="rounded-q1">Nombre del organismo acreditador</th>
+                         <th class="rounded-q1">Pais</th>
+                        <th class="rounded-q1">Vigencia de la acreditaci&oacute;n</th>
+                        <th class="rounded-q4">Fecha de la acreditaci&oacute;n</th>
+                    </tr>
+                </thead>
+                <%
+                    programas = "SELECT id_pe,nombre_programa,version FROM programa_educativo WHERE id_nivel=".concat(String.valueOf(niv.getString(1))).concat(" AND id_pe IN (SELECT id_pe FROM pe_universidad where id_universidad =".concat(sesion.getAttribute("idUniversidad").toString()).concat(" and id_periodo =".concat(sesion.getAttribute("idPeriodo").toString()).concat(")")));
+                    prog = con.Consultar(programas);
+                    while (prog.next()) { //CANTIDAD DE PROGRAMAS EDUCATIVOS QUE TIENE EN EL NIVEL 'X'
+                        contador2++;
+                        String datos = "Select matricula_inicial_aten,matricula_acreditada,acreditados,pertinenciain19_1.id_organismo,vigencia_acreditacion,fecha_acreditacion, pais from pertinenciain19_1 inner join organismos_acreditacion on organismos_acreditacion.id_organismo= pertinenciain19_1.id_organismo where id_universidad =".concat(String.valueOf(idUniversidad)).concat(" and id_periodo =").concat(String.valueOf(idPeriodo)).concat(" and id_pe=").concat(String.valueOf(prog.getString(1))).concat(" order by id_pe");
+                        ResultSet valores = con.Consultar(datos);
+
+                %>
+                <%if (valores.next()) {
+                        //  nombre_orge = "SELECT nombre FROM organismos_acreditacion WHERE id_organismo=(SELECT id_organismo FROM pertinenciain19_1 WHERE pertinenciain19_1.id_organismo = organismos_acreditacion.id_organismo AND id_pe =".concat(prog.getString("id_pe")).concat(" and extranjero=1)");
+                        // name_orge = con.Consultar(nombre_orge);
+%>
+                <tr>
+                    <td><%=noProgb%></td>
+                    <td><input type="hidden" name='idb<%=cuadrob%><%=noProgb%>' value='<%=prog.getString("id_pe")%>' /><%=prog.getString("nombre_programa")%> (<%=prog.getString(3)%>)</td>
+                    <td><input size="9" disabled maxlength="6" type="text" name="matriculab<%=cuadrob%><%=noProgb%>"  value="<%=valores.getString(1)%>" onblur="indicador19(this,<%=cuadro%>,2000);"/></td>
+                    <td><input size="9" maxlength="6" type="text" name="matricula_acreb<%=cuadrob%><%=noProgb%>"  value="<%=valores.getString(2)%>" onblur="indicador19(this,<%=cuadro%>,2000);"/></td>
+                    <td>
+                       <div id="radio2<%=cuadrob%><%=noProgb%>">
+                            <input type="radio" id="optionb<%=cuadrob%><%=noProgb%><%=1%>" name="optionb<%=cuadrob%><%=noProgb%>" value="1" onclick="operacionesPertinencia19b();"  <%if (valores.getInt(3)==1  ) {%> checked='checked' <%}%>/><label for="optionb<%=cuadrob%><%=noProgb%>1" >Si</label>
+                            <input type="radio" id="optionb<%=cuadrob%><%=noProgb%><%=2%>" name="optionb<%=cuadrob%><%=noProgb%>" value="0" onclick="operacionesPertinencia19b();"  <%if (valores.getInt(3)==0  ) {%> checked='checked' <%}%>/><label for="optionb<%=cuadrob%><%=noProgb%>2" >No</label>
+                        </div>
+                    </td>
+                    <td><input type="hidden" name='id_organismob<%=cuadrob%><%=noProgb%>' value='<%=valores.getString(4)%>' />
+                        <select  name="organismob<%=cuadrob%><%=noProgb%>" id="organismob<%=cuadrob%><%=noProgb%>" onblur="select19b();" onchange="cambiaorganismo(this.value, <%=cuadro%>, <%=noProgb%>)">
+                            <%while (organismose.next()) {%>
+                            <option value="<%=organismose.getString(1)%>"><%=organismose.getString(2).concat(" (").concat(organismose.getString(3)).concat(")")%> </option>
+                            <%}%>
+                        </select>
+                         <select style="visibility:hidden" name="paises<%=cuadro%><%=noProgb%>" id="paises<%=cuadrob%><%=noProgb%>" width='10%' onblur="">
+                            <%while (paises.next()) {%>
+                            <option value="<%=paises.getString(1)%>"><%=paises.getString(2)%></option>
+                            <%}%>
+                        </select>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="pais<%=cuadrob%><%=noProgb%>"  maxlength="10" name="pais<%=cuadrob%><%=noProgb%>" value="<%=valores.getString(7)%>"/>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="vigencia_acreditacionb<%=cuadrob%><%=noProgb%>" maxlength="10" name="vigencia_acreditacionb<%=cuadrob%><%=noProgb%>" value="<%=valores.getString(5)%>" onchange="validarfecha19b(<%=cuadrob%>,<%=noProgb%>,this);"/>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="fecha_acreditacionb<%=cuadrob%><%=noProgb%>" maxlength="10" value="<%=valores.getString(6)%>" name="fecha_acreditacionb<%=cuadrob%><%=noProgb%>" onchange="validarfecha19b(<%=cuadrob%>,<%=noProgb%>,this);"/>
+                    </td>
+                </tr>
+                <% organismose.beforeFirst();
+                paises.beforeFirst();
+                } else {%>
+                <tr>
+                    <td><%=noProgb%></td>
+                    <td><input type="hidden" name='idb<%=cuadrob%><%=noProgb%>' value='<%=prog.getString("id_pe")%>' /><%=prog.getString("nombre_programa")%> (<%=prog.getString(3)%>)</td>
+                    <td><input size="9" disabled maxlength="6" type="text" name="matriculab<%=cuadrob%><%=noProgb%>"  value="0" onblur="indicador19(this,2);"/></td>
+                    <td><input size="9" maxlength="6" type="text" name="matricula_acreb<%=cuadrob%><%=noProgb%>"  value="0" onblur="indicador19(this,2,2000);"/></td>
+                    <td>
+                        <div id="radio2<%=cuadrob%><%=noProgb%>">
+                            <input type="radio" id="optionb<%=cuadrob%><%=noProgb%><%=1%>" name="optionb<%=cuadrob%><%=noProgb%>" value="1" onclick="operacionesPertinencia19b();"/><label for="optionb<%=cuadrob%><%=noProgb%>1" >Si</label>
+                            <input type="radio" id="optionb<%=cuadrob%><%=noProgb%><%=2%>" name="optionb<%=cuadrob%><%=noProgb%>" value="0" onclick="operacionesPertinencia19b();" checked='checked'/><label for="optionb<%=cuadrob%><%=noProgb%>2" >No</label>
+                        </div>
+                    </td>                    
+                    <td>
+                        <input type="hidden" name='id_organismob<%=cuadrob%><%=noProgb%>' value='' />
+                        <select  name="organismob<%=cuadrob%><%=noProgb%>" id="organismob<%=cuadrob%><%=noProgb%>" onblur="select19b();" onchange="cambiaorganismo(this.value, <%=cuadro%>, <%=noProgb%>)">
+                            <%while (organismose.next()) {%>
+                            <option value="<%=organismose.getString(1)%>"><%=organismose.getString(2).concat(" (").concat(organismose.getString(3)).concat(")")%> </option>
+                            <%}%>
+                        </select>
+                        
+                    </td>
+                    <td hidden="hidden">
+                        <select style="visibility:hidden" name="paises<%=cuadro%><%=noProgb%>" id="paises<%=cuadrob%><%=noProgb%>" width='10%' onblur="">
+                            <%while (paises.next()) {%>
+                            <option value="<%=paises.getString(1)%>"><%=paises.getString(2)%></option>
+                            <%}%>
+                        </select>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="pais<%=cuadrob%><%=noProgb%>"  maxlength="10" name="pais<%=cuadrob%><%=noProgb%>" value=""/>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="vigencia_acreditacionb<%=cuadrob%><%=noProgb%>"  name="vigencia_acreditacionb<%=cuadrob%><%=noProgb%>"  value="0"/>
+                    </td>
+                    <td>
+                        <input size="10" readonly=\"readonly\" id="fecha_acreditacionb<%=cuadrob%><%=noProgb%>"  name="fecha_acreditacionb<%=cuadrob%><%=noProgb%>"/>
+                    </td>
+                </tr>
+                <%}%>
+                <%
+                        noProgb++;
+                        organismose.beforeFirst();
+                        paises.beforeFirst();
+                    }
+                %>
+                <input type="hidden"  id="noProgb<%=cuadrob%>" name="noProgb<%=cuadrob%>" value="<%=noProgb - 1%>" />
+                <tr>
+                    <td align="center" colspan="2">TOTAL</td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total1b<%=cuadrob%>' value='0' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total3b<%=cuadrob%>' value='0' ></td>
+                    <td align="center" ><input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='total2b<%=cuadrob%>' value='0' ></td>
+                    <td align="center" colspan="4"></td>
+                </tr>
+                <tfoot>
+                    <tr>
+                        <td  colspan='2'>DISTRIBUCIÓN PORCENTUAL <input type="hidden" id="totalPEE1I<%=cuadro%>" value="<%=contador2%>" /></td>
+                        <td>&nbsp;</td>
+                        <td>PEAI2</td>
+                         <td>PEAI1</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                     <tr>
+                        <td  colspan='2'><input type="hidden" id="totalPEE1I<%=cuadro%>" value="<%=contador2%>" /></td>
+                        <td>&nbsp;</td>
+                        <td>
+                        <input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='peaI2<%=cuadrob%>' value='0' >
+                        </td>
+                        <td>
+                       <input readonly=\"readonly\" id="etiqueta" style='width:90%' type='text' name='peaI<%=cuadrob%>' value='0' >
+                       </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan='8' class='rounded-foot-left'>&nbsp;</td><td class="rounded-foot-right" ></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <%
+                    noProgb = 1;
+                    cuadrob++;
+                    prog.beforeFirst();
+                    cuadro++;
+                }
+            } catch (SQLException ex) {
+                System.out.println("Jsp Error pertinencia 19: " + ex);
+            } finally {
+                con.Desconectar();
+            }
+        %>
+        <input type="hidden" name="noCuadros" value="<%=cuadro - 1%>" />
+        <input type="text" name="noCuadrosb" value="<%=cuadrob - 1%>"/>
+        <input type="hidden" name="noMatricula" value="<%=Matricula%>"/>
+        <html:hidden name="PertinenciaIn19Form" property="valores" styleId="valores" />
+
+    </div>
+    <%
+        String consulta = "select activo from system_mecasut";
+        ResultSet rs = con.Consultar(consulta);
+        rs.next();
+        if (rs.getInt(1) == 1) {
+           if ((sesion.getAttribute("iniciado").toString().equals("1")) && (sesion.getAttribute("terminado").toString().equals("0"))) {
+                if (!sesion.getAttribute("tipoUsuario").equals("CGenUT")) {
+    %>
+    <button type="button" class="btnGuardarIndicador" onclick="enviarDatosIndicadores(guardarPertinenciaIn19(),'PertinenciaIn19Datos');" >Guardar</button>
+
+    <%          }
+            }
+    } else {%>
+   <button type="button" class="btnGuardarIndicador" disabled="disabled">La evaluación ha sido desactivada.</button>
+    <%        }%>
+</html:form>
+<%
+} catch (NullPointerException exNull) {
+%>
+<div id="pert19" align="center">
+    La sesi&oacute;n ha caducado, cierre e inicie sesi&oacute;n nuevamente y vuelva a intentarlo.
+</div>
+<%            }
+%>
+
+
+
+
+

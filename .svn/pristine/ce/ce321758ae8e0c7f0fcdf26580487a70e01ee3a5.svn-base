@@ -1,0 +1,301 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.mecasut.reportes.sabana;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+/**
+ * @author Salvador Zamora Arias
+ */
+public class ExcelRepProgramas extends SabanaCategorias {
+    int contCol = 0;
+    int c = 0;
+    int f = 5;
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        System.err.println("Excel Reporte Programas Eliminada :)");
+    }
+
+    public ExcelRepProgramas(String anio, HojaCalculo obj, String periodo, ListaUniversidades univs, ListaNiveles niveles) {
+        super(periodo, obj, univs, niveles, anio);
+        this.obj = obj;
+        this.f += 25*20;
+        
+    }
+
+    public HojaCalculo hacerRepProgramas() {
+        System.out.println("entra a ExcelRepProgramas");
+        AC();
+        DL();
+        MP();
+        QS();
+        TZ();
+        con.Desconectar();
+        return obj;
+    }
+    private void AC() {
+            c = 10;
+            obj.crearHoja("A-C", f, c);
+            obj.setAnchoColumna(0, 17500);
+           obj.setAnchoColumna(1, 9000);
+                obj.setAnchoColumna(2, 25000);
+            
+        try {
+            consulta = "Select id_universidad, nombre_universidad from universidades where (nombre_universidad like"
+                    + " 'UNIVERSIDAD TECNÓLOGICA A%' OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA B%' "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA C%' ) AND id_universidad > 0 order by nombre_universidad";
+            rs = con.Consultar(consulta);
+            int i =0, numuni=0;
+            int numero=1;
+            
+            obj.val(0, numero, "Universidad", "h1");
+            obj.val(1, numero, "Nivel", "h1");
+            obj.val(2, numero, "Nombre del programa educativo", "h1");
+            obj.val(3, numero, "Nomenclatura", "h1");
+            obj.val(4, numero, "Versión", "h1");
+            obj.val(5, numero, "Año de incorporación a la UT", "h1");
+            obj.val(6, numero, "Nuevo ingreso", "h1");
+            obj.val(7, numero, "Matricula total", "h1");
+            
+            while ( rs.next()) {
+                numuni++;
+                obj.val(0, i + numero + 1, rs.getString("nombre_universidad"), "program");//NOMBRE DE LA UNIVERSIDAD
+                String consulta2="Select * from pe_universidad peu INNER JOIN  programa_educativo pe ON pe.id_pe=peu.id_pe INNER JOIN nivel_pe npe ON npe.id_nivel=pe.id_nivel "
+                        + "where id_universidad=".concat(rs.getString("id_universidad"))
+                        .concat(" and id_periodo=".concat(periodo));     
+                ResultSet rspe=con.Consultar(consulta2);
+                
+                while (rspe.next()) {                    
+                    i++;
+                    obj.val(1, i + numero + 1, rspe.getString("npe.descripcion"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(2, i + numero + 1, rspe.getString("pe.nombre_programa"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(3, i + numero + 1, rspe.getString("pe.nomenclatura"), "program");//
+                    obj.val(4, i + numero + 1, rspe.getInt("pe.version"), "program");//
+                    obj.val(5, i + numero + 1, rspe.getInt("peu.anio_incorporacion"), "program");//
+                    obj.val(6, i + numero + 1, rspe.getInt("peu.nuevo_ingreso"), "program");//
+                    obj.val(7, i + numero + 1, rspe.getInt("peu.matricula_total"), "program");//
+                }
+                i++;
+             }
+        } catch (Exception e) {
+            System.err.print("Error Excel Programas "+e);
+            
+        }   
+    }     
+    
+       private void DL() {
+            c = 10;
+            obj.crearHoja("D-L", f, c);
+            obj.setAnchoColumna(0, 17500);
+            obj.setAnchoColumna(1, 9000);
+            obj.setAnchoColumna(2, 25000);
+            
+        try {
+            consulta = " Select id_universidad, nombre_universidad from universidades where ( "
+                    + "nombre_universidad  like 'UNIVERSIDAD TECNÓLOGICA D%' OR nombre_universidad "
+                    + "like 'UNIVERSIDAD TECNÓLOGICA E%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA F%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA G%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA H%'   "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA I%'    "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA J%'   "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA K%'      "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA L%') AND id_universidad > 0 order by nombre_universidad";
+            rs = con.Consultar(consulta);
+            int i =0, numuni=0;
+            int numero=1;
+            obj.val(0, numero, "Universidad", "h1");
+            obj.val(1, numero, "Nivel", "h1");
+            obj.val(2, numero, "Nombre del programa educativo", "h1");
+            obj.val(3, numero, "Nomenclatura", "h1");
+            obj.val(4, numero, "Versión", "h1");
+            obj.val(5, numero, "Año de incorporación a la UT", "h1");
+            obj.val(6, numero, "Nuevo ingreso", "h1");
+            obj.val(7, numero, "Matricula total", "h1");
+            
+            while ( rs.next()) {
+                numuni++;
+                obj.val(0, i + numero + 1, rs.getString("nombre_universidad"), "program");//NOMBRE DE LA UNIVERSIDAD
+                String consulta2="Select * from pe_universidad peu INNER JOIN  programa_educativo pe ON pe.id_pe=peu.id_pe INNER JOIN nivel_pe npe ON npe.id_nivel=pe.id_nivel"
+                        + " where id_universidad=".concat(rs.getString("id_universidad"))
+                        .concat(" and id_periodo=".concat(periodo));     
+                ResultSet rspe=con.Consultar(consulta2);
+                
+                while (rspe.next()) {                    
+                    i++;
+                   obj.val(1, i + numero + 1, rspe.getString("npe.descripcion"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(2, i + numero + 1, rspe.getString("pe.nombre_programa"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(3, i + numero + 1, rspe.getString("pe.nomenclatura"), "program");//
+                    obj.val(4, i + numero + 1, rspe.getInt("pe.version"), "program");//
+                    obj.val(5, i + numero + 1, rspe.getInt("peu.anio_incorporacion"), "program");//
+                    obj.val(6, i + numero + 1, rspe.getInt("peu.nuevo_ingreso"), "program");//
+                    obj.val(7, i + numero + 1, rspe.getInt("peu.matricula_total"), "program");//                   
+                }
+                i++;
+             }
+        } catch (Exception e) {
+            System.err.print("Error Excel Programas "+e);
+            
+        }   
+    }     
+    
+     private void MP() {
+            c = 10;
+            obj.crearHoja("M-P", f, c);
+            obj.setAnchoColumna(0, 17500);
+            obj.setAnchoColumna(1, 9000);
+            obj.setAnchoColumna(2, 25000);     
+        try {
+            consulta = " Select id_universidad, nombre_universidad from universidades where ( "
+                    + "nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA M%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA N%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA Ñ%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA O%'   "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA P%'    "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA L%') AND id_universidad > 0 order by nombre_universidad";
+            rs = con.Consultar(consulta);
+            int i =0, numuni=0;
+            int numero=1;
+            obj.val(0, numero, "Universidad", "h1");
+            obj.val(1, numero, "Nivel", "h1");
+            obj.val(2, numero, "Nombre del programa educativo", "h1");
+            obj.val(3, numero, "Nomenclatura", "h1");
+            obj.val(4, numero, "Versión", "h1");
+            obj.val(5, numero, "Año de incorporación a la UT", "h1");
+            obj.val(6, numero, "Nuevo ingreso", "h1");
+            obj.val(7, numero, "Matricula total", "h1");
+            
+            while ( rs.next()) {
+                numuni++;
+                obj.val(0, i + numero + 1, rs.getString("nombre_universidad"), "program");//NOMBRE DE LA UNIVERSIDAD
+                String consulta2="Select * from pe_universidad peu INNER JOIN  programa_educativo pe ON pe.id_pe=peu.id_pe INNER JOIN nivel_pe npe ON npe.id_nivel=pe.id_nivel"
+                        + " where id_universidad=".concat(rs.getString("id_universidad"))
+                        .concat(" and id_periodo=".concat(periodo));     
+                ResultSet rspe=con.Consultar(consulta2);
+                
+                while (rspe.next()) {                    
+                    i++;
+                   obj.val(1, i + numero + 1, rspe.getString("npe.descripcion"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(2, i + numero + 1, rspe.getString("pe.nombre_programa"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(3, i + numero + 1, rspe.getString("pe.nomenclatura"), "program");//
+                    obj.val(4, i + numero + 1, rspe.getInt("pe.version"), "program");//
+                    obj.val(5, i + numero + 1, rspe.getInt("peu.anio_incorporacion"), "program");//
+                    obj.val(6, i + numero + 1, rspe.getInt("peu.nuevo_ingreso"), "program");//
+                    obj.val(7, i + numero + 1, rspe.getInt("peu.matricula_total"), "program");//                  
+                }
+                i++;
+             }
+        } catch (Exception e) {
+            System.err.print("Error Excel Programas "+e);
+            
+        }   
+    }        
+       
+    private void QS() {
+            c = 10;
+            obj.crearHoja("Q-S", f, c);
+            obj.setAnchoColumna(0, 17500);
+            obj.setAnchoColumna(1, 9000);
+            obj.setAnchoColumna(2, 25000);
+            
+        try {
+            consulta = " Select id_universidad, nombre_universidad from universidades where ( "
+                    + "nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA Q%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA R%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA S%') AND id_universidad > 0 order by nombre_universidad";
+            rs = con.Consultar(consulta);
+            int i =0, numuni=0;
+            int numero=1;
+            obj.val(0, numero, "Universidad", "h1");
+            obj.val(1, numero, "Nivel", "h1");
+            obj.val(2, numero, "Nombre del programa educativo", "h1");
+            obj.val(3, numero, "Nomenclatura", "h1");
+            obj.val(4, numero, "Versión", "h1");
+            obj.val(5, numero, "Año de incorporación a la UT", "h1");
+            obj.val(6, numero, "Nuevo ingreso", "h1");
+            obj.val(7, numero, "Matricula total", "h1");
+            
+            while ( rs.next()) {
+                numuni++;
+                obj.val(0, i + numero + 1, rs.getString("nombre_universidad"), "program");//NOMBRE DE LA UNIVERSIDAD
+                String consulta2="Select * from pe_universidad peu INNER JOIN  programa_educativo pe ON pe.id_pe=peu.id_pe INNER JOIN nivel_pe npe ON npe.id_nivel=pe.id_nivel"
+                        + " where id_universidad=".concat(rs.getString("id_universidad"))
+                        .concat(" and id_periodo=".concat(periodo));     
+                ResultSet rspe=con.Consultar(consulta2);
+                
+                while (rspe.next()) {                    
+                    i++;
+                   obj.val(1, i + numero + 1, rspe.getString("npe.descripcion"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(2, i + numero + 1, rspe.getString("pe.nombre_programa"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(3, i + numero + 1, rspe.getString("pe.nomenclatura"), "program");//
+                    obj.val(4, i + numero + 1, rspe.getInt("pe.version"), "program");//
+                    obj.val(5, i + numero + 1, rspe.getInt("peu.anio_incorporacion"), "program");//
+                    obj.val(6, i + numero + 1, rspe.getInt("peu.nuevo_ingreso"), "program");//
+                    obj.val(7, i + numero + 1, rspe.getInt("peu.matricula_total"), "program");//                 
+                }
+                i++;
+             }
+        } catch (Exception e) {
+            System.err.print("Error Excel Programas "+e);
+            
+        }   
+    }      
+       private void TZ() {
+            c = 10;
+            obj.crearHoja("T-Z", f, c);
+            obj.setAnchoColumna(0, 17500);
+            obj.setAnchoColumna(1, 9000);
+            obj.setAnchoColumna(2, 25000);
+        try {
+            consulta = " Select id_universidad, nombre_universidad from universidades where ( "
+                    + "nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA T%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA U%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA V%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA W%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA X%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA Y%'  "
+                    + "OR nombre_universidad like 'UNIVERSIDAD TECNÓLOGICA Z%') AND id_universidad > 0 order by nombre_universidad";
+            rs = con.Consultar(consulta);
+            int i =0, numuni=0;
+            int numero=1;
+            obj.val(0, numero, "Universidad", "h1");
+            obj.val(1, numero, "Nivel", "h1");
+            obj.val(2, numero, "Nombre del programa educativo", "h1");
+            obj.val(3, numero, "Nomenclatura", "h1");
+            obj.val(4, numero, "Versión", "h1");
+            obj.val(5, numero, "Año de incorporación a la UT", "h1");
+            obj.val(6, numero, "Nuevo ingreso", "h1");
+            obj.val(7, numero, "Matricula total", "h1");
+            
+            while ( rs.next()) {
+                numuni++;
+                obj.val(0, i + numero + 1, rs.getString("nombre_universidad"), "program");//NOMBRE DE LA UNIVERSIDAD
+                String consulta2="Select * from pe_universidad peu INNER JOIN  programa_educativo pe ON pe.id_pe=peu.id_pe INNER JOIN nivel_pe npe ON npe.id_nivel=pe.id_nivel"
+                        + " where id_universidad=".concat(rs.getString("id_universidad"))
+                        .concat(" and id_periodo=".concat(periodo));     
+                ResultSet rspe=con.Consultar(consulta2);
+                
+                while (rspe.next()) {                    
+                    i++;
+                   obj.val(1, i + numero + 1, rspe.getString("npe.descripcion"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(2, i + numero + 1, rspe.getString("pe.nombre_programa"), "program");//NOMBRE DEl PROGRAMA 
+                    obj.val(3, i + numero + 1, rspe.getString("pe.nomenclatura"), "program");//
+                    obj.val(4, i + numero + 1, rspe.getInt("pe.version"), "program");//
+                    obj.val(5, i + numero + 1, rspe.getInt("peu.anio_incorporacion"), "program");//
+                    obj.val(6, i + numero + 1, rspe.getInt("peu.nuevo_ingreso"), "program");//
+                    obj.val(7, i + numero + 1, rspe.getInt("peu.matricula_total"), "program");//
+                                       
+                }
+                i++;
+             }
+        } catch (Exception e) {
+            System.err.print("Error Excel Programas "+e);
+            
+        }   
+    }     
+}

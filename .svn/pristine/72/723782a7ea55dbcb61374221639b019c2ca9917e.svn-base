@@ -1,0 +1,69 @@
+<%-- 
+    Document   : CgutEdificios
+    Created on : 5/07/2013, 08:06:51 AM
+    Author     : Cuauthemoc Medina Muñoz
+--%>
+
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+
+
+<html:form action="/CgutEdificios" onsubmit="return false">
+    <table align="center" border="0px" width="900">
+        <tr>
+            <td colspan="4">
+                <h2>Tipos de Edificios</h2>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="right">
+                <label>Edificio:</label>
+            </td>
+            <td colspan="2">
+                <span id="comboEdificio">
+                    <html:select styleId="cboEdificio" onchange="retrieveURL('/CgutEdificios.msut?ask=buscaEdificio','CgutEdificiosForm');" property="cboEdificio" style="width:auto;" >
+                        <html:option value="-1">Ingresar nuevo tipo de edificio...</html:option>
+                        <html:optionsCollection name="CgutEdificiosForm" property="edificios" label="name" value="id"></html:optionsCollection>
+                    </html:select>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4"><h2>Especificaciones:</h2></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="right"><label>Nuevo tipo de edificio:</label></td>
+            <td colspan="2">
+                <span id="nombEdificio">
+                    <html:text maxlength="70" styleId="nombreEdificio" property="nombreEdificio" style="width:400px;"/>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="right"><label>Capacidad:</label></td>
+            <td colspan="2">
+                <span id="capEdificio">
+                    <html:text maxlength="6" styleId="capacidadEdificio" property="capacidadEdificio" style="width:400px;"/>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" align="center">
+                <span id="edifact">
+                    <logic:notEqual name="CgutEdificiosForm" property="edificioActivo" value="">
+                        <a class="green" onclick="bajaEdificio();">
+                            <i><strong><bean:write name="CgutEdificiosForm" property="edificioActivo"></bean:write></strong></i>
+                        </a>
+                    </logic:notEqual>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" align="right">
+                <a class="green" onclick="retrieveURL('/CgutEdificios.msut?ask=nuevoEdificio','CgutEdificiosForm');">Nuevo registro</a>
+                <a class="green" onclick="validarFormularioEdificio();">Guardar cambios</a>
+            </td>
+        </tr>
+    </table>
+</html:form>

@@ -1,0 +1,103 @@
+<%-- 
+    Document   : CgutMantenimientoUniversidad
+    Created on : 5/07/2013, 08:08:19 AM
+   Author     : Daniel Ramírez Torres
+--%>
+
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%  HttpSession sesion = request.getSession();
+    String id_periodo = "", id_user = "";
+    if (sesion.getAttribute("usuario") == null) {
+%>
+<jsp:forward page="/login.msut">
+    <jsp:param name="error" value="true"></jsp:param>
+    <jsp:param name="ask" value="false"></jsp:param>
+    <jsp:param name="errorMessage" value="Sesi&oacute;n caducada o inv&aacute;lida<br/>El recurso al que deseas acceder est&aacute; restringido, debes iniciar sesi&oacute;n para utilizarlo."></jsp:param>
+</jsp:forward>
+<%  } else {
+        id_periodo = sesion.getAttribute("idPeriodo").toString();
+        id_user = sesion.getAttribute("idUsuario").toString();
+    }
+%>
+<html:form action="/CgutMantenimientoUniversidadAction" onsubmit="return false"> 
+    <div class="box">
+        <table align="center" border="0px">
+            <tr>
+                <td>
+                    <h2>Universidad:</h2>
+                </td>
+            </tr>
+            <tr>
+                <td align="center" colspan="4">
+                    <span id="juniversidades">
+                        <html:select onchange="retrieveURL('/CgutMantenimientoUniversidadAction.msut?ask=mantUniversidad','CgutMantenimientoUniversidadForm');" property="uniM" styleId="uniMant" style="width:auto;" >
+                            <html:option value="-1">Seleccione una universidad..</html:option>
+                            <html:optionsCollection name="CgutMantenimientoUniversidadForm" property="uniMan" label="name" value="id"></html:optionsCollection>
+                        </html:select>
+                    </span>
+                </td>
+            </tr>
+        </table>
+        <table align="center">
+            <tr>
+                <td>
+                    <h2>Estado actual</h2>
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <span id="estaUn" >
+                        <label><bean:write name="CgutMantenimientoUniversidadForm" property="estadoUni"></bean:write></label>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span id="estadoUniv"> </span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h2>Acciones disponibles</h2>
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <a id="btnReiniciarDatos" onclick="reiniciarDatos();">Reiniciar datos generales de la universidad</a>
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    Reiniciar
+                    <html:select property="cboReiniciar" style="width:auto;" >
+                        <html:option value="-1">Elige una opci&oacute;n..</html:option>
+                        <html:option value="1">la categor&iacute;a Eficacia</html:option>
+                        <html:option value="2">la categor&iacute;a Eficiencia</html:option>
+                        <html:option value="3">la categor&iacute;a Pertinencia</html:option>
+                        <html:option value="4">la categor&iacute;a Viculaci&oacute;n</html:option>
+                        <html:option value="5">la categor&iacute;a Equidad</html:option>
+                        <html:option value="6">todas las categor&iacute;as</html:option>
+                    </html:select>
+                    <a id="btnReiniciarCategoria" onclick="reiniciarCategoria();">Reiniciar</a>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center;">
+                    <span id="reactivar">
+                        <html:hidden styleId="terminado" property="terminado" />
+                    </span>
+                    <a id="btnReactivarEvaluacion" onclick="reactivarEvaluacion();">Re-Activar Evaluaci&oacute;n</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</html:form>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#btnReiniciarDatos, #btnReiniciarCategoria, #btnReactivarEvaluacion").button();                
+    });
+
+</script>
+

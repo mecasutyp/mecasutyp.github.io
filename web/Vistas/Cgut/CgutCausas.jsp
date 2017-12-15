@@ -1,0 +1,68 @@
+<%-- 
+    Document   : CgutCausas
+    Created on : 3/07/2013, 08:13:40 AM
+    Author     : Cuauhtemoc Medina Muñoz
+--%>
+
+
+<%@page import="java.sql.SQLException"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="com.mecasut.conexion.ConexionMySQL"%>
+<%@taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@taglib uri="http://struts.apache.org/tags-html" prefix="html" %>
+<%@taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+
+<html:form action="/CgutCausas" onsubmit="return false">
+    <table align="center" border="0px" width="900">
+        <tr>
+            <td colspan="2">
+                <h2>Causas de Deserción:</h2>
+            </td>
+        </tr>
+        <tr>
+            <td align="right">
+                <label>Causa:</label>
+            </td>
+            <td>
+                <span id="comboAreas">
+                    <html:select onchange="retrieveURL('/CgutCausas.msut?ask=buscaCausas','CgutCausasForm');"
+                                 property="cboCausas" style="width:auto;" >
+                        <html:option value="-1">Ingresar nueva Causa...</html:option>
+                        <html:optionsCollection name="CgutCausasForm" property="causas" label="name" 
+                                                value="id"></html:optionsCollection>
+                    </html:select>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"><h2>Especificaciones:</h2></td>
+        </tr>
+        <tr>
+            <td align="right"><label>Causa de Deserción:</label></td>
+            <td align="left">
+                <span id="nombreCausaS">
+                    <html:text maxlength="30" styleId="nombreCausas" property="nombreCausas" style="width:300px;"/>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center" >
+                <span id="desactivarOactivarCausas">
+                    <logic:notEqual name="CgutCausasForm" property="activo" value="">
+                        <a class="green" onclick="bajaCausas();">
+                            <i><strong><bean:write name="CgutCausasForm" 
+                                        property="activo"></bean:write></strong></i>
+                            </a>
+                    </logic:notEqual>
+                    <html:hidden property="activo" styleId="activo"></html:hidden>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="right">
+                <a class="green" onclick="retrieveURL('/CgutCausas.msut?ask=nuevaCausa','CgutCausasForm');">Nuevo registro</a>
+                <a class="green" onclick="validarFormularioCausas();">Guardar cambios</a>
+            </td>
+        </tr>
+    </table>
+</html:form>
